@@ -1,0 +1,133 @@
+---
+name: hoka-cnp
+description: '변경을 의도 단위로 분할 커밋하고 원격에 푸시한다. 커밋 메세지는 `<type>:[<태그>] <한글 subject>` 형식이고, 태그는 커밋에 담긴 파일의 최상위 디렉터리로 정한다 — `hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api` 중 하나, 넷 다 아니면 `common`. hoka 저장소에서 "커밋하고 푸시해줘", "커밋 후 푸시", "commit and push", "커밋해줘", "푸시해줘" 처럼 커밋/푸시를 요청할 때 ip-commit-push 대신 반드시 이 스킬을 쓴다. 커밋 메세지만 작성하거나 메세지 규칙을 물어볼 때도 이 규칙을 따른다.'
+---
+
+# Commit & Push
+
+## 절차
+
+1. `git status --short` + `git diff HEAD` (스테이징 안 된 것 포함) 으로 변경 내용을 확인한다. `git log --oneline -5` 로 기존 메세지 톤도 본다.
+   아직 커밋이 하나도 없으면(`git rev-parse --verify -q HEAD` 가 실패) `HEAD` 가 없어 `git diff HEAD` 와 `git log` 가 실패한다.
+   이때는 `git status --short` 와 `git diff --cached` 로 확인한다.
+2. 변경을 아래 "커밋 분할" 기준으로 묶는다.
+3. 묶음마다 아래 "태그 정하기" 로 태그를 정한다.
+4. 묶음마다 해당 파일만 `git add` 하고, 아래 규칙대로 메세지를 작성해 커밋한다.
+5. 전부 커밋한 뒤 한 번에 푸시한다. upstream이 없으면 `git push -u origin HEAD`.
+   `origin` 원격이 없으면(`git remote get-url origin` 이 실패) 푸시하지 않고 커밋까지만 끝냈다고 알린다. 원격을 임의로 추가하지 않는다.
+
+주의:
+- 스테이징된 게 있으면 그것만 커밋한다. 없으면 변경 파일을 명시적으로 `git add` 한다. `git add -A` 는 의도하지 않은 파일이 섞이므로 쓰지 않는다.
+- 디렉터리째 `git add` 하지 않는다. `hoka-*/.claude/settings.local.json` (이 PC의 절대 경로가 들어 있다) 과 `hoka-*-front/.env*` 는 커밋하지 않는다.
+- 현재 브랜치가 `main`/`master` 이고 원격에 보호가 걸려 있어 푸시가 거절되면, 브랜치를 새로 만들지 말고 사용자에게 알린다.
+- 훅(pre-commit 등)이 파일을 수정했으면 `git add` 후 재커밋한다. 훅이 실패하면 원인을 고치고 다시 시도한다. `--no-verify` 는 사용자가 명시적으로 요청할 때만.
+
+## 태그 정하기
+
+태그는 저장소 이름이 아니라 **그 커밋이 어느 프로젝트를 바꾸는지**다. `hoka-fo-front`,
+`hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api` 가 한 저장소 루트 아래 디렉터리로 같이 있어서
+저장소명으로는 구분이 안 되고, 커밋 로그를 프로젝트별로 걸러 보는 것이 이 태그를 다는 유일한 이유다.
+
+커밋에 넣을 파일마다 경로의 **첫 번째 세그먼트**를 본다:
+
+| 첫 세그먼트 | 분류 |
+|---|---|
+| `hoka-fo-front` | `hoka-fo-front` |
+| `hoka-bo-front` | `hoka-bo-front` |
+| `hoka-fo-api` | `hoka-fo-api` |
+| `hoka-bo-api` | `hoka-bo-api` |
+| 그 밖 (`okf/`, `.claude/`, `CLAUDE.md` 등 루트 파일) | 루트 파일 |
+
+그 다음 커밋 단위로 정한다:
+
+- **프로젝트 파일이 한 프로젝트 것뿐이면 그 프로젝트.** 같이 들어간 루트 파일은 따라간다 —
+  `hoka-fo-api/…/ProductService.java` + `okf/projects/hoka-fo-api.md` 는 `[hoka-fo-api]`. 코드와 그 문서는 한
+  커밋에 있어야 하고, 문서가 끼었다고 태그가 바뀌면 `[hoka-fo-api]` 로 걸렀을 때 그 변경이 빠진다.
+- **루트 파일뿐이면 `common`.** 내용이 특정 프로젝트 얘기여도(`okf/projects/hoka-fo-api.md` 단독)
+  `common` 이다. 내용으로 판단하면 세션마다 값이 갈리고, 같은 종류의 커밋이 두 태그로 흩어진다.
+- **두 프로젝트 이상이 섞이면 태그를 고르지 않는다.** 커밋을 나눈다 (아래 "커밋 분할").
+
+주의:
+- 첫 세그먼트가 **정확히 같은지** 본다. 앞부분으로 판단하면 `hoka-fo` 가 `hoka-fo-front/` 와 `hoka-fo-api/` 를 둘 다 잡는다.
+- 사용자가 태그를 지정했으면 판정하지 않고 그 값을 쓴다.
+- 커밋 직전에 스테이징된 파일로 한 번 더 확인한다. 계획과 다르면 이미 스테이징돼 있던 파일이 섞인 것이다:
+  ```bash
+  git diff --cached --no-renames --name-only | cut -d/ -f1 | sort -u
+  ```
+  `--no-renames` 는 이동의 옛 경로도 보이게 한다. 빼면 `hoka-fo-api/` 밖으로 옮긴 커밋이 `common` 으로 잡힌다.
+
+## 커밋 분할
+
+한 줄(subject 한 개)로 설명되지 않으면 두 개 이상의 커밋이다.
+
+- **묶는 기준은 파일이 아니라 의도다.** 같은 작업에 속하면 파일이 여러 개여도 한 커밋 (e.g. controller + service + DTO). 같은 파일이라도 작업이 다르면 나눈다.
+- **프로젝트가 다르면 나눈다.** 태그는 커밋에 하나뿐이라, `hoka-fo-api/` 와 `hoka-fo-front/` 를 한 커밋에 넣으면
+  어느 태그로 걸러도 절반이 빠진다. 한 작업(API 필드 추가 + 화면 반영)이어도 프로젝트별로 나누고
+  의존 순서대로 커밋한다. 루트 파일은 그 파일이 설명하는 쪽 커밋에 붙이고(`okf/projects/hoka-fo-api.md` 는
+  API 를 바꾼 `[hoka-fo-api]` 커밋에), 어느 쪽인지 애매하면 따로 떼어 `[common]` 커밋으로 만든다.
+- **FO/BO 쌍에 같은 변경을 넣어도 나눈다.** `hoka-fo-front/` 와 `hoka-bo-front/` 에 같은 설정을 넣었으면
+  subject 가 같아도 `[hoka-fo-front]`, `[hoka-bo-front]` 두 커밋이다.
+- type이 다르면 나눈다. `feat` 과 `chore`(의존성 추가), `refactor` 와 `fix` 는 섞지 않는다.
+- 의존 순서대로 커밋한다. 각 커밋이 그 자체로 빌드/동작하는 상태면 이상적이고, 안 되면 최소한 논리적 선행 순서를 지킨다.
+- 포맷팅/린트 자동수정처럼 대량이지만 동작 변경이 없는 변경은 항상 별도 `style` 커밋으로 떼어낸다.
+- 커밋하기 전에 계획을 먼저 한 줄씩 보여준다. 태그는 경로로 정해지므로 파일 목록이 곧 근거다 —
+  파일이 많으면 `.claude/skills/**` 처럼 줄여도 되지만 프로젝트 디렉터리 파일은 빼지 않는다:
+  ```
+  1. feat:[hoka-fo-api] 상품 응답에 할인율 필드 추가 — hoka-fo-api/…/ProductService.java, okf/projects/hoka-fo-api.md
+  2. feat:[hoka-fo-front] 상품 상세에 할인율 표시 — hoka-fo-front/src/app/…
+  3. chore:[common] 에이전트 스킬 추가 — .claude/skills/**
+  ```
+
+### 한 파일에 여러 업무가 섞인 경우
+
+`git add -p` 는 인터랙티브라 사용할 수 없다. 이때는 임의로 합치지 말고 사용자에게 상황과 두 가지 선택지를 알린다:
+
+- 그 파일을 주된 작업 커밋에 포함시키기 (섞인 변경이 사소할 때)
+- 사용자가 직접 `git add -p` 로 스테이징한 뒤 다시 요청하기
+
+## 메세지 형식
+
+```
+<type>:[<태그>] <subject>
+
+<body (선택)>
+```
+
+`<태그>` 는 `hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api`, `common` 중 하나다.
+
+### Type
+
+| Type | 용도 |
+|------|------|
+| `feat` | 새로운 기능 추가 |
+| `fix` | 버그 수정 |
+| `refactor` | 기능 변경 없는 코드 구조 개선 |
+| `style` | 코드 포맷팅, 세미콜론 누락 등 (동작 변경 없음) |
+| `docs` | 문서 변경 |
+| `chore` | 빌드, 설정, 의존성 등 기타 변경 |
+| `test` | 테스트 추가/수정 |
+
+### 규칙
+
+- `<type>` 접두사만 **영어**, subject와 body는 **한글**로 작성
+- `<type>` 과 `[` 사이에 공백이 없고, `]` 다음에 공백 하나가 온다 — `feat:[hoka-fo-api] 추가`.
+  간격이 흔들리면 커밋 로그를 기계로 걸러낼 수 없다
+- 태그는 대괄호 안에만 넣는다. subject 에서 프로젝트명을 다시 언급하지 않는다 —
+  같은 말이 두 번 나오면 50자를 그만큼 낭비한다
+- subject는 대괄호까지 포함해 50자 이내, "무엇을 했는지"를 간결하게 서술 (e.g. `~ 추가`, `~ 수정`, `~ 전환`).
+  태그가 최대 15자(`[hoka-fo-front]`)라 subject 본문은 30자 안쪽으로 잡는다
+- body는 선택사항이며, "무엇을 왜" 변경했는지 간결하게 서술. body 에는 태그를 넣지 않는다
+- body 작성 시 subject와 빈 줄로 구분
+
+### 예시
+
+```
+feat:[hoka-fo-api] JWT 기반 사용자 인증 추가
+
+로그인/회원가입 엔드포인트와 JWT 토큰 발급을 구현하고
+Spring Security 필터 체인에서 인증을 적용한다.
+```
+
+```
+docs:[common] 워크트리 절차 문서 경로 수정
+```
