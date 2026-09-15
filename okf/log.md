@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-09-15
+* **Creation**: [hoka-batch](/projects/hoka-batch.md) 추가. [Projects](/projects/index.md), [System overview](/architecture/system-overview.md), [OKF authoring](/conventions/okf-authoring.md)의 프로젝트 목록 갱신.
 * **Creation**: [Sample CRUD](/architecture/sample-crud.md) 추가.
 * **Update**: SecurityConfig(HTTP Basic, STATELESS, CSRF 끔)와 샘플 CRUD 추가에 맞춰 [hoka-fo-api](/projects/hoka-fo-api.md), [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes 갱신.
 * **Update**: DB 접속 기본값을 `appdb`/`app`으로 변경. [hoka-fo-api](/projects/hoka-fo-api.md), [hoka-bo-api](/projects/hoka-bo-api.md), [System overview](/architecture/system-overview.md) 갱신.

@@ -5,7 +5,7 @@ description: HOKA 공유 지식 번들(OKF v0.2)을 읽고 쓰는 규칙.
 resource: https://raw.githubusercontent.com/GoogleCloudPlatform/open-knowledge-format/main/SPEC.md
 tags: [okf, convention]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-14T09:00:56Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-15T01:22:11Z }
 sources:
   - id: okf-spec
     resource: https://raw.githubusercontent.com/GoogleCloudPlatform/open-knowledge-format/main/SPEC.md
@@ -17,7 +17,7 @@ sources:
 
 # Location
 
-번들 루트는 `hoka/okf/`이며 네 프로젝트에서 `../okf/`로 접근한다. 여러 프로젝트에 걸친 지식(API 계약, 도메인 용어, 공통 규칙, 아키텍처 결정)은 개별 프로젝트가 아니라 이 번들에 기록한다.
+번들 루트는 `hoka/okf/`이며 각 프로젝트에서 `../okf/`로 접근한다. 여러 프로젝트에 걸친 지식(API 계약, 도메인 용어, 공통 규칙, 아키텍처 결정)은 개별 프로젝트가 아니라 이 번들에 기록한다.
 
 # Reading
 

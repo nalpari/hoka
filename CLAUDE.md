@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Layout
 
-The root is the git repository but not a build. It holds four separate projects, all freshly scaffolded with no business code yet:
+The root is the git repository but not a build. It holds five separate projects, all freshly scaffolded with no business code yet:
 
 | Project | Stack | Role |
 |---|---|---|
@@ -12,6 +12,7 @@ The root is the git repository but not a build. It holds four separate projects,
 | `hoka-bo-front` | same as above | Back office (admin) UI |
 | `hoka-fo-api` | Spring Boot 4.1.1, Java 21, Maven | Front office API (`com.hoka.fo`) |
 | `hoka-bo-api` | same as above | Back office API (`com.hoka.bo`) |
+| `hoka-batch` | Spring Boot 4.1.1 + Spring Batch 6, Java 21, Maven | Batch jobs run from the shell with `java -jar` (`com.hoka.batch`) |
 
 - The FO/BO pairs are identical apart from their names. Keep them in step unless a change is meant for only one side.
 - Each project has its own build. Run commands from inside that project's directory.
@@ -35,7 +36,7 @@ The root is the git repository but not a build. It holds four separate projects,
 
 ## Shared knowledge (`okf/`)
 
-`okf/` is an [OKF v0.2](https://github.com/GoogleCloudPlatform/open-knowledge-format) bundle shared by all four projects. Each project's `CLAUDE.md` imports `../okf/index.md` and `../okf/conventions/okf-authoring.md`. Cross-project facts (API contracts, domain terms, architecture decisions) go there, following the authoring convention. Check conformance with:
+`okf/` is an [OKF v0.2](https://github.com/GoogleCloudPlatform/open-knowledge-format) bundle shared by all projects. Each project's `CLAUDE.md` imports `../okf/index.md` and `../okf/conventions/okf-authoring.md`. Cross-project facts (API contracts, domain terms, architecture decisions) go there, following the authoring convention. Check conformance with:
 
 ```bash
 uv run --with pyyaml python okf/.okf/okf_check.py okf
@@ -52,6 +53,7 @@ uv run --with pyyaml python okf/.okf/okf_check.py okf
 | 프론트 `next.config.ts`, `tsconfig.json`의 `paths`, Tailwind 설정 | 같은 문서의 `# Stack` |
 | API `pom.xml`의 Spring Boot·Java 버전, starter·DB 드라이버 추가/제거 | `okf/projects/hoka-*-api.md`의 `# Stack` |
 | API `application.yaml`의 datasource, `server.port` 등 동작을 바꾸는 설정 | 같은 문서의 `# Stack`(Config 행)과 `# Notes`. 포트면 `okf/architecture/system-overview.md`의 `# Local ports (현재 기본값)`도 |
+| 배치 `pom.xml`·`application.yaml`, job 추가·삭제·파라미터 규칙, `bin/run-job.sh` | `okf/projects/hoka-batch.md`. 메타 테이블 위치·DB 연결이 바뀌면 `system-overview.md`도 |
 | 보안 설정(Spring Security 필터 체인, 인증 방식) | API 문서의 `# Notes`. 프론트–API 인증 흐름이 생기면 `system-overview.md`도 |
 | 프론트가 API를 호출하는 코드(base URL, 연동 대상) | `system-overview.md`의 `# Assumptions (미검증)`. 코드로 확인된 가정은 본문 사실로 옮기고 목록에서 뺀다 |
 | 빌드·실행·테스트 명령 | 해당 프로젝트 문서의 `# Commands`와 이 파일의 명령 블록 |
@@ -96,6 +98,22 @@ pnpm lint       # eslint (flat config: next core-web-vitals + typescript)
 - Sample CRUD lives in the `sample` package (`/api/samples`, MyBatis XML at `mapper/SampleMapper.xml`). `SampleControllerTests` hits the real local `appdb`, so `./mvnw test` needs the DB running.
 - Config is `src/main/resources/application.yaml`, which sets `spring.application.name`, the datasource (env vars `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, defaulting to `jdbc:postgresql://localhost:5432/appdb` with `app`/`app`), and MyBatis (mapper XML at `classpath:mapper/**/*.xml`, underscore-to-camelCase on). `@Mapper` interfaces are auto-scanned under the application package.
 - No `server.port` is set, so both APIs default to 8080. Both frontends also default to 3000. To run FO and BO at the same time, set different ports.
+
+## Batch (`hoka-batch`)
+
+```bash
+./mvnw test                                    # Testcontainers: Docker must be running
+./mvnw test -Dtest=SampleJobTests#countsSampleRowsWithinKstDay
+./mvnw package                                 # target/hoka-batch.jar
+bin/run-job.sh sampleJob 2026-09-14            # omit the date for yesterday in Asia/Seoul (GNU date)
+bin/run-job.sh --recover sampleJob 2026-09-14  # mark an execution stuck after kill -9 as FAILED
+```
+
+- Spring Batch 6 with the JDBC job repository (`spring-boot-starter-batch-jdbc`). The `BATCH_*` meta tables live in `appdb` `public`; locally `initialize-schema: always` creates them, production sets `SPRING_BATCH_JDBC_INITIALIZE_SCHEMA=never` and applies the DDL.
+- One jar, many jobs, chosen with `--spring.batch.job.name`. Every job takes a required identifying `targetDate=yyyy-MM-dd` enforced by a validator, with no Java default. A completed date is rejected on rerun; a failed date resumes from the failed step.
+- Day boundaries use `Asia/Seoul`. Data access is MyBatis with the same settings and DB env vars as the APIs.
+- No web starter. Tests must set `spring.batch.job.enabled=false`, or the job launches at context startup without `targetDate` and fails.
+- Exit codes, cron usage, and the crash-recovery procedure: `okf/projects/hoka-batch.md`.
 
 ## Do Always
 

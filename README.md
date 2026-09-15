@@ -1,7 +1,7 @@
 # HOKA
 
-프론트오피스(고객용)와 백오피스(관리자용)가 각각 Next.js 프론트와 Spring Boot API 한 쌍으로 이뤄진 모노레포다.
-네 프로젝트 모두 스캐폴딩 직후 상태라 아직 비즈니스 코드는 없다.
+프론트오피스(고객용)와 백오피스(관리자용)가 각각 Next.js 프론트와 Spring Boot API 한 쌍으로 이뤄지고,
+셸에서 실행하는 Spring Batch jar가 하나 붙은 모노레포다. 모든 프로젝트가 스캐폴딩 직후 상태라 아직 비즈니스 코드는 없다.
 
 ## 구성
 
@@ -12,7 +12,8 @@
 | [`hoka-bo-front`](hoka-bo-front/) | 백오피스 UI                       | 위와 동일                                                                  |
 | [`hoka-fo-api`](hoka-fo-api/)     | 프론트오피스 API (`com.hoka.fo`)    | Spring Boot 4.1.1, Java 21, Maven                                      |
 | [`hoka-bo-api`](hoka-bo-api/)     | 백오피스 API (`com.hoka.bo`)      | 위와 동일                                                                  |
-| [`okf`](okf/)                     | 네 프로젝트가 공유하는 지식 문서 (OKF v0.2) | Markdown                                                               |
+| [`hoka-batch`](hoka-batch/)       | 셸에서 `java -jar`로 실행하는 배치 (`com.hoka.batch`) | Spring Boot 4.1.1 + Spring Batch 6, Java 21, Maven                     |
+| [`okf`](okf/)                     | 프로젝트가 공유하는 지식 문서 (OKF v0.2) | Markdown                                                               |
 
 
 - 루트는 git 저장소일 뿐 빌드가 아니다. **명령은 각 프로젝트 디렉터리 안에서 실행한다.**
@@ -29,7 +30,7 @@ macOS + [Homebrew](https://brew.sh) 기준이다. 위에서부터 순서대로 �
 | ---------------------------------------------------------- | ------------------------------------------------------------------ |
 | Node.js 24 / npm                                           | Claude Code 훅·상태줄 스크립트(`.claude/helpers/*.cjs`), graft CLI 전역 설치    |
 | pnpm 11                                                    | 프론트 패키지 매니저 (`pnpm-lock.yaml`)                                         |
-| JDK 21                                                     | API 빌드. Maven은 `./mvnw`가 받아 쓰므로 따로 설치하지 않는다                        |
+| JDK 21                                                     | API·배치 빌드. Maven은 `./mvnw`가 받아 쓰므로 따로 설치하지 않는다                        |
 | jq                                                         | Stop 훅 `okf-sync-check.sh`. 없으면 훅이 조용히 건너뛴다                        |
 | [uv](https://docs.astral.sh/uv/)                           | `okf/` 적합성 검사                                                      |
 | [Claude Code](https://docs.claude.com/en/docs/claude-code) | 에이전트 CLI                                                           |
@@ -83,6 +84,7 @@ cd hoka
 (cd hoka-bo-front && pnpm install --frozen-lockfile)
 (cd hoka-fo-api && ./mvnw -q dependency:go-offline)
 (cd hoka-bo-api && ./mvnw -q dependency:go-offline)
+(cd hoka-batch && ./mvnw -q dependency:go-offline)
 ```
 
 ### 5. graft 그래프 생성
@@ -155,6 +157,22 @@ cd hoka-fo-api
   ```
 - 샘플 CRUD는 `/api/samples`(`sample` 테이블)다. `SampleControllerTests`는 로컬 `appdb`에 실제로 접속하므로 `./mvnw test` 전에 DB가 떠 있어야 한다.
 
+### 배치 (`hoka-batch`)
+
+```bash
+cd hoka-batch
+./mvnw test                                    # Testcontainers로 PostgreSQL을 띄우므로 Docker가 떠 있어야 한다
+./mvnw package                                 # target/hoka-batch.jar
+
+bin/run-job.sh sampleJob 2026-09-14            # 날짜를 빼면 Asia/Seoul 기준 어제 (GNU date 필요, macOS는 날짜를 넘긴다)
+bin/run-job.sh --recover sampleJob 2026-09-14  # kill -9 등으로 멈춘 실행을 FAILED로 표시
+```
+
+- Spring Batch 6. job 여러 개를 jar 하나에 두고 `--spring.batch.job.name`으로 고른다. job은 `targetDate=yyyy-MM-dd`를 필수로 받는다.
+- 이미 성공한 날짜를 다시 실행하면 거부되고(종료 코드 1), 실패한 날짜는 실패한 step부터 이어서 실행된다.
+- DB 설정은 API와 같다. 실행 이력 테이블(`BATCH_*`)은 로컬 `appdb`에 처음 실행할 때 자동으로 만들어진다.
+- 종료 코드, cron 예시, 비정상 종료 복구 절차는 [`okf/projects/hoka-batch.md`](okf/projects/hoka-batch.md)에 있다.
+
 ## 여러 앱 동시에 띄우기
 
 설정된 포트가 없어 기본값이 겹친다. 프론트 두 개는 모두 3000, API 두 개는 모두 8080이다.
@@ -200,7 +218,7 @@ uv run --with pyyaml python okf/.okf/okf_check.py okf
 
 - **type:** `feat` `fix` `refactor` `style` `docs` `chore` `test`
 - **태그:** 커밋에 담긴 파일의 최상위 디렉터리로 정한다.
-`hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api` 중 하나이고, 루트 파일(`okf/`, `.claude/`, `README.md` 등)만 있으면 `common`이다.
+`hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api`, `hoka-batch` 중 하나이고, 루트 파일(`okf/`, `.claude/`, `README.md` 등)만 있으면 `common`이다.
 프로젝트 파일에 함께 들어간 루트 파일은 그 프로젝트 태그를 따른다.
 - **두 프로젝트 이상을 한 커밋에 섞지 않는다.** FO/BO에 같은 변경을 넣어도 커밋을 나눈다.
 - `:`와 `[` 사이에는 공백이 없고 `]` 뒤에 공백 하나를 둔다. subject는 태그까지 포함해 50자 이내로 쓴다.

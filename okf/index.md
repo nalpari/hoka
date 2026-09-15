@@ -4,11 +4,11 @@ okf_version: "0.2"
 
 # HOKA 지식 번들
 
-hoka-fo-front, hoka-bo-front, hoka-fo-api, hoka-bo-api 네 프로젝트가 공유하는 OKF(Open Knowledge Format) v0.2 번들.
+hoka-fo-front, hoka-bo-front, hoka-fo-api, hoka-bo-api, hoka-batch 다섯 프로젝트가 공유하는 OKF(Open Knowledge Format) v0.2 번들.
 
 # Projects
 
-* [Projects](projects/) - 네 프로젝트별 스택·실행 방법·현재 상태
+* [Projects](projects/) - 프로젝트별 스택·실행 방법·현재 상태
 
 # Architecture
 
