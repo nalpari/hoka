@@ -144,14 +144,16 @@ cd hoka-fo-api
 
 백오피스는 클래스 이름이 `HokaBoApiApplicationTests`다.
 
-- 설정 파일은 `src/main/resources/application.yaml`이고, 지금은 `spring.application.name`만 있다.
-- Starter: `webmvc`, `security`, `actuator`, `devtools`. PostgreSQL 드라이버가 들어 있지만
-JPA/JDBC starter와 datasource 설정이 없어서 아직 DB에 연결하지 않는다.
-- **Spring Security 커스텀 설정이 없어 모든 엔드포인트가 인증을 요구한다.** 사용자 이름은 `user`이고,
+- 설정 파일은 `src/main/resources/application.yaml`이고, `spring.application.name`, datasource(환경변수 `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, 기본값 `jdbc:postgresql://localhost:5432/appdb`, `app`/`app`), MyBatis 설정이 있다.
+- Starter: `webmvc`, `security`, `actuator`, `devtools`, MyBatis(`mybatis-spring-boot-starter` 4.1.0)와 PostgreSQL 드라이버.
+- **모든 엔드포인트가 HTTP Basic 인증을 요구한다**(`config/SecurityConfig`, 세션 없음·CSRF 끔). 사용자 이름은 `user`이고,
 비밀번호는 기동할 때마다 콘솔에 `Using generated security password: ...`로 찍힌다.
   ```bash
   curl -u user:<비밀번호> http://localhost:8080/actuator/health
+  curl -u user:<비밀번호> http://localhost:8080/api/samples
+  curl -u user:<비밀번호> -X POST -H 'Content-Type: application/json' -d '{"name":"hello"}' http://localhost:8080/api/samples
   ```
+- 샘플 CRUD는 `/api/samples`(`sample` 테이블)다. `SampleControllerTests`는 로컬 `appdb`에 실제로 접속하므로 `./mvnw test` 전에 DB가 떠 있어야 한다.
 
 ## 여러 앱 동시에 띄우기
 

@@ -4,7 +4,7 @@ title: System overview
 description: 프론트오피스/백오피스 각각 Next.js 프론트와 Spring Boot API 한 쌍으로 구성된 시스템.
 tags: [architecture, fo, bo]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-14 }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-15T01:07:43Z }
 ---
 
 # Components
@@ -17,7 +17,7 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-14 }
 # Assumptions (미검증)
 
 - 각 프론트는 같은 영역의 API를 호출한다고 가정한다. 이는 프로젝트 이름에서 추론한 것이며 연동 코드는 아직 없다.
-- 두 API의 저장소로 PostgreSQL을 가정한다(드라이버만 존재).
+- 두 API는 MyBatis로 PostgreSQL에 접속하도록 설정돼 있다. 기본 접속 대상은 둘 다 `localhost:5432/appdb`(계정 `app`)이며, 운영 DB 구성은 미정.
 - 공유 DB 여부, 인증 방식, 배포 구성은 미정.
 
 # Local ports (현재 기본값)

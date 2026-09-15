@@ -1,6 +1,10 @@
 # Directory Update Log
 
 ## 2026-09-15
+* **Creation**: [Sample CRUD](/architecture/sample-crud.md) 추가.
+* **Update**: SecurityConfig(HTTP Basic, STATELESS, CSRF 끔)와 샘플 CRUD 추가에 맞춰 [hoka-fo-api](/projects/hoka-fo-api.md), [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes 갱신.
+* **Update**: DB 접속 기본값을 `appdb`/`app`으로 변경. [hoka-fo-api](/projects/hoka-fo-api.md), [hoka-bo-api](/projects/hoka-bo-api.md), [System overview](/architecture/system-overview.md) 갱신.
+* **Update**: MyBatis 추가에 맞춰 [hoka-fo-api](/projects/hoka-fo-api.md), [hoka-bo-api](/projects/hoka-bo-api.md), [System overview](/architecture/system-overview.md)의 Stack·Notes 갱신.
 * **Update**: 프론트 패키지 매니저 npm → pnpm 전환에 맞춰 [hoka-fo-front](/projects/hoka-fo-front.md), [hoka-bo-front](/projects/hoka-bo-front.md), [Worktrees](/development/worktrees.md)의 명령 갱신.
 
 ## 2026-09-14

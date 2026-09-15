@@ -91,9 +91,10 @@ pnpm lint       # eslint (flat config: next core-web-vitals + typescript)
 ./mvnw package
 ```
 
-- Starters: `webmvc`, `security`, `actuator`, `devtools`, plus the PostgreSQL runtime driver. No JPA or JDBC starter is added yet, so the driver does nothing until one is added and a datasource is configured.
-- Spring Security is on the classpath with no custom config. Every endpoint therefore requires auth, using Spring's generated default user.
-- Config is `src/main/resources/application.yaml`, which currently sets only `spring.application.name`.
+- Starters: `webmvc`, `security`, `actuator`, `devtools`, MyBatis (`mybatis-spring-boot-starter` 4.1.0, which brings `spring-boot-starter-jdbc`), plus the PostgreSQL runtime driver.
+- Spring Security is configured in `config/SecurityConfig`: every request needs HTTP Basic auth with Spring's generated default user (`user`, password printed at startup), sessions are stateless, and CSRF is off.
+- Sample CRUD lives in the `sample` package (`/api/samples`, MyBatis XML at `mapper/SampleMapper.xml`). `SampleControllerTests` hits the real local `appdb`, so `./mvnw test` needs the DB running.
+- Config is `src/main/resources/application.yaml`, which sets `spring.application.name`, the datasource (env vars `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, defaulting to `jdbc:postgresql://localhost:5432/appdb` with `app`/`app`), and MyBatis (mapper XML at `classpath:mapper/**/*.xml`, underscore-to-camelCase on). `@Mapper` interfaces are auto-scanned under the application package.
 - No `server.port` is set, so both APIs default to 8080. Both frontends also default to 3000. To run FO and BO at the same time, set different ports.
 
 ## Do Always
