@@ -358,45 +358,6 @@ table {
   margin-left: auto;
 }
 
-/* 채널 스위처 */
-.switcher {
-  margin: var(--s-3) var(--s-3) var(--s-2);
-  flex: 0 0 auto;
-}
-
-.switcher__btn {
-  width: 100%;
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) 16px;
-  align-items: center;
-  gap: 9px;
-  padding: 7px 9px;
-  background: var(--surface-2);
-  border: 1px solid var(--hairline);
-  border-radius: var(--r-md);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s var(--ease), border-color 0.15s var(--ease);
-}
-
-.switcher__btn:hover {
-  background: var(--surface-3);
-  border-color: var(--hairline-strong);
-}
-
-.switcher__logo {
-  width: 26px;
-  height: 26px;
-  border-radius: var(--r-sm);
-  background: #03c75a;
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.switcher__btn > span,
 .userchip > span {
   min-width: 0;
 }
@@ -420,12 +381,8 @@ table {
   white-space: nowrap;
 }
 
-.switcher__btn svg {
-  color: var(--ink-tertiary);
-}
-
 .rail__search {
-  margin: 0 var(--s-3) var(--s-3);
+  margin: var(--s-3);
   position: relative;
   flex: 0 0 auto;
 }

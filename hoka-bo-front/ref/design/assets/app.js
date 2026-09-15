@@ -173,12 +173,11 @@
   ];
 
   function brandMark() {
-    /* 단순 기하 마크 : 접힌 두 날개 — "FLY HUMAN FLY" */
+    /* H 마크 : 두 기둥 + 오른쪽으로 솟는 가로획 — "FLY HUMAN FLY" */
     return (
       '<svg viewBox="0 0 24 24" aria-hidden="true">' +
       '<rect x="1" y="1" width="22" height="22" rx="6.5" fill="currentColor"/>' +
-      '<path d="M5.5 10.2 12 6.4l6.5 3.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-      '<path d="M5.5 15.6 12 11.8l6.5 3.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".62"/>' +
+      '<path d="M8 6.5v11M16 6.5v11M8 13.4l8-2.8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' +
       "</svg>"
     );
   }
@@ -216,12 +215,6 @@
       "</span>" +
       '<b class="wordmark">HOKA</b><span class="rail__tag">백오피스</span>' +
       "</a>" +
-      '<div class="switcher"><button class="switcher__btn" type="button">' +
-      '<span class="switcher__logo">N</span>' +
-      '<span><span class="switcher__name">호카코리아 브랜드스토어</span>' +
-      '<span class="switcher__meta">네이버 · 운영 중 · 상품 312</span></span>' +
-      ic("selector", 15) +
-      "</button></div>" +
       '<div class="rail__search">' +
       ic("search", 14) +
       '<input type="search" placeholder="주문번호·상품·회원 검색" aria-label="검색"><kbd>⌘K</kbd></div>' +
