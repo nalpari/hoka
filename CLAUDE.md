@@ -41,6 +41,29 @@ The root is the git repository but not a build. It holds four separate projects,
 uv run --with pyyaml python okf/.okf/okf_check.py okf
 ```
 
+### 코드를 바꾸면 같은 변경에서 번들도 고친다
+
+`okf/`는 빌드·테스트·린트 어디에도 걸리지 않는다. 코드만 바뀌고 문서가 그대로면 누군가 믿고 틀릴 때까지
+조용히 틀린 채로 남는다. 프로젝트 파일을 수정했으면 작업을 끝내기 전에 아래 표로 영향받는 문서를 찾아 같이 고친다.
+
+| 바꾼 것 | 고칠 곳 |
+|---|---|
+| 프론트 `package.json`의 프레임워크·라이브러리 버전, npm 스크립트, 테스트 러너 추가 | `okf/projects/hoka-*-front.md`의 `# Stack`, `# Commands`, `# Notes` |
+| 프론트 `next.config.ts`, `tsconfig.json`의 `paths`, Tailwind 설정 | 같은 문서의 `# Stack` |
+| API `pom.xml`의 Spring Boot·Java 버전, starter·DB 드라이버 추가/제거 | `okf/projects/hoka-*-api.md`의 `# Stack` |
+| API `application.yaml`의 datasource, `server.port` 등 동작을 바꾸는 설정 | 같은 문서의 `# Stack`(Config 행)과 `# Notes`. 포트면 `okf/architecture/system-overview.md`의 `# Local ports (현재 기본값)`도 |
+| 보안 설정(Spring Security 필터 체인, 인증 방식) | API 문서의 `# Notes`. 프론트–API 인증 흐름이 생기면 `system-overview.md`도 |
+| 프론트가 API를 호출하는 코드(base URL, 연동 대상) | `system-overview.md`의 `# Assumptions (미검증)`. 코드로 확인된 가정은 본문 사실로 옮기고 목록에서 뺀다 |
+| 빌드·실행·테스트 명령 | 해당 프로젝트 문서의 `# Commands`와 이 파일의 명령 블록 |
+| 추적하지 않는 설정 파일(`.env*` 등) 추가 | `okf/development/worktrees.md`의 `# 복사 대상` 표 |
+| 여러 프로젝트가 공유하는 새 개념(API 엔드포인트 계약, DB 테이블, 도메인 용어) | 새 개념 문서, 그 디렉터리의 `index.md`, `okf/log.md` |
+
+- **FO/BO 쌍 중 한쪽만 바꿨으면** 쌍이 같다고 적은 곳이 아직 맞는지 확인한다: 프론트 두 문서의 "이름 외 설정이 동일한 쌍둥이" 문장, 이 파일 Layout의 "The FO/BO pairs are identical" 줄.
+- 문서를 고칠 때 frontmatter(`generated`, `verified`, `status`) 처리는 [OKF authoring](okf/conventions/okf-authoring.md)을 따르고, 고친 뒤 위 적합성 검사를 돌린다.
+- 커밋할 때는 코드와 그 문서를 같은 커밋에 넣는다. hoka-cnp 태그 규칙이 `okf/` 파일을 해당 프로젝트 커밋에 붙인다.
+- 코드 변경이 번들의 어떤 내용도 틀리게 만들지 않으면 그렇다고 말하고 넘어간다. 타임스탬프만 올리지 않는다.
+- Stop hook(`.claude/hooks/okf-sync-check.sh`)이 이 규칙을 확인한다. 프로젝트 파일은 바뀌었는데 `okf/`가 그대로면 응답을 끝내기 전에 한 번 되돌려 보낸다. 같은 변경으로는 세션당 한 번만 알린다.
+
 ## Frontends (`hoka-*-front`)
 
 ```bash
