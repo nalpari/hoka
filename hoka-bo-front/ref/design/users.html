@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>사용자 관리 · HOKA 백오피스</title>
+    <link rel="stylesheet" href="assets/hoka.css" />
+    <script>
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t = q || localStorage.getItem("hoka-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-page="users">
+    <!-- HOKA 백오피스 디자인 시안 · 사용자 관리
+         백오피스 계정(직원)을 관리한다. 스토어 회원은 회원 관리에서. 데이터는 전부 시안용 합성 자료다. -->
+    <div class="app">
+      <aside class="rail" id="rail"></aside>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="btn btn--ghost btn--icon btn--sm railtoggle" data-railtoggle aria-label="메뉴 열기"></button>
+          <span class="topbar__title">
+            <span class="crumb">시스템 <svg width="13" height="13" aria-hidden="true"><use href="#i-right" /></svg></span>
+            사용자 관리
+          </span>
+          <div class="topbar__actions" data-topact></div>
+        </header>
+
+        <div class="scopebar">
+          <span class="scopebar__lead" data-icon="user" data-icon-size="14">설정 주체</span>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-store" /></svg>
+            <b>호카코리아</b> 브랜드스토어
+          </button>
+          <button class="scope" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-users" /></svg>
+            전체 <b>10</b> · 활성 7 · 잠금 1 · 초대 대기 1 · 비활성 1
+          </button>
+          <button class="scope" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-shield" /></svg>
+            역할 7개
+          </button>
+          <span class="scopebar__spacer"></span>
+          <button class="btn btn--secondary btn--sm" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-download" /></svg>
+            CSV 내보내기
+          </button>
+          <button class="btn btn--primary btn--sm" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-mail" /></svg>
+            사용자 초대
+          </button>
+        </div>
+
+        <main class="page">
+          <div class="split">
+            <!-- 좌측 : 사용자 목록 -->
+            <section class="panel">
+              <div class="toolbar">
+                <div class="toolbar__search">
+                  <svg width="14" height="14" aria-hidden="true"><use href="#i-search" /></svg>
+                  <input type="search" placeholder="이름 · 이메일 · 부서" aria-label="사용자 검색" />
+                </div>
+                <div class="chips">
+                  <span class="chip">
+                    상태 <b>활성 · 잠금 · 초대 대기</b>
+                    <button type="button" aria-label="상태 조건 지우기">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-x" /></svg>
+                    </button>
+                  </span>
+                  <button class="btn btn--ghost btn--sm" type="button">
+                    <svg width="14" height="14" aria-hidden="true"><use href="#i-filter" /></svg>
+                    역할 · 부서
+                  </button>
+                </div>
+                <span class="grow"></span>
+                <span class="toolbar__count">10명 중 10명</span>
+              </div>
+
+              <div class="tablewrap">
+                <table class="table" data-selectable>
+                  <thead>
+                    <tr>
+                      <th style="width: 36px">
+                        <label class="check"><input type="checkbox" data-checkall aria-label="전체 선택" /></label>
+                      </th>
+                      <th style="width: 260px">사용자</th>
+                      <th style="width: 110px">부서</th>
+                      <th style="width: 120px">역할</th>
+                      <th style="width: 110px">상태</th>
+                      <th style="width: 96px">2단계 인증</th>
+                      <th style="width: 150px">최근 접속 <span class="sortmark"><svg width="12" height="12" aria-hidden="true"><use href="#i-down" /></svg></span></th>
+                      <th style="width: 44px"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="김서연 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="avatar" src="assets/img/user-1.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">김서연</span>
+                            <small>seoyeon.kim@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>이커머스팀</td>
+                      <td><span class="badge badge--accent">슈퍼관리자</span></td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>활성</span></td>
+                      <td><span class="badge badge--ok">OTP</span></td>
+                      <td class="num">09-15 10:31</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="박준혁 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="avatar" src="assets/img/user-2.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">박준혁</span>
+                            <small>junhyuk.park@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>이커머스팀</td>
+                      <td><span class="badge">운영 관리자</span></td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>활성</span></td>
+                      <td><span class="badge badge--ok">OTP</span></td>
+                      <td class="num">09-15 09:58</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="이도윤 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="avatar" src="assets/img/user-3.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">이도윤</span>
+                            <small>doyun.lee@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>CS팀</td>
+                      <td><span class="badge">CS 담당</span></td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>활성</span></td>
+                      <td><span class="badge badge--ok">OTP</span></td>
+                      <td class="num">09-15 10:12</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="is-selected is-risk" data-row aria-current="true">
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="한지우 선택" checked /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <span class="avatar initial">한</span>
+                          <div class="cellstack">
+                            <span class="primary">한지우</span>
+                            <small>jiwoo.han@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>CS팀</td>
+                      <td><span class="badge">CS 담당</span></td>
+                      <td><span class="badge badge--risk">잠금</span></td>
+                      <td><span class="badge badge--ok">OTP</span></td>
+                      <td class="num">09-13 22:14 <span class="dim">실패</span></td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="최민지 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="avatar" src="assets/img/user-4.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">최민지</span>
+                            <small>minji.choi@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>재무팀</td>
+                      <td><span class="badge">정산 담당</span></td>
+                      <td><span class="flex gap-2"><i class="dot dot--ok"></i>활성</span></td>
+                      <td><span class="badge badge--ok">OTP</span></td>
+                      <td class="num">09-14 18:20</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="정하람 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <span class="avatar initial">정</span>
+                          <div class="cellstack">
+                            <span class="primary">정하람</span>
+                            <small>haram.jung@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>MD팀</td>
+                      <td><span class="badge">MD</span></td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>활성</span></td>
+                      <td><span class="badge badge--ok">OTP</span></td>
+                      <td class="num">09-15 08:47</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="배소율 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <span class="avatar initial">배</span>
+                          <div class="cellstack">
+                            <span class="primary">배소율</span>
+                            <small>soyul.bae@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>MD팀</td>
+                      <td><span class="badge">MD</span></td>
+                      <td><span class="flex gap-2"><i class="dot dot--ok"></i>활성</span></td>
+                      <td><span class="badge badge--warn">미등록</span></td>
+                      <td class="num">09-14 11:03</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="윤태오 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <span class="avatar initial">윤</span>
+                          <div class="cellstack">
+                            <span class="primary">윤태오</span>
+                            <small>taeo.yoon@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>물류팀</td>
+                      <td><span class="badge">조회 전용</span></td>
+                      <td><span class="flex gap-2"><i class="dot dot--ok"></i>활성</span></td>
+                      <td><span class="badge badge--ok">OTP</span></td>
+                      <td class="num">09-12 17:40</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="오세진 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <span class="avatar initial">오</span>
+                          <div class="cellstack">
+                            <span class="primary">오세진</span>
+                            <small>sejin.oh@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>마케팅팀</td>
+                      <td><span class="badge">마케팅</span></td>
+                      <td><span class="badge badge--accent">초대 대기</span></td>
+                      <td class="dim">-</td>
+                      <td class="num dim">초대 09-11</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="is-muted" data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="강나래 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <span class="avatar initial">강</span>
+                          <div class="cellstack">
+                            <span class="primary" style="color: var(--ink-subtle)">강나래</span>
+                            <small>narae.kang@hoka.co.kr</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>이커머스팀</td>
+                      <td><span class="badge badge--outline">운영 관리자</span></td>
+                      <td><span class="badge badge--outline">비활성</span></td>
+                      <td class="dim">-</td>
+                      <td class="num dim">08-29 19:12</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="pager">
+                <span>1명 선택</span>
+                <button class="btn btn--ghost btn--sm" type="button">역할 변경</button>
+                <button class="btn btn--ghost btn--sm" type="button">비활성화</button>
+                <span class="grow"></span>
+                <span>10명 중 1 ~ 10</span>
+                <div class="pagenums">
+                  <a href="#" aria-current="page">1</a>
+                </div>
+              </div>
+            </section>
+
+            <!-- 우측 : 선택한 사용자 -->
+            <section class="panel">
+              <div class="panel__head">
+                <h3>사용자 상세</h3>
+                <div class="right-slot">
+                  <button class="btn btn--ghost btn--icon btn--sm" type="button" aria-label="편집">
+                    <svg width="15" height="15" aria-hidden="true"><use href="#i-edit" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="panel__body">
+                <div class="flex gap-3 flex--start">
+                  <span class="avatar avatar--lg initial">한</span>
+                  <div class="grow">
+                    <div class="t-h3">한지우</div>
+                    <div class="t-sm muted">jiwoo.han@hoka.co.kr</div>
+                    <div class="flex gap-1 mt-2">
+                      <span class="badge">CS 담당</span>
+                      <span class="badge badge--risk">잠금</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="note note--risk mt-4">
+                  <svg width="16" height="16" aria-hidden="true"><use href="#i-lock" /></svg>
+                  <div>
+                    <strong>09-13 22:14 비밀번호 5회 오류로 잠겼습니다</strong>
+                    풀면 임시 비밀번호가 메일로 가고, 첫 로그인 때 새 비밀번호를 정해야 합니다. 배정된 문의 8건은 그동안 다른 담당자에게 넘길 수 있습니다.
+                    <div class="flex gap-2 mt-3">
+                      <button class="btn btn--primary btn--sm" type="button">잠금 해제</button>
+                      <button class="btn btn--secondary btn--sm" type="button">문의 8건 재배정</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel__body" style="border-top: 1px solid var(--hairline)">
+                <dl class="deflist">
+                  <dt>부서</dt>
+                  <dd>CS팀</dd>
+                  <dt>역할</dt>
+                  <dd><a href="roles.html">CS 담당</a></dd>
+                  <dt>데이터 범위</dt>
+                  <dd>브랜드스토어 전체</dd>
+                  <dt>2단계 인증</dt>
+                  <dd>OTP 앱 · 2025-11-03 등록</dd>
+                  <dt>계정 생성</dt>
+                  <dd>2025-11-03 · 김서연 초대</dd>
+                  <dt>비밀번호 변경</dt>
+                  <dd>2026-07-02 <span class="dim">· 75일 경과</span></dd>
+                </dl>
+              </div>
+
+              <div class="panel__body" style="border-top: 1px solid var(--hairline)">
+                <div class="sechead">
+                  <h2>접근 가능한 메뉴</h2>
+                  <span class="t-xs dim">CS 담당 역할 기준</span>
+                </div>
+                <div class="flex gap-1 flex--wrap">
+                  <span class="badge badge--outline">대시보드</span>
+                  <span class="badge badge--outline">주문·배송 <span class="dim">조회</span></span>
+                  <span class="badge badge--outline">클레임·반품</span>
+                  <span class="badge badge--outline">문의·리뷰</span>
+                  <span class="badge badge--outline">회원 관리 <span class="dim">조회</span></span>
+                </div>
+              </div>
+
+              <div class="panel__body" style="border-top: 1px solid var(--hairline); padding-bottom: var(--s-2)">
+                <div class="sechead">
+                  <h2>최근 로그인</h2>
+                  <a class="t-xs muted" href="#">감사 로그</a>
+                </div>
+              </div>
+              <ul class="stack" style="margin-top: calc(var(--s-2) * -1)">
+                <li style="grid-template-columns: minmax(0, 1fr) auto; padding: 8px var(--s-4)">
+                  <span class="cellstack">
+                    <span class="primary" style="color: var(--risk)">로그인 실패 5회</span>
+                    <small>09-13 22:09 ~ 22:14 · Chrome · 서울</small>
+                  </span>
+                  <span class="badge badge--risk">잠금</span>
+                </li>
+                <li style="grid-template-columns: minmax(0, 1fr) auto; padding: 8px var(--s-4)">
+                  <span class="cellstack">
+                    <span class="primary">로그인</span>
+                    <small>09-13 09:02 · Chrome · 서울</small>
+                  </span>
+                  <span class="badge badge--ok">성공</span>
+                </li>
+                <li style="grid-template-columns: minmax(0, 1fr) auto; padding: 8px var(--s-4)">
+                  <span class="cellstack">
+                    <span class="primary">로그인</span>
+                    <small>09-12 08:58 · Safari · 서울</small>
+                  </span>
+                  <span class="badge badge--ok">성공</span>
+                </li>
+              </ul>
+
+              <div class="panel__foot">
+                <button class="btn btn--secondary btn--sm" type="button">
+                  <svg width="14" height="14" aria-hidden="true"><use href="#i-key" /></svg>
+                  비밀번호 초기화
+                </button>
+                <span class="grow"></span>
+                <button class="btn btn--risk btn--sm" type="button">계정 비활성화</button>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script src="assets/app.js"></script>
+  </body>
+</html>

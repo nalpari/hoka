@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>대시보드 · HOKA 백오피스</title>
+    <link rel="stylesheet" href="assets/hoka.css" />
+    <script>
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t = q || localStorage.getItem("hoka-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-page="dashboard">
+    <!-- HOKA 백오피스 디자인 시안 · 대시보드
+         숫자판이 아니라 오늘 처리할 일의 큐. 데이터는 전부 시안용 합성 자료다. -->
+    <div class="app">
+      <aside class="rail" id="rail"></aside>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="btn btn--ghost btn--icon btn--sm railtoggle" data-railtoggle aria-label="메뉴 열기"></button>
+          <span class="topbar__title">대시보드</span>
+          <div class="topbar__actions" data-topact></div>
+        </header>
+
+        <div class="scopebar">
+          <span class="scopebar__lead" data-icon="eye" data-icon-size="14">조회 범위</span>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-store" /></svg>
+            <b>호카코리아</b> 브랜드스토어
+          </button>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-calendar" /></svg>
+            2026-09-01 ~ 09-15
+          </button>
+          <button class="scope" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-layers" /></svg>
+            카테고리 전체
+          </button>
+          <button class="scope scope--ghost" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-plus" /></svg>
+            조건 추가
+          </button>
+          <span class="scopebar__spacer"></span>
+          <div class="seg" role="group" aria-label="상품군">
+            <button type="button" aria-pressed="true">전체</button>
+            <button type="button" aria-pressed="false">로드</button>
+            <button type="button" aria-pressed="false">트레일</button>
+            <button type="button" aria-pressed="false">라이프스타일</button>
+          </div>
+          <span class="t-xs dim num">10:42 갱신</span>
+          <button class="btn btn--ghost btn--icon btn--sm" type="button" aria-label="다시 조회">
+            <svg width="15" height="15" aria-hidden="true"><use href="#i-refresh" /></svg>
+          </button>
+        </div>
+
+        <main class="page">
+          <!-- 1행 : 매출 추이 + 처리 대기 큐 -->
+          <div class="split split--wide">
+            <section class="panel">
+              <div class="panel__head">
+                <h3>매출 추이</h3>
+                <span class="badge badge--outline">네이버페이 결제 기준</span>
+                <div class="right-slot">
+                  <div class="legend">
+                    <span><i></i>9월</span>
+                    <span><i class="compare"></i>8월 같은 날</span>
+                  </div>
+                  <a class="btn btn--secondary btn--sm" href="#">
+                    매출 상세
+                    <svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg>
+                  </a>
+                </div>
+              </div>
+
+              <dl class="figures">
+                <div>
+                  <dt>오늘 매출</dt>
+                  <dd>
+                    <span class="figure">48,216,000</span><span class="unit">원</span>
+                    <span class="delta delta--up">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-upright" /></svg>12.4%
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>9월 누계</dt>
+                  <dd>
+                    <span class="figure">612,480,000</span><span class="unit">원</span>
+                    <span class="delta delta--up">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-upright" /></svg>8.1%
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>주문 건수</dt>
+                  <dd>
+                    <span class="figure">3,236</span><span class="unit">건</span>
+                    <span class="delta delta--up">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-upright" /></svg>9.7%
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>객단가</dt>
+                  <dd>
+                    <span class="figure">189,300</span><span class="unit">원</span>
+                    <span class="delta delta--down">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-downright" /></svg>2.1%
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+
+              <div class="panel__body">
+                <div
+                  class="chartbox"
+                  data-chart
+                  data-h="176"
+                  data-suffix="만"
+                  data-labelevery="2"
+                  data-today="14"
+                  data-values="3812,3540,3388,4102,4460,5210,4988,3720,3655,3910,4088,4210,4735,4390,4822"
+                  data-compare="3540,3310,3160,3810,4120,4790,4610,3450,3390,3620,3780,3900,4380,4060,4210"
+                  data-labels="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15"
+                ></div>
+              </div>
+
+              <div class="panel__body" style="border-top: 1px solid var(--hairline)">
+                <div class="grid grid--2" style="gap: var(--s-5)">
+                  <div>
+                    <div class="sechead">
+                      <h2>카테고리별 판매</h2>
+                      <span class="t-xs dim">9월 누계 · 매출액 기준</span>
+                    </div>
+                    <div class="hbar">
+                      <span>로드 러닝</span>
+                      <span class="hbar__track"><i class="hbar__fill" style="width: 58%"></i></span>
+                      <span class="num right">58.2%</span>
+                    </div>
+                    <div class="hbar">
+                      <span>트레일</span>
+                      <span class="hbar__track"><i class="hbar__fill" style="width: 18%"></i></span>
+                      <span class="num right">17.6%</span>
+                    </div>
+                    <div class="hbar">
+                      <span>라이프스타일·워킹</span>
+                      <span class="hbar__track"><i class="hbar__fill" style="width: 12%"></i></span>
+                      <span class="num right">12.4%</span>
+                    </div>
+                    <div class="hbar">
+                      <span>의류·액세서리</span>
+                      <span class="hbar__track"><i class="hbar__fill" style="width: 8%"></i></span>
+                      <span class="num right">7.9%</span>
+                    </div>
+                    <div class="hbar">
+                      <span>리커버리</span>
+                      <span class="hbar__track"><i class="hbar__fill" style="width: 4%"></i></span>
+                      <span class="num right">3.9%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="sechead">
+                      <h2>많이 팔린 상품</h2>
+                      <a class="t-xs muted" href="#">상품 관리</a>
+                    </div>
+                    <ul class="stack">
+                      <li style="grid-template-columns: 30px minmax(0, 1fr) auto; padding: 7px 0">
+                        <img class="thumb" style="width: 30px; height: 30px" src="assets/img/shoe-clifton.webp" alt="" />
+                        <span class="cellstack"><span class="primary">클리프톤 10</span><small>로드 · 169,000원</small></span>
+                        <span class="num">412족</span>
+                      </li>
+                      <li style="grid-template-columns: 30px minmax(0, 1fr) auto; padding: 7px 0">
+                        <img class="thumb" style="width: 30px; height: 30px" src="assets/img/shoe-bondi.webp" alt="" />
+                        <span class="cellstack"><span class="primary">본디 9</span><small>로드 · 209,000원</small></span>
+                        <span class="num">286족</span>
+                      </li>
+                      <li style="grid-template-columns: 30px minmax(0, 1fr) auto; padding: 7px 0">
+                        <img class="thumb" style="width: 30px; height: 30px" src="assets/img/shoe-speedgoat.webp" alt="" />
+                        <span class="cellstack"><span class="primary">스피드고트 6</span><small>트레일 · 189,000원</small></span>
+                        <span class="num">173족</span>
+                      </li>
+                      <li style="grid-template-columns: 30px minmax(0, 1fr) auto; padding: 7px 0">
+                        <img class="thumb" style="width: 30px; height: 30px" src="assets/img/shoe-mach.webp" alt="" />
+                        <span class="cellstack"><span class="primary">마하 6</span><small>로드 · 179,000원</small></span>
+                        <span class="num">151족</span>
+                      </li>
+                      <li style="grid-template-columns: 30px minmax(0, 1fr) auto; padding: 7px 0">
+                        <img class="thumb" style="width: 30px; height: 30px" src="assets/img/shoe-arahi.webp" alt="" />
+                        <span class="cellstack"><span class="primary">아라히 8</span><small>로드 · 169,000원</small></span>
+                        <span class="num">98족</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel__head">
+                <h3>처리 대기</h3>
+                <span class="badge badge--risk">8</span>
+                <div class="right-slot">
+                  <button class="btn btn--ghost btn--sm" type="button">기한순</button>
+                </div>
+              </div>
+              <ul class="stack queue">
+                <li>
+                  <span class="queue__icon is-risk">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-truck" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">출고 기한 임박 주문 27건</span>
+                    <span class="queue__meta">상품준비중<span class="sep">·</span>오늘 17:00 마감</span>
+                  </span>
+                  <span class="badge badge--risk">6시간</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+                <li>
+                  <span class="queue__icon is-risk">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-ruler" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">품절 임박 사이즈 9개</span>
+                    <span class="queue__meta">본디 9 280 외<span class="sep">·</span>10족 미만</span>
+                  </span>
+                  <span class="badge badge--risk">발주</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+                <li>
+                  <span class="queue__icon is-warn">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-message" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">미답변 문의 14건</span>
+                    <span class="queue__meta">가장 오래된 것 어제 15:20<span class="sep">·</span>응답 기한 24시간</span>
+                  </span>
+                  <span class="badge badge--warn">오늘</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+                <li>
+                  <span class="queue__icon is-warn">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-undo" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">반품·교환 승인 대기 6건</span>
+                    <span class="queue__meta">사이즈 교환 4<span class="sep">·</span>단순 변심 2</span>
+                  </span>
+                  <span class="badge badge--warn">D+2</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+                <li>
+                  <span class="queue__icon is-warn">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-star" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">신고된 리뷰 2건 검토</span>
+                    <span class="queue__meta">클리프톤 10<span class="sep">·</span>광고성 의심</span>
+                  </span>
+                  <span class="badge">D-1</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+                <li>
+                  <span class="queue__icon is-accent">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-tag" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">추석 러닝 기획전 종료 예정</span>
+                    <span class="queue__meta">09-22 종료<span class="sep">·</span>쿠폰 1,240장 남음</span>
+                  </span>
+                  <span class="badge badge--accent">D-7</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+                <li>
+                  <span class="queue__icon is-accent">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-wallet" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">8월 정산 확정 대기</span>
+                    <span class="queue__meta">네이버페이 정산 09-20<span class="sep">·</span>최민지</span>
+                  </span>
+                  <span class="badge badge--accent">확인</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+                <li>
+                  <span class="queue__icon is-accent">
+                    <svg width="13" height="13" aria-hidden="true"><use href="#i-box" /></svg>
+                  </span>
+                  <span class="grow">
+                    <span class="queue__title">신규 상품 등록 승인 2건</span>
+                    <span class="queue__meta">스카이워드 X 2<span class="sep">·</span>정하람 요청</span>
+                  </span>
+                  <span class="badge badge--accent">승인</span>
+                  <span class="queue__go"><svg width="14" height="14" aria-hidden="true"><use href="#i-right" /></svg></span>
+                </li>
+              </ul>
+              <div class="panel__foot">
+                <span class="t-xs muted">항목을 열면 기간·카테고리 조건이 그대로 넘어갑니다.</span>
+                <span class="grow"></span>
+                <a class="btn btn--ghost btn--sm" href="#">전체 보기</a>
+              </div>
+            </section>
+          </div>
+
+          <!-- 2행 : 사이즈별 재고 -->
+          <section class="panel">
+            <div class="panel__head">
+              <h3>사이즈별 재고</h3>
+              <span class="t-xs dim">판매 상위 5개 · 9월 15일 10:42 기준</span>
+              <div class="right-slot">
+                <div class="seg" role="group" aria-label="성별">
+                  <button type="button" aria-pressed="true">남성</button>
+                  <button type="button" aria-pressed="false">여성</button>
+                  <button type="button" aria-pressed="false">공용</button>
+                </div>
+                <a class="btn btn--secondary btn--sm" href="#">재고 관리</a>
+              </div>
+            </div>
+            <div class="tablewrap">
+              <table class="sizegrid">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; padding-left: var(--s-3); font-family: var(--font-ui); font-size: 11.5px">상품</th>
+                    <th>240</th>
+                    <th>245</th>
+                    <th>250</th>
+                    <th>255</th>
+                    <th>260</th>
+                    <th>265</th>
+                    <th>270</th>
+                    <th>275</th>
+                    <th>280</th>
+                    <th>285</th>
+                    <th>290</th>
+                    <th>295</th>
+                    <th>300</th>
+                    <th style="text-align: right; padding-right: var(--s-3)">합계</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th><img class="thumb" src="assets/img/shoe-clifton.webp" alt="" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px" />클리프톤 10<small style="padding-left: 32px">화이트/코발트 · 7일 판매 118</small></th>
+                    <td><span>62</span></td>
+                    <td><span>48</span></td>
+                    <td><span>91</span></td>
+                    <td><span>77</span></td>
+                    <td><span>120</span></td>
+                    <td><span>104</span></td>
+                    <td><span class="is-low">8</span></td>
+                    <td><span>36</span></td>
+                    <td><span>52</span></td>
+                    <td><span>41</span></td>
+                    <td><span>27</span></td>
+                    <td><span>19</span></td>
+                    <td><span class="is-na">-</span></td>
+                    <td class="right" style="padding-right: var(--s-3)"><span>685</span></td>
+                  </tr>
+                  <tr>
+                    <th><img class="thumb" src="assets/img/shoe-bondi.webp" alt="" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px" />본디 9<small style="padding-left: 32px">블랙/화이트 · 7일 판매 84</small></th>
+                    <td><span>33</span></td>
+                    <td><span>29</span></td>
+                    <td><span>58</span></td>
+                    <td><span>44</span></td>
+                    <td><span>71</span></td>
+                    <td><span class="is-low">6</span></td>
+                    <td><span>39</span></td>
+                    <td><span>22</span></td>
+                    <td><span class="is-out">품절</span></td>
+                    <td><span class="is-low">4</span></td>
+                    <td><span>18</span></td>
+                    <td><span>12</span></td>
+                    <td><span>7</span></td>
+                    <td class="right" style="padding-right: var(--s-3)"><span>343</span></td>
+                  </tr>
+                  <tr>
+                    <th><img class="thumb" src="assets/img/shoe-speedgoat.webp" alt="" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px" />스피드고트 6<small style="padding-left: 32px">올리브/오렌지 · 7일 판매 51</small></th>
+                    <td><span class="is-na">-</span></td>
+                    <td><span>14</span></td>
+                    <td><span>31</span></td>
+                    <td><span>27</span></td>
+                    <td><span>46</span></td>
+                    <td><span>38</span></td>
+                    <td><span>52</span></td>
+                    <td><span>30</span></td>
+                    <td><span>25</span></td>
+                    <td><span class="is-low">9</span></td>
+                    <td><span>11</span></td>
+                    <td><span class="is-na">-</span></td>
+                    <td><span class="is-na">-</span></td>
+                    <td class="right" style="padding-right: var(--s-3)"><span>283</span></td>
+                  </tr>
+                  <tr>
+                    <th><img class="thumb" src="assets/img/shoe-mach.webp" alt="" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px" />마하 6<small style="padding-left: 32px">코랄/옐로 · 7일 판매 44</small></th>
+                    <td><span>21</span></td>
+                    <td><span>17</span></td>
+                    <td><span>40</span></td>
+                    <td><span class="is-low">5</span></td>
+                    <td><span>63</span></td>
+                    <td><span>49</span></td>
+                    <td><span>57</span></td>
+                    <td><span class="is-out">품절</span></td>
+                    <td><span>28</span></td>
+                    <td><span>16</span></td>
+                    <td><span>13</span></td>
+                    <td><span class="is-na">-</span></td>
+                    <td><span class="is-na">-</span></td>
+                    <td class="right" style="padding-right: var(--s-3)"><span>309</span></td>
+                  </tr>
+                  <tr>
+                    <th><img class="thumb" src="assets/img/shoe-arahi.webp" alt="" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px" />아라히 8<small style="padding-left: 32px">네이비/스카이 · 7일 판매 29</small></th>
+                    <td><span>18</span></td>
+                    <td><span>12</span></td>
+                    <td><span>34</span></td>
+                    <td><span>26</span></td>
+                    <td><span>45</span></td>
+                    <td><span>37</span></td>
+                    <td><span>41</span></td>
+                    <td><span>23</span></td>
+                    <td><span class="is-low">3</span></td>
+                    <td><span>15</span></td>
+                    <td><span class="is-out">품절</span></td>
+                    <td><span>6</span></td>
+                    <td><span class="is-na">-</span></td>
+                    <td class="right" style="padding-right: var(--s-3)"><span>260</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="panel__foot">
+              <span class="t-xs muted">사이즈당 10족 미만이면 노란색, 0족이면 빨간색입니다. 발주 제안은 재고·사이즈 메뉴에서 만듭니다.</span>
+              <span class="grow"></span>
+              <a class="btn btn--ghost btn--sm" href="#">전체 312개 상품 보기</a>
+            </div>
+          </section>
+
+          <!-- 3행 : 주문 처리 흐름 + 담당자별 대기 -->
+          <div class="grid grid--2">
+            <section class="panel">
+              <div class="panel__head">
+                <h3>주문 처리 흐름</h3>
+                <span class="t-xs dim">오늘 10:42 기준 · 건</span>
+                <div class="right-slot">
+                  <a class="btn btn--ghost btn--sm" href="#">주문·배송</a>
+                </div>
+              </div>
+              <div class="panel__body">
+                <dl class="flow">
+                  <div>
+                    <dt>결제완료</dt>
+                    <dd><span class="figure">312</span></dd>
+                    <small>발주 확인 전</small>
+                  </div>
+                  <div class="is-risk">
+                    <dt>상품준비중</dt>
+                    <dd><span class="figure">184</span></dd>
+                    <small style="color: var(--risk)">27건 오늘 17:00 마감</small>
+                  </div>
+                  <div>
+                    <dt>배송중</dt>
+                    <dd><span class="figure">527</span></dd>
+                    <small>평균 1.8일</small>
+                  </div>
+                  <div>
+                    <dt>배송완료</dt>
+                    <dd><span class="figure">1,203</span></dd>
+                    <small>구매확정 대기</small>
+                  </div>
+                  <div>
+                    <dt>구매확정</dt>
+                    <dd><span class="figure">988</span></dd>
+                    <small>정산 대상</small>
+                  </div>
+                </dl>
+
+                <div class="sechead mt-5">
+                  <h2>반품·교환 사유</h2>
+                  <span class="t-xs dim">9월 누계 · 137건</span>
+                </div>
+                <div class="hbar">
+                  <span>사이즈 교환</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 41%"></i></span>
+                  <span class="num right">41.6%</span>
+                </div>
+                <div class="hbar">
+                  <span>단순 변심</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 28%"></i></span>
+                  <span class="num right">27.7%</span>
+                </div>
+                <div class="hbar">
+                  <span>색상 차이</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 14%"></i></span>
+                  <span class="num right">13.9%</span>
+                </div>
+                <div class="hbar">
+                  <span>불량</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 9%"></i></span>
+                  <span class="num right">8.8%</span>
+                </div>
+                <div class="hbar">
+                  <span>기타</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 8%"></i></span>
+                  <span class="num right">8.0%</span>
+                </div>
+                <div class="note note--warn mt-4" style="border: 0; background: none; padding: 0 0 0 2px">
+                  <svg width="16" height="16" aria-hidden="true"><use href="#i-info" /></svg>
+                  <div>사이즈 교환이 계속 4할을 넘습니다. 상품 페이지의 사이즈 가이드를 기획전·콘텐츠에서 손볼 수 있습니다.</div>
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel__head">
+                <h3>담당자별 대기</h3>
+                <span class="t-xs dim">2026-09-15</span>
+                <div class="right-slot">
+                  <a class="btn btn--ghost btn--sm" href="users.html">사용자 관리</a>
+                </div>
+              </div>
+              <ul class="stack">
+                <li style="grid-template-columns: 26px minmax(0, 1fr) auto">
+                  <span class="avatar initial">한</span>
+                  <span class="cellstack">
+                    <span class="primary">한지우</span>
+                    <small>CS팀 · CS 담당 · 계정 잠김 · 배정된 문의 8건</small>
+                  </span>
+                  <span class="badge badge--risk">재배정 필요</span>
+                </li>
+                <li style="grid-template-columns: 26px minmax(0, 1fr) auto">
+                  <img class="avatar" src="assets/img/user-3.webp" alt="" />
+                  <span class="cellstack">
+                    <span class="primary">이도윤</span>
+                    <small>CS팀 · CS 담당 · 미답변 6건 · 평균 응답 2시간 10분</small>
+                  </span>
+                  <span class="badge badge--warn">처리 중</span>
+                </li>
+                <li style="grid-template-columns: 26px minmax(0, 1fr) auto">
+                  <img class="avatar" src="assets/img/user-2.webp" alt="" />
+                  <span class="cellstack">
+                    <span class="primary">박준혁</span>
+                    <small>이커머스팀 · 운영 관리자 · 반품 승인 6건 · 출고 27건</small>
+                  </span>
+                  <span class="badge badge--warn">처리 중</span>
+                </li>
+                <li style="grid-template-columns: 26px minmax(0, 1fr) auto">
+                  <img class="avatar" src="assets/img/user-4.webp" alt="" />
+                  <span class="cellstack">
+                    <span class="primary">최민지</span>
+                    <small>재무팀 · 정산 담당 · 8월 정산 확정 · 09-20까지</small>
+                  </span>
+                  <span class="badge">예정</span>
+                </li>
+                <li style="grid-template-columns: 26px minmax(0, 1fr) auto">
+                  <span class="avatar initial">정</span>
+                  <span class="cellstack">
+                    <span class="primary">정하람</span>
+                    <small>MD팀 · MD · 신규 상품 승인 요청 2건 · 발주 제안 9건</small>
+                  </span>
+                  <span class="badge badge--accent">승인 대기</span>
+                </li>
+                <li style="grid-template-columns: 26px minmax(0, 1fr) auto">
+                  <span class="avatar initial">오</span>
+                  <span class="cellstack">
+                    <span class="primary">오세진</span>
+                    <small>마케팅팀 · 초대 대기 · 09-11 초대 발송</small>
+                  </span>
+                  <span class="badge badge--outline">미가입</span>
+                </li>
+              </ul>
+              <div class="panel__foot">
+                <span class="t-xs muted">잠긴 계정의 배정 건은 자동으로 넘어가지 않습니다. 사용자 관리에서 풀거나 재배정하세요.</span>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script src="assets/app.js"></script>
+  </body>
+</html>

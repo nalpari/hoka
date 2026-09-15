@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>로그인 · HOKA 백오피스</title>
+    <link rel="stylesheet" href="assets/hoka.css" />
+    <script>
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t = q || localStorage.getItem("hoka-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-page="login">
+    <!-- HOKA 백오피스 디자인 시안 · 로그인
+         계정·수치·사진은 모두 시안용 합성 자료다. -->
+    <div class="auth">
+      <div class="auth__form">
+        <div class="flex flex--between" style="margin-bottom: var(--s-7)">
+          <a class="flex gap-2" href="index.html" style="text-decoration: none">
+            <span class="brandmark" data-brandmark style="width: 26px; height: 26px"></span>
+            <b class="wordmark">HOKA</b>
+            <span class="rail__tag" style="margin-left: 2px">백오피스</span>
+          </a>
+          <div class="flex gap-2" data-topact></div>
+        </div>
+
+        <h1 class="t-display">브랜드스토어 운영을 한곳에서</h1>
+        <p class="muted mt-3" style="max-width: 44ch; font-size: 16px">
+          주문과 출고, 재고와 사이즈, 프로모션과 정산까지. 호카코리아 운영팀의 하루가 여기서 시작됩니다.
+        </p>
+
+        <form class="col gap-4 mt-5" onsubmit="return false">
+          <div class="field">
+            <label for="account">사원 계정</label>
+            <input
+              class="input input--lg"
+              id="account"
+              type="email"
+              value="seoyeon.kim@hoka.co.kr"
+              autocomplete="username"
+              spellcheck="false"
+            />
+          </div>
+          <div class="field">
+            <label for="pw">비밀번호</label>
+            <div class="inputwrap">
+              <input
+                class="input input--lg"
+                id="pw"
+                type="password"
+                value="hoka-bo-2026-09"
+                autocomplete="current-password"
+                style="padding-left: 12px; padding-right: 40px"
+              />
+              <button
+                class="btn btn--ghost btn--icon btn--sm suffixbtn"
+                type="button"
+                data-reveal="pw"
+                aria-label="비밀번호 표시"
+              >
+                <svg width="15" height="15" aria-hidden="true"><use href="#i-eye" /></svg>
+              </button>
+            </div>
+            <span class="err" hidden>
+              <svg width="13" height="13" aria-hidden="true"><use href="#i-alert" /></svg>
+              비밀번호가 맞지 않습니다. 5회 틀리면 계정이 잠기고 권한 관리자가 풀어야 합니다.
+            </span>
+          </div>
+          <div class="flex flex--between">
+            <label class="check"><input type="checkbox" checked /> 이 기기에서 로그인 유지</label>
+            <a class="t-sm muted" href="#">비밀번호 찾기</a>
+          </div>
+          <button class="btn btn--primary btn--lg btn--block" type="submit">로그인</button>
+          <p class="t-xs dim" style="display: flex; align-items: center; gap: 6px">
+            <svg width="13" height="13" aria-hidden="true"><use href="#i-smartphone" /></svg>
+            로그인 뒤 OTP 앱의 6자리 인증 코드를 한 번 더 입력합니다.
+          </p>
+        </form>
+
+        <hr class="hr" style="margin: var(--s-6) 0" />
+
+        <div class="col gap-3">
+          <span class="t-h4">계정이 아직 없으신가요?</span>
+          <ul class="stack auth__paths">
+            <li>
+              <span class="queue__icon is-accent">
+                <svg width="15" height="15" aria-hidden="true"><use href="#i-mail" /></svg>
+              </span>
+              <span class="cellstack">
+                <span class="primary">초대 메일로 계정 만들기</span>
+                <small>백오피스 계정은 권한 관리자가 발급합니다. 받은 초대 링크는 24시간 안에 열어 주세요.</small>
+              </span>
+              <span class="queue__go"><svg width="15" height="15" aria-hidden="true"><use href="#i-right" /></svg></span>
+            </li>
+            <li>
+              <span class="queue__icon">
+                <svg width="15" height="15" aria-hidden="true"><use href="#i-shield" /></svg>
+              </span>
+              <span class="cellstack">
+                <span class="primary">접근 권한 요청</span>
+                <small>계정은 있지만 필요한 메뉴가 보이지 않을 때. 소속 팀의 권한 관리자에게 요청이 전달됩니다.</small>
+              </span>
+              <span class="queue__go"><svg width="15" height="15" aria-hidden="true"><use href="#i-right" /></svg></span>
+            </li>
+            <li>
+              <span class="queue__icon">
+                <svg width="15" height="15" aria-hidden="true"><use href="#i-unlock" /></svg>
+              </span>
+              <span class="cellstack">
+                <span class="primary">잠긴 계정 풀기</span>
+                <small>비밀번호를 5회 틀렸거나 90일 동안 접속하지 않은 계정입니다.</small>
+              </span>
+              <span class="queue__go"><svg width="15" height="15" aria-hidden="true"><use href="#i-right" /></svg></span>
+            </li>
+          </ul>
+        </div>
+
+        <p class="t-xs dim mt-5">
+          이 화면은 디자인 시안입니다. 계정·수치·사진은 모두 시안용 합성 자료입니다.
+          <a href="index.html">시안 목록으로</a>
+        </p>
+      </div>
+
+      <div class="auth__art">
+        <img src="assets/img/login-hero.webp" alt="새벽 한강 러닝 코스에서 러닝화 끈을 묶는 러너" />
+        <div class="auth__quote">
+          <p>주문은 밤에도 들어옵니다. 아침에 열면 오늘 나갈 것부터 보여야 합니다.</p>
+          <p>출고 마감, 사이즈 재고, 미답변 문의를 한 범위 안에서 봅니다.</p>
+        </div>
+      </div>
+    </div>
+    <script src="assets/app.js"></script>
+  </body>
+</html>
