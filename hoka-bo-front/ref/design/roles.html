@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>권한 관리 · HOKA 백오피스</title>
+    <link rel="stylesheet" href="assets/hoka.css" />
+    <script>
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t = q || localStorage.getItem("hoka-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-page="roles">
+    <!-- HOKA 백오피스 디자인 시안 · 권한 관리
+         역할 × 메뉴 × CRUD 격자. 데이터는 전부 시안용 합성 자료다. -->
+    <div class="app">
+      <aside class="rail" id="rail"></aside>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="btn btn--ghost btn--icon btn--sm railtoggle" data-railtoggle aria-label="메뉴 열기"></button>
+          <span class="topbar__title">
+            <span class="crumb">시스템 <svg width="13" height="13" aria-hidden="true"><use href="#i-right" /></svg></span>
+            권한 관리
+          </span>
+          <div class="topbar__actions" data-topact></div>
+        </header>
+
+        <div class="scopebar">
+          <span class="scopebar__lead" data-icon="shield" data-icon-size="14">설정 주체</span>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-store" /></svg>
+            <b>호카코리아</b> 브랜드스토어
+          </button>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-shield" /></svg>
+            역할 <b>운영 관리자</b>
+          </button>
+          <button class="scope" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-users" /></svg>
+            사용자 2명
+          </button>
+          <button class="scope" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-branch" /></svg>
+            메뉴 트리 v12 기준
+          </button>
+          <span class="scopebar__spacer"></span>
+          <button class="btn btn--ghost btn--sm" type="button">변경 이력</button>
+          <button class="btn btn--secondary btn--sm" type="button">역할 복제</button>
+          <button class="btn btn--primary btn--sm" type="button">권한 저장</button>
+        </div>
+
+        <main class="page">
+          <div class="split--left grid" style="align-items: start">
+            <!-- 좌측 : 역할 목록 -->
+            <section class="panel">
+              <div class="panel__head">
+                <h3>역할</h3>
+                <span class="badge">7</span>
+                <div class="right-slot">
+                  <button class="btn btn--ghost btn--icon btn--sm" type="button" aria-label="역할 추가" title="역할 추가">
+                    <svg width="15" height="15" aria-hidden="true"><use href="#i-plus" /></svg>
+                  </button>
+                </div>
+              </div>
+              <ul class="stack" data-selectable>
+                <li data-row style="grid-template-columns: minmax(0, 1fr) auto; cursor: pointer">
+                  <span class="cellstack">
+                    <span class="primary flex gap-2" style="display: flex">슈퍼관리자
+                      <svg width="13" height="13" aria-hidden="true" style="color: var(--ink-tertiary)"><use href="#i-lock" /></svg>
+                    </span>
+                    <small>1명 · 모든 메뉴 · 시스템 설정</small>
+                  </span>
+                  <span class="num t-xs dim">18/18</span>
+                </li>
+                <li class="is-selected" data-row aria-current="true" style="grid-template-columns: minmax(0, 1fr) auto; cursor: pointer">
+                  <span class="cellstack">
+                    <span class="primary">운영 관리자</span>
+                    <small>2명 · 주문 · 상품 · 마케팅 일부</small>
+                  </span>
+                  <span class="num t-xs dim">13/18</span>
+                </li>
+                <li data-row style="grid-template-columns: minmax(0, 1fr) auto; cursor: pointer">
+                  <span class="cellstack">
+                    <span class="primary">CS 담당</span>
+                    <small>2명 · 문의 · 클레임 · 주문 조회</small>
+                  </span>
+                  <span class="num t-xs dim">5/18</span>
+                </li>
+                <li data-row style="grid-template-columns: minmax(0, 1fr) auto; cursor: pointer">
+                  <span class="cellstack">
+                    <span class="primary">MD</span>
+                    <small>2명 · 상품 · 재고 · 전시</small>
+                  </span>
+                  <span class="num t-xs dim">6/18</span>
+                </li>
+                <li data-row style="grid-template-columns: minmax(0, 1fr) auto; cursor: pointer">
+                  <span class="cellstack">
+                    <span class="primary">정산 담당</span>
+                    <small>1명 · 정산 · 세금계산서 · 주문 조회</small>
+                  </span>
+                  <span class="num t-xs dim">4/18</span>
+                </li>
+                <li data-row style="grid-template-columns: minmax(0, 1fr) auto; cursor: pointer">
+                  <span class="cellstack">
+                    <span class="primary">마케팅</span>
+                    <small>1명 · 프로모션 · 기획전 · 등급 조회</small>
+                  </span>
+                  <span class="num t-xs dim">5/18</span>
+                </li>
+                <li data-row style="grid-template-columns: minmax(0, 1fr) auto; cursor: pointer">
+                  <span class="cellstack">
+                    <span class="primary">조회 전용</span>
+                    <small>1명 · 대시보드 · 주문 · 재고 조회</small>
+                  </span>
+                  <span class="num t-xs dim">4/18</span>
+                </li>
+              </ul>
+              <div class="panel__foot" style="display: block">
+                <span class="t-xs dim">
+                  역할은 메뉴 트리를 기준으로 권한을 정합니다. 메뉴가 추가되면 슈퍼관리자 외에는 닫힌 채로 시작합니다.
+                </span>
+              </div>
+            </section>
+
+            <!-- 우측 : 역할 정보 + 메뉴별 권한 -->
+            <div class="col gap-4">
+              <section class="panel">
+                <div class="panel__head">
+                  <h3>역할 정보</h3>
+                  <span class="t-xs dim">OPS_ADMIN · 2025-10-14 생성</span>
+                  <div class="right-slot">
+                    <button class="btn btn--risk btn--sm" type="button">역할 삭제</button>
+                  </div>
+                </div>
+                <div class="panel__body">
+                  <div class="formgrid">
+                    <div class="field">
+                      <label for="r-name">역할명 <span class="req">*</span></label>
+                      <input class="input" id="r-name" type="text" value="운영 관리자" />
+                    </div>
+                    <div class="field">
+                      <label for="r-code">역할 코드</label>
+                      <input class="input mono" id="r-code" type="text" value="OPS_ADMIN" readonly />
+                    </div>
+                    <div class="field span-2">
+                      <label for="r-desc">설명</label>
+                      <textarea class="textarea" id="r-desc" style="min-height: 56px">주문·출고·클레임과 상품 운영을 맡는 이커머스팀 담당자. 마케팅에서 위임받은 범위 안에서 쿠폰을 발급할 수 있습니다.</textarea>
+                    </div>
+                    <div class="field">
+                      <label>데이터 범위</label>
+                      <div class="seg" role="group" aria-label="데이터 범위">
+                        <button type="button" aria-pressed="true">브랜드스토어 전체</button>
+                        <button type="button" aria-pressed="false">담당 카테고리만</button>
+                      </div>
+                      <span class="hint">담당 카테고리만 고르면 주문·상품 목록이 그 카테고리로 걸러집니다.</span>
+                    </div>
+                    <div class="field">
+                      <label>소속 사용자 <span class="dim">2명</span></label>
+                      <ul class="stack" style="border: 1px solid var(--hairline); border-radius: var(--r-md)">
+                        <li style="grid-template-columns: 22px minmax(0, 1fr) auto; padding: 7px 10px">
+                          <img class="avatar avatar--sm" src="assets/img/user-2.webp" alt="" />
+                          <span class="t-sm">박준혁 <span class="dim">이커머스팀</span></span>
+                          <span class="flex gap-2 t-xs muted"><i class="dot dot--live"></i>활성</span>
+                        </li>
+                        <li style="grid-template-columns: 22px minmax(0, 1fr) auto; padding: 7px 10px">
+                          <span class="avatar avatar--sm initial" style="font-size: 9px">강</span>
+                          <span class="t-sm dim">강나래 <span class="dim">이커머스팀</span></span>
+                          <span class="badge badge--outline">비활성</span>
+                        </li>
+                      </ul>
+                      <span class="hint">사용자에게 역할을 붙이거나 떼는 일은 <a href="users.html">사용자 관리</a>에서 합니다.</span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="panel__head">
+                  <h3>메뉴별 권한</h3>
+                  <span class="t-xs dim">C 등록 · R 조회 · U 수정 · D 삭제</span>
+                  <div class="right-slot">
+                    <button class="btn btn--ghost btn--sm" type="button">조회 권한만 남기기</button>
+                    <button class="btn btn--ghost btn--sm" type="button">전체 해제</button>
+                  </div>
+                </div>
+
+                <div class="tablewrap">
+                  <table class="table table--matrix">
+                    <thead>
+                      <tr>
+                        <th style="width: 220px">메뉴</th>
+                        <th class="center" style="width: 56px">C</th>
+                        <th class="center" style="width: 56px">R</th>
+                        <th class="center" style="width: 56px">U</th>
+                        <th class="center" style="width: 56px">D</th>
+                        <th style="width: 160px">부여 근거</th>
+                        <th>비고</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th>대시보드</th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="대시보드 조회" /></label></td>
+                        <td class="dim center">-</td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">허용된 범위 안에서만 집계됩니다</td>
+                      </tr>
+                      <tr>
+                        <th>주문·배송</th>
+                        <td><label class="check"><input type="checkbox" checked aria-label="주문 등록" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="주문 조회" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="주문 수정" /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="주문 삭제" /></label></td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">발주 확인·송장 등록·취소는 U에 포함</td>
+                      </tr>
+                      <tr>
+                        <th>클레임·반품</th>
+                        <td><label class="check"><input type="checkbox" checked aria-label="클레임 등록" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="클레임 조회" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="클레임 수정" /></label></td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">환불 승인은 건당 50만원까지</td>
+                      </tr>
+                      <tr>
+                        <th>문의·리뷰</th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="문의 조회" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="문의 수정" /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="문의 삭제" /></label></td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">리뷰 숨김은 CS 담당만</td>
+                      </tr>
+                      <tr>
+                        <th>상품 관리</th>
+                        <td><label class="check"><input type="checkbox" checked aria-label="상품 등록" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="상품 조회" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="상품 수정" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="상품 삭제" /></label></td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">신규 등록은 MD 승인 뒤 노출</td>
+                      </tr>
+                      <tr>
+                        <th>재고·사이즈</th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="재고 조회" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="재고 수정" /></label></td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">발주 제안은 MD가 승인</td>
+                      </tr>
+                      <tr>
+                        <th>카테고리·전시</th>
+                        <td><label class="check"><input type="checkbox" checked aria-label="전시 등록" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="전시 조회" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="전시 수정" /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="전시 삭제" /></label></td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">-</td>
+                      </tr>
+                      <tr>
+                        <th><span class="inherit">프로모션·쿠폰</span></th>
+                        <td><label class="check"><input type="checkbox" checked aria-label="쿠폰 등록" /></label></td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="쿠폰 조회" /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="쿠폰 수정" /></label></td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--accent">마케팅 위임</span></td>
+                        <td class="dim">발급 한도 월 500만원 · 09-30까지</td>
+                      </tr>
+                      <tr>
+                        <th><span class="inherit">기획전·콘텐츠</span></th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="기획전 조회" /></label></td>
+                        <td class="dim center">-</td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--accent">마케팅 위임</span></td>
+                        <td class="dim">-</td>
+                      </tr>
+                      <tr>
+                        <th>회원 관리</th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="회원 조회" /></label></td>
+                        <td class="dim center">-</td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">연락처·주소는 마스킹 표시</td>
+                      </tr>
+                      <tr>
+                        <th>등급·혜택</th>
+                        <td><label class="check"><input type="checkbox" aria-label="등급 등록" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="등급 조회" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="등급 수정" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="등급 삭제" disabled /></label></td>
+                        <td><span class="badge badge--risk">슈퍼관리자 전용</span></td>
+                        <td class="dim">-</td>
+                      </tr>
+                      <tr>
+                        <th>정산·매출</th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="정산 조회" /></label></td>
+                        <td class="dim center">-</td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">확정은 정산 담당만</td>
+                      </tr>
+                      <tr>
+                        <th>세금계산서</th>
+                        <td><label class="check"><input type="checkbox" aria-label="세금계산서 등록" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="세금계산서 조회" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="세금계산서 수정" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="세금계산서 삭제" disabled /></label></td>
+                        <td><span class="badge badge--risk">정산 담당 전용</span></td>
+                        <td class="dim">-</td>
+                      </tr>
+                      <tr>
+                        <th>메뉴 관리</th>
+                        <td><label class="check"><input type="checkbox" aria-label="메뉴 등록" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="메뉴 조회" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="메뉴 수정" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="메뉴 삭제" disabled /></label></td>
+                        <td><span class="badge badge--risk">슈퍼관리자 전용</span></td>
+                        <td class="dim">-</td>
+                      </tr>
+                      <tr>
+                        <th>사용자 관리</th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="사용자 조회" /></label></td>
+                        <td class="dim center">-</td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--outline">기본</span></td>
+                        <td class="dim">초대·잠금 해제는 슈퍼관리자만</td>
+                      </tr>
+                      <tr>
+                        <th><span class="inherit">권한 관리</span></th>
+                        <td class="dim center">-</td>
+                        <td><label class="check"><input type="checkbox" checked aria-label="권한 조회" /></label></td>
+                        <td class="dim center">-</td>
+                        <td class="dim center">-</td>
+                        <td><span class="badge badge--accent">메뉴 트리 v13</span></td>
+                        <td class="dim">v13 배포 뒤 열립니다 · 지금은 예정</td>
+                      </tr>
+                      <tr>
+                        <th>감사 로그</th>
+                        <td><label class="check"><input type="checkbox" aria-label="감사 로그 등록" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="감사 로그 조회" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="감사 로그 수정" disabled /></label></td>
+                        <td><label class="check"><input type="checkbox" aria-label="감사 로그 삭제" disabled /></label></td>
+                        <td><span class="badge badge--risk">슈퍼관리자 전용</span></td>
+                        <td class="dim">-</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="panel__foot" style="display: block">
+                  <div class="note note--accent" style="border: 0; background: none; padding: 0">
+                    <svg width="16" height="16" aria-hidden="true"><use href="#i-branch" /></svg>
+                    <div>
+                      <strong>위임된 권한은 위임한 역할의 범위를 넘을 수 없습니다</strong>
+                      파란 레일이 붙은 행이 그렇게 부여된 권한입니다. 마케팅 위임은 09-30에 끝나고, 메뉴 트리 v13이 배포되면
+                      권한 관리 조회가 자동으로 열립니다. 저장하면 감사 로그에 변경 전후가 남습니다.
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script src="assets/app.js"></script>
+  </body>
+</html>
