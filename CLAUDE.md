@@ -14,7 +14,7 @@ The root is the git repository but not a build. It holds five separate projects,
 | `hoka-bo-api` | same as above | Back office API (`com.hoka.bo`) |
 | `hoka-batch` | Spring Boot 4.1.1 + Spring Batch 6, Java 21, Maven | Batch jobs run from the shell with `java -jar` (`com.hoka.batch`) |
 
-- The FO/BO pairs are identical apart from their names. Keep them in step unless a change is meant for only one side.
+- The FO/BO pairs are identical apart from their names, with one exception: only `hoka-fo-api` has Resilience4j (dependencies, `application.yaml` settings, the sample `GET /api/samples/{id}`, its tests, and the okf rule in its `CLAUDE.md`). Keep them in step unless a change is meant for only one side.
 - Each project has its own build. Run commands from inside that project's directory.
 - Git: one repository rooted here (branch `main`, remote `origin` = `https://github.com/nalpari/hoka.git`). The projects have no `.git` of their own. `origin/main`, which the [worktree policy](#worktrees) branches from, exists only after the first push.
 
@@ -93,7 +93,7 @@ pnpm lint       # eslint (flat config: next core-web-vitals + typescript)
 ./mvnw package
 ```
 
-- Starters: `webmvc`, `security`, `actuator`, `devtools`, MyBatis (`mybatis-spring-boot-starter` 4.1.0, which brings `spring-boot-starter-jdbc`), plus the PostgreSQL runtime driver.
+- Starters: `webmvc`, `security`, `actuator`, `devtools`, MyBatis (`mybatis-spring-boot-starter` 4.1.0, which brings `spring-boot-starter-jdbc`), plus the PostgreSQL runtime driver. `hoka-fo-api` also has `spring-boot-starter-aspectj` and `resilience4j-spring-boot4` 2.4.0; rules in `okf/conventions/resilience4j.md`.
 - Spring Security is configured in `config/SecurityConfig`: every request needs HTTP Basic auth with Spring's generated default user (`user`, password printed at startup), sessions are stateless, and CSRF is off.
 - Sample CRUD lives in the `sample` package (`/api/samples`, MyBatis XML at `mapper/SampleMapper.xml`). `SampleControllerTests` hits the real local `appdb`, so `./mvnw test` needs the DB running.
 - Config is `src/main/resources/application.yaml`, which sets `spring.application.name`, the datasource (env vars `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, defaulting to `jdbc:postgresql://localhost:5432/appdb` with `app`/`app`), and MyBatis (mapper XML at `classpath:mapper/**/*.xml`, underscore-to-camelCase on). `@Mapper` interfaces are auto-scanned under the application package.

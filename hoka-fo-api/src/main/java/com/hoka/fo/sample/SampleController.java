@@ -3,6 +3,10 @@ package com.hoka.fo.sample;
 import java.util.List;
 import java.util.Optional;
 
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,9 +35,21 @@ public class SampleController {
         return sampleMapper.findAll();
     }
 
+    // Retry가 CircuitBreaker 바깥에서 돈다. fallback을 @CircuitBreaker에 달면 fallback이 던진 503을 Retry가 다시 재시도한다.
     @GetMapping("/{id}")
+    @Retry(name = "sample", fallbackMethod = "getFallback")
+    @CircuitBreaker(name = "sample")
     public ResponseEntity<Sample> get(@PathVariable long id) {
         return ResponseEntity.of(Optional.ofNullable(sampleMapper.findById(id)));
+    }
+
+    // DB 장애와 브레이커 차단만 503으로 바꾼다. 그 밖의 예외는 fallback에 맞지 않아 그대로 나간다.
+    private ResponseEntity<Sample> getFallback(long id, DataAccessException e) {
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "sample unavailable", e);
+    }
+
+    private ResponseEntity<Sample> getFallback(long id, CallNotPermittedException e) {
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "sample unavailable", e);
     }
 
     @PostMapping
