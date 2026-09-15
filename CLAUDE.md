@@ -48,7 +48,7 @@ uv run --with pyyaml python okf/.okf/okf_check.py okf
 
 | 바꾼 것 | 고칠 곳 |
 |---|---|
-| 프론트 `package.json`의 프레임워크·라이브러리 버전, npm 스크립트, 테스트 러너 추가 | `okf/projects/hoka-*-front.md`의 `# Stack`, `# Commands`, `# Notes` |
+| 프론트 `package.json`의 프레임워크·라이브러리 버전, 스크립트, `packageManager`, 테스트 러너 추가, `pnpm-workspace.yaml`의 `allowBuilds` | `okf/projects/hoka-*-front.md`의 `# Stack`, `# Commands`, `# Notes` |
 | 프론트 `next.config.ts`, `tsconfig.json`의 `paths`, Tailwind 설정 | 같은 문서의 `# Stack` |
 | API `pom.xml`의 Spring Boot·Java 버전, starter·DB 드라이버 추가/제거 | `okf/projects/hoka-*-api.md`의 `# Stack` |
 | API `application.yaml`의 datasource, `server.port` 등 동작을 바꾸는 설정 | 같은 문서의 `# Stack`(Config 행)과 `# Notes`. 포트면 `okf/architecture/system-overview.md`의 `# Local ports (현재 기본값)`도 |
@@ -67,9 +67,10 @@ uv run --with pyyaml python okf/.okf/okf_check.py okf
 ## Frontends (`hoka-*-front`)
 
 ```bash
-npm run dev     # next dev, http://localhost:3000
-npm run build
-npm run lint    # eslint (flat config: next core-web-vitals + typescript)
+pnpm install --frozen-lockfile
+pnpm dev        # next dev, http://localhost:3000
+pnpm build
+pnpm lint       # eslint (flat config: next core-web-vitals + typescript)
 ```
 
 - **Read `AGENTS.md` in each frontend first.** This Next.js version has breaking changes compared with your training data. Before writing Next.js code, check the bundled docs in `node_modules/next/dist/docs/`. `next dev` rewrites that block in `AGENTS.md`, so don't remove it.
@@ -77,7 +78,8 @@ npm run lint    # eslint (flat config: next core-web-vitals + typescript)
 - Tailwind v4 has no `tailwind.config`. Theme tokens live in `src/app/globals.css` under `@theme inline`.
 - Path alias: `@/*` maps to `src/*`.
 - There is no test runner yet.
-- npm is the package manager (`package-lock.json`).
+- pnpm 11 is the package manager (`packageManager: pnpm@11.18.0`, `pnpm-lock.yaml`). Don't run `npm install`; it creates a `package-lock.json`.
+- pnpm blocks dependency build scripts by default. The allowlist is `allowBuilds` in each frontend's `pnpm-workspace.yaml` (currently `unrs-resolver`). On `ERR_PNPM_IGNORED_BUILDS`, add the package there as `true`/`false`; `pnpm approve-builds` is interactive and hangs in agent sessions.
 
 ## APIs (`hoka-*-api`)
 

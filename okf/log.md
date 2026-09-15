@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-09-15
+* **Update**: 프론트 패키지 매니저 npm → pnpm 전환에 맞춰 [hoka-fo-front](/projects/hoka-fo-front.md), [hoka-bo-front](/projects/hoka-bo-front.md), [Worktrees](/development/worktrees.md)의 명령 갱신.
+
 ## 2026-09-14
 * **Update**: [OKF authoring](/conventions/okf-authoring.md)에 기존 문서를 고칠 때의 frontmatter 규칙 추가.
 * **Update**: `origin` 원격 연결에 맞춰 [Worktrees](/development/worktrees.md) 전제 갱신.
