@@ -1,3 +1,12 @@
 spring:
   application:
     name: hoka-bo-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/appdb}
+    username: ${DB_USERNAME:app}
+    password: ${DB_PASSWORD:app}
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
