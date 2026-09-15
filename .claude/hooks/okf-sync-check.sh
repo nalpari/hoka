@@ -17,7 +17,7 @@ root=$(git -C "${cwd:-.}" rev-parse --show-toplevel 2>/dev/null) || exit 0
 cd "$root" || exit 0
 
 # okf 문서와 무관한 파일: next dev 가 다시 쓰는 AGENTS.md, 에이전트 지침, README
-pathspec=(hoka-fo-front hoka-bo-front hoka-fo-api hoka-bo-api ':!*/AGENTS.md' ':!*/CLAUDE.md' ':!*/README.md')
+pathspec=(hoka-fo-front hoka-bo-front hoka-fo-api hoka-bo-api hoka-batch ':!*/AGENTS.md' ':!*/CLAUDE.md' ':!*/README.md')
 
 changed=$(git -c core.quotepath=off status --porcelain -uall --no-renames -- "${pathspec[@]}" | cut -c4-)
 [ -n "$changed" ] || exit 0

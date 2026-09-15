@@ -1,6 +1,6 @@
 ---
 name: hoka-cnp
-description: '변경을 의도 단위로 분할 커밋하고 원격에 푸시한다. 커밋 메세지는 `<type>:[<태그>] <한글 subject>` 형식이고, 태그는 커밋에 담긴 파일의 최상위 디렉터리로 정한다 — `hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api` 중 하나, 넷 다 아니면 `common`. hoka 저장소에서 "커밋하고 푸시해줘", "커밋 후 푸시", "commit and push", "커밋해줘", "푸시해줘" 처럼 커밋/푸시를 요청할 때 ip-commit-push 대신 반드시 이 스킬을 쓴다. 커밋 메세지만 작성하거나 메세지 규칙을 물어볼 때도 이 규칙을 따른다.'
+description: '변경을 의도 단위로 분할 커밋하고 원격에 푸시한다. 커밋 메세지는 `<type>:[<태그>] <한글 subject>` 형식이고, 태그는 커밋에 담긴 파일의 최상위 디렉터리로 정한다 — `hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api`, `hoka-batch` 중 하나, 모두 아니면 `common`. hoka 저장소에서 "커밋하고 푸시해줘", "커밋 후 푸시", "commit and push", "커밋해줘", "푸시해줘" 처럼 커밋/푸시를 요청할 때 ip-commit-push 대신 반드시 이 스킬을 쓴다. 커밋 메세지만 작성하거나 메세지 규칙을 물어볼 때도 이 규칙을 따른다.'
 ---
 
 # Commit & Push
@@ -25,7 +25,7 @@ description: '변경을 의도 단위로 분할 커밋하고 원격에 푸시한
 ## 태그 정하기
 
 태그는 저장소 이름이 아니라 **그 커밋이 어느 프로젝트를 바꾸는지**다. `hoka-fo-front`,
-`hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api` 가 한 저장소 루트 아래 디렉터리로 같이 있어서
+`hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api`, `hoka-batch` 가 한 저장소 루트 아래 디렉터리로 같이 있어서
 저장소명으로는 구분이 안 되고, 커밋 로그를 프로젝트별로 걸러 보는 것이 이 태그를 다는 유일한 이유다.
 
 커밋에 넣을 파일마다 경로의 **첫 번째 세그먼트**를 본다:
@@ -36,6 +36,7 @@ description: '변경을 의도 단위로 분할 커밋하고 원격에 푸시한
 | `hoka-bo-front` | `hoka-bo-front` |
 | `hoka-fo-api` | `hoka-fo-api` |
 | `hoka-bo-api` | `hoka-bo-api` |
+| `hoka-batch` | `hoka-batch` |
 | 그 밖 (`okf/`, `.claude/`, `CLAUDE.md` 등 루트 파일) | 루트 파일 |
 
 그 다음 커밋 단위로 정한다:
@@ -93,7 +94,7 @@ description: '변경을 의도 단위로 분할 커밋하고 원격에 푸시한
 <body (선택)>
 ```
 
-`<태그>` 는 `hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api`, `common` 중 하나다.
+`<태그>` 는 `hoka-fo-front`, `hoka-bo-front`, `hoka-fo-api`, `hoka-bo-api`, `hoka-batch`, `common` 중 하나다.
 
 ### Type
 
