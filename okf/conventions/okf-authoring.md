@@ -4,8 +4,8 @@ title: OKF authoring
 description: HOKA 공유 지식 번들(OKF v0.2)을 읽고 쓰는 규칙.
 resource: https://raw.githubusercontent.com/GoogleCloudPlatform/open-knowledge-format/main/SPEC.md
 tags: [okf, convention]
-status: stable
-generated: { by: claude-code/claude-opus-5, at: 2026-09-14 }
+status: draft
+generated: { by: claude-code/claude-opus-5, at: 2026-09-14T09:00:56Z }
 sources:
   - id: okf-spec
     resource: https://raw.githubusercontent.com/GoogleCloudPlatform/open-knowledge-format/main/SPEC.md
@@ -30,6 +30,7 @@ sources:
 - 개념 1개 = `.md` 파일 1개. 파일명은 kebab-case. `index.md`, `log.md`는 예약 파일이므로 개념으로 쓰지 않는다.[^okf-spec]
 - frontmatter의 `type`은 필수. `title`, `description`도 채운다. 현재 사용하는 type: `Project`, `Architecture`, `Convention`, `Development Procedure`. 새 type이 필요하면 추가해도 된다.
 - 에이전트가 작성하면 `generated: { by: claude-code/<model>, at: <ISO 8601> }`와 `status: draft`를 붙인다. 사람이 검토하면 `verified: { by: human:<id>, at: ... }`를 추가하고 `status: stable`로 바꾼다.
+- 기존 문서를 고치면 `generated.at`을 고친 시각으로 바꾸고 `verified` 항목은 지운다. 바뀌기 전 내용을 검증한 기록이라 새 내용을 보증하지 않는다. 에이전트가 고쳤으면 `status: stable`도 `draft`로 되돌린다.
 - 근거는 `sources`에 기록하고, 본문 주장은 `[^id]` 각주로 연결한다. 프로젝트 파일은 `../../hoka-fo-api/pom.xml`처럼 상대 경로로 가리킨다.
 - 개념 간 링크는 번들 기준 절대 경로(`/projects/hoka-fo-api.md`)를 쓴다. 관계의 종류(호출, 의존 등)는 문장으로 설명한다.
 - 개념을 추가·삭제하면 해당 디렉터리 `index.md`에 `* [Title](file.md) - description` 줄을 갱신하고, 루트 [log.md](/log.md) 맨 위 날짜 섹션에 기록한다.
