@@ -42,6 +42,8 @@ sources:
 - 권한은 토큰에 넣지 않는다. 요청마다 DB에서 읽어 authority(`SUPER` 또는 `MENU_CODE:C|R|U|D`)로 만든다. 잠금·비활성화·역할 변경·권한 저장이 즉시 반영된다.[^converter]
 - 임시 비밀번호를 쓰는 동안(`password_change_required`)에는 authority가 `PASSWORD_CHANGE_REQUIRED` 하나뿐이라 비밀번호 변경 외에는 막힌다.
 - refresh 토큰은 랜덤 문자열이고 서버에는 SHA-256 해시만 남는다. 쓸 때마다 새로 발급하며 이미 쓴 토큰은 거부한다. 만료는 로그인 유지 30일 / 미유지 12시간이고, 회전해도 원래 만료 시각을 유지한다.
+- 토큰 소비는 `delete ... returning` 한 문장이다. 조회와 삭제를 나누면 같은 토큰으로 동시에 들어온 두 요청이 모두 통과해 세션이 둘로 갈라진다. 행을 지운 쪽만 결과를 받으므로 하나만 이긴다.
+- 로그인 실패 경로는 `noRollbackFor = ApiException.class`로 커밋한다. 실패 횟수·잠금·이력을 쓴 뒤 예외를 던지므로, 기본 롤백 규칙을 두면 5회 잠금과 감사 기록이 전혀 쌓이지 않는다.
 - 잠금 해제·비밀번호 초기화·비활성화는 그 사용자의 refresh 토큰을 지운다.
 
 # Login rules
@@ -97,6 +99,8 @@ where email = '<슈퍼관리자 이메일>';
 [hoka-bo-front](/projects/hoka-bo-front.md)가 BFF로 붙어 있다. 로그인 화면(`/login`)은 Server Action으로 `POST /api/auth/login`을 부르고 토큰을 HttpOnly 쿠키 `bo_at`(15분)·`bo_rt`(30일/12시간)에 담는다. "로그인 유지" 선택은 `bo_rm`에 남긴다 — refresh를 회전시킬 때 원래 선택을 알아야 만료가 줄지 않는다.
 
 `src/proxy.ts`가 보호 라우트를 지키고, access 쿠키가 사라지면 `POST /api/auth/refresh`로 갱신해 응답과 요청 헤더 양쪽에 새 쿠키를 싣는다. 로그인 이력의 IP·UA는 BFF가 넘긴 `X-Forwarded-For`·`User-Agent`에서 온다.
+
+API가 세션을 거절하면(계정 비활성화, 권한 회수 등) 페이지는 `/login`이 아니라 **`/session/clear`**로 보낸다. 이 Route Handler가 쿠키를 지운 뒤 `/login?expired=1`로 넘긴다. 곧장 `/login`으로 보내면 proxy가 아직 남아 있는 access 쿠키를 보고 다시 대시보드로 돌려보내 무한 왕복이 된다. 그래서 `/session/clear`는 쿠키가 있어도 통과시키는 유일한 경로다.
 
 # Not built yet
 
