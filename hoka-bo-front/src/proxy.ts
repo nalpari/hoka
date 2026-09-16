@@ -21,7 +21,7 @@ export async function proxy(request: NextRequest) {
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
 
   if (accessToken) {
-    return isPublic ? NextResponse.redirect(new URL("/", request.url)) : NextResponse.next();
+    return isPublic ? NextResponse.redirect(new URL("/dashboard", request.url)) : NextResponse.next();
   }
 
   // access 쿠키가 사라진 것이 곧 만료 신호다. 쿠키를 쓸 수 있는 자리가 여기뿐이라 갱신도 여기서 한다.
@@ -67,7 +67,7 @@ function withRenewedTokens(request: NextRequest, tokens: Tokens, isPublic: boole
   );
 
   const response = isPublic
-    ? NextResponse.redirect(new URL("/", request.url))
+    ? NextResponse.redirect(new URL("/dashboard", request.url))
     : NextResponse.next({ request: { headers } });
   response.cookies.set(ACCESS_COOKIE, tokens.accessToken, {
     ...COOKIE_OPTIONS,

@@ -42,7 +42,7 @@ export async function login(_previous: LoginState, formData: FormData): Promise<
     return { error: messageFor(error), email };
   }
   // redirect는 예외를 던져 흐름을 끊으므로 try 밖에서 부른다.
-  redirect("/");
+  redirect("/dashboard");
 }
 
 export async function logout() {
