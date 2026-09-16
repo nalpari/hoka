@@ -58,8 +58,10 @@ public class MenuService {
                 requested.useCreate(), requested.useRead(), requested.useUpdate(), requested.useDelete(),
                 requested.exclusiveRoleCode()));
         validate(menu);
-        if (SELF.equals(code) && !menu.visible()) {
-            throw ApiException.badRequest("MENU_SELF_HIDDEN", "메뉴 관리 자신은 숨길 수 없습니다.");
+        // 조회를 끄면 슈퍼관리자의 canRead도 함께 꺼져(findAccessibleMenus가 use_read를 쓴다)
+        // 메뉴 관리 화면으로 돌아올 길이 사라진다. 숨기는 것과 같은 자물쇠다.
+        if (SELF.equals(code) && (!menu.visible() || !menu.useRead())) {
+            throw ApiException.badRequest("MENU_SELF_HIDDEN", "메뉴 관리 자신은 숨기거나 조회를 끌 수 없습니다.");
         }
         // 그룹이 바뀌면 옮겨 간 그룹의 맨 뒤에 붙인다.
         if (!Objects.equals(current.parentCode(), menu.parentCode())) {

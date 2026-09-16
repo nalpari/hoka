@@ -4,7 +4,7 @@ title: BO 인증·권한
 description: hoka-bo-api의 로그인(JWT), 역할×메뉴 CRUD 권한, 사용자 관리 API 계약과 운영 절차.
 tags: [api, bo, auth, security, jwt]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-16T07:30:00Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-16T08:10:00Z }
 sources:
   - id: security-config
     resource: ../../hoka-bo-api/src/main/java/com/hoka/bo/config/SecurityConfig.java
@@ -24,6 +24,9 @@ sources:
   - id: menu-service
     resource: ../../hoka-bo-api/src/main/java/com/hoka/bo/menu/MenuService.java
     title: MenuService.java
+  - id: auth-mapper
+    resource: ../../hoka-bo-api/src/main/resources/mapper/AuthUserMapper.xml
+    title: AuthUserMapper.xml
   - id: design
     resource: ../../docs/bo-api/bo-auth-design.md
     title: 백오피스 사용자·권한 관리 설계
@@ -35,8 +38,9 @@ sources:
 
 - 사용자 1명은 역할 1개(`bo_user.role_code`)를 가진다.
 - 권한은 역할 × 메뉴 × CRUD다(`bo_role_menu`). 메뉴가 실제로 쓰는 동작은 `bo_menu.use_*`로 정하고, 격자에서 `-`로 비는 칸이 그것이다.
+- **실효 권한은 역할이 가진 행과 메뉴가 지금 쓰는 동작의 교집합이다.** `bo_role_menu`의 행만으로는 판정하지 않는다. 권한 저장 때 막는 규칙(`ACTION_NOT_SUPPORTED`, `MENU_EXCLUSIVE`)을 authority·접근 가능 메뉴를 읽는 순간에도 똑같이 적용해야, 메뉴 관리에서 동작을 끄거나 전용 역할을 지정한 뒤에도 이미 나가 있던 권한이 살아남지 않는다. 행을 지우지 않고 판정에서 거르므로, 제한을 되돌리면 권한도 그대로 돌아온다.[^auth-mapper]
 - 슈퍼관리자 역할(`bo_role.is_super`, 하나만 존재)은 권한 행 없이 항상 전부 허용이다. 역할 수정·삭제·권한 저장 대상이 아니다.
-- `bo_menu.exclusive_role_code`가 있으면 그 역할(과 슈퍼관리자)만 해당 메뉴 권한을 받는다. 시드에서는 등급·혜택·메뉴 관리·감사 로그가 슈퍼관리자, 세금계산서가 정산 담당 전용이다.[^seed]
+- `bo_menu.exclusive_role_code`가 있으면 그 역할(과 슈퍼관리자)만 해당 메뉴 권한을 받는다. 권한을 줄 때만이 아니라 읽을 때도 그렇다. 시드에서는 등급·혜택·메뉴 관리·감사 로그가 슈퍼관리자, 세금계산서가 정산 담당 전용이다.[^seed]
 - 사용자·권한 관리 메뉴(`SYS_USERS`, `SYS_ROLES`)는 조회 권한만 줄 수 있다. 쓰기는 모두 슈퍼관리자 전용이다.
 - `bo_menu.icon`·`description`은 메뉴 관리 화면이 편집하는 표시 정보다(`V3`). `icon`은 레일이 그릴 아이콘 이름이고 그룹에는 없다. 레일은 이 값을 그대로 쓰므로 메뉴 관리에서 바꾸면 다음 화면 이동 때 반영된다.
 - 트리 순서는 그룹의 `sort_order`가 바깥, 메뉴의 `sort_order`가 그 그룹 안이다. `GET /api/menus`가 그 순서로 내려준다.
@@ -45,7 +49,7 @@ sources:
 # Tokens
 
 - access 토큰은 HS256 JWT, 15분, 클레임은 `sub`(= `bo_user.id`)뿐이다.[^auth-service]
-- 권한은 토큰에 넣지 않는다. 요청마다 DB에서 읽어 authority(`SUPER` 또는 `MENU_CODE:C|R|U|D`)로 만든다. 잠금·비활성화·역할 변경·권한 저장이 즉시 반영된다.[^converter]
+- 권한은 토큰에 넣지 않는다. 요청마다 DB에서 읽어 authority(`SUPER` 또는 `MENU_CODE:C|R|U|D`)로 만든다. 잠금·비활성화·역할 변경·권한 저장·**메뉴 제한 변경**이 즉시 반영된다.[^converter]
 - 임시 비밀번호를 쓰는 동안(`password_change_required`)에는 authority가 `PASSWORD_CHANGE_REQUIRED` 하나뿐이라 비밀번호 변경 외에는 막힌다.
 - refresh 토큰은 랜덤 문자열이고 서버에는 SHA-256 해시만 남는다. 쓸 때마다 새로 발급하며 이미 쓴 토큰은 거부한다. 만료는 로그인 유지 30일 / 미유지 12시간이고, 회전해도 원래 만료 시각을 유지한다.
 - 토큰 소비는 `delete ... returning` 한 문장이다. 조회와 삭제를 나누면 같은 토큰으로 동시에 들어온 두 요청이 모두 통과해 세션이 둘로 갈라진다. 행을 지운 쪽만 결과를 받으므로 하나만 이긴다.
@@ -87,14 +91,14 @@ sources:
 
 `PUT /api/menus/{code}/move`는 `{"direction":"up"|"down"}`을 받아 같은 그룹 안 이웃과 순서를 맞바꾼다. 끝이면 아무것도 하지 않는다. 그룹을 옮기는 일은 `PUT /api/menus/{code}`가 `parentCode`로 하고, 옮겨 간 그룹의 맨 뒤에 붙는다.
 
-`POST /api/users/{id}/avatar`는 `file` 하나짜리 multipart다. 파일은 10MB까지 받고(`spring.servlet.multipart`), 서버가 가운데를 정사각으로 잘라 128x128 PNG로 다시 쓴다. 메모리를 좌우하는 건 파일 크기가 아니라 픽셀 수라, 디코드하기 전에 헤더의 치수를 읽어 5천만 픽셀을 넘으면 거절한다(`AVATAR_TOO_LARGE`). ImageIO가 읽지 못하면 `AVATAR_NOT_IMAGE`로 거절하므로 확장자를 속인 파일도 걸린다. EXIF 방향은 보지 않는다.
+`POST /api/users/{id}/avatar`는 `file` 하나짜리 multipart다. 파일은 10MB까지 받고(`spring.servlet.multipart.max-file-size`; `max-request-size`는 multipart 경계·헤더 몫을 더해 11MB다), 서버가 가운데를 정사각으로 잘라 128x128 PNG로 다시 쓴다. 메모리를 좌우하는 건 파일 크기가 아니라 픽셀 수라, 디코드하기 전에 헤더의 치수를 읽어 5천만 픽셀을 넘으면 거절한다(`AVATAR_TOO_LARGE`). ImageIO가 읽지 못하면 `AVATAR_NOT_IMAGE`로 거절하므로 확장자를 속인 파일도 걸린다. EXIF 방향은 보지 않는다.
 
 메뉴 쓰기 규칙:[^menu-service]
 
 - 그룹(`parentCode` 없음)은 경로·아이콘·`use_*`·전용 역할을 갖지 않는다. 보내도 서버가 비운다.
 - 그룹과 메뉴는 서로 바꿀 수 없다(`MENU_KIND_IMMUTABLE`). 새로 만들고 옮긴다.
 - 하위 메뉴가 있는 그룹(`MENU_HAS_CHILDREN`)과 역할이 권한을 가진 메뉴(`MENU_IN_USE`)는 지우지 못한다. 권한이 조용히 사라지지 않게 권한 관리에서 먼저 빼게 한다.
-- `SYS_MENUS`는 삭제도 숨김도 막는다(`MENU_SELF_DELETE`, `MENU_SELF_HIDDEN`). 메뉴 관리 화면으로 돌아올 길이 사라지기 때문이다.
+- `SYS_MENUS`는 삭제도 숨김도, 조회 끄기(`useRead`)도 막는다(`MENU_SELF_DELETE`, `MENU_SELF_HIDDEN`). 메뉴 관리 화면으로 돌아올 길이 사라지기 때문이다. 슈퍼관리자의 `canRead`는 `bo_menu.use_read`에서 나오므로, 보이기만 하고 조회를 끈 메뉴는 슈퍼관리자에게도 잠긴다.
 - 경로는 `/`로 시작하는 소문자·숫자·하이픈이고 전체에서 유일해야 한다(`MENU_PATH_DUPLICATE`).
 
 에러는 RFC 9457 ProblemDetail에 `code`를 실어 구분한다. 예: `ROLE_IN_USE`, `ROLE_EXCLUSIVE_MENU`, `SUPER_ROLE_IMMUTABLE`, `MENU_IS_GROUP`, `ACTION_NOT_SUPPORTED`, `MENU_EXCLUSIVE`, `READ_REQUIRED`, `MENU_CODE_DUPLICATE`, `MENU_PATH_DUPLICATE`, `MENU_HAS_CHILDREN`, `MENU_IN_USE`, `MENU_KIND_IMMUTABLE`, `MENU_PARENT_INVALID`, `MENU_SELF_DELETE`, `MENU_SELF_HIDDEN`, `USE_READ_REQUIRED`, `AVATAR_NOT_IMAGE`, `AVATAR_TOO_LARGE`, `AVATAR_UNREADABLE`, `AVATAR_NOT_FOUND`, `EMAIL_DUPLICATE`, `LAST_SUPER_ADMIN`, `SELF_DEACTIVATION`, `NOT_LOCKED`, `INVITE_INVALID`, `REFRESH_INVALID`, `ACCOUNT_LOCKED`.
@@ -128,6 +132,8 @@ API가 세션을 거절하면(계정 비활성화, 권한 회수 등) 페이지�
 
 메뉴 API는 `/menus` 화면이 쓴다. 조회는 `SYS_MENUS:R`, 변경은 `SUPER`다. 레일(`components/Rail.tsx`)은 하드코딩된 목록이 아니라 `GET /api/auth/me`의 `menus`를 그리므로, 이 화면에서 이름·아이콘·순서·노출을 바꾸면 레일이 따라간다. `MenuAccess`가 `groupName`과 `icon`을 같이 내려 주는 이유다.
 
+사진 업로드는 Server Action의 multipart로 간다. Next의 Server Action 본문 한도는 기본 1MB라, 10MB를 받겠다는 화면 문구가 지켜지려면 `next.config.ts`의 `experimental.serverActions.bodySizeLimit`을 올려야 한다(`11mb`, API의 `max-request-size`와 같은 값). 이 한도는 action 함수에 닿기 전에 걸리므로 앱의 크기 검증과 에러 처리가 아예 돌지 않는다.
+
 사진은 브라우저가 API에서 바로 받지 못한다(토큰이 HttpOnly 쿠키에 있다). `<img>`가 부르는 주소는 Next의 `/avatar/{id}` Route Handler이고, 그것이 Bearer를 붙여 API로 중계한다. 화면은 `?v=<avatarUpdatedAt>`을 붙여 부르므로 사진이 바뀌면 주소가 바뀌고, 그래서 응답을 하루 캐시해도 오래된 사진이 남지 않는다.
 
 초대 링크·임시 비밀번호는 응답 본문에만 있고 다시 조회할 수 없다. 화면은 이 값을 상세 패널에 한 번 띄우고, 사용자가 놓치면 다시 초대(`POST /api/users/{id}/invitation`)하거나 다시 초기화(`POST /api/users/{id}/password-reset`)하게 한다.
@@ -147,4 +153,5 @@ API가 세션을 거절하면(계정 비활성화, 권한 회수 등) 페이지�
 [^schema]: V1__bo_auth_schema.sql
 [^seed]: V2__bo_role_menu_seed.sql
 [^menu-service]: MenuService.java
+[^auth-mapper]: AuthUserMapper.xml
 [^design]: 백오피스 사용자·권한 관리 설계

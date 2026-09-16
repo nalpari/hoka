@@ -130,6 +130,13 @@ class MenuServiceTests extends DatabaseTest {
                         0, false, true, true, true, true, "SUPER_ADMIN")))
                 .isInstanceOfSatisfying(ApiException.class,
                         e -> assertThat(e.getCode()).isEqualTo("MENU_SELF_HIDDEN"));
+
+        // 보이기만 해서는 소용없다. 조회를 끄면 슈퍼관리자의 canRead도 꺼져 화면이 잠긴다.
+        assertThatThrownBy(() -> menus.update("SYS_MENUS",
+                new Menu("SYS_MENUS", "SYS", "메뉴 관리", "/menus", "sitemap", null,
+                        0, true, false, false, false, false, "SUPER_ADMIN")))
+                .isInstanceOfSatisfying(ApiException.class,
+                        e -> assertThat(e.getCode()).isEqualTo("MENU_SELF_HIDDEN"));
     }
 
     @Test
