@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>hoka-bo-api 데이터 모델</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:  #ffffff;
+      --color-ink:    #0b0e12;
+      --color-muted:  #3b4149;
+      --color-soft:   #5e656e;
+      --color-accent: #0072b3;
+      --font-sans: 'Pretendard Variable', Pretendard, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+      -webkit-font-smoothing: antialiased;
+    }
+    .frame { max-width: 1360px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-muted); margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-sans); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 600; letter-spacing: -0.02em; line-height: 1.15;
+      color: var(--color-ink); margin-bottom: 0.5rem;
+    }
+    .sub {
+      font-size: 0.85rem; color: var(--color-soft); line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .sub code { font-family: var(--font-mono); font-size: 0.78rem; }
+    svg { width: 100%; min-width: 1000px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">ER · hoka-bo-api</p>
+    <h1>백오피스 인증 · 권한 데이터 모델</h1>
+    <p class="sub">Flyway <code>V1__bo_auth_schema.sql</code> 기준. 사용자 → 역할 → 메뉴 권한이 한 줄기, 세션·감사 기록이 다른 줄기다.<br>
+      슈퍼관리자는 <code>bo_role_menu</code> 행 없이 코드에서 전부 허용하고, <code>bo_menu</code>의 그룹 행(경로 없음)에는 권한을 붙이지 않는다.</p>
+
+    <svg viewBox="0 0 1360 840" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bo-erd-title bo-erd-desc">
+      <title id="bo-erd-title">hoka-bo-api 인증·권한 데이터 모델</title>
+      <desc id="bo-erd-desc">백오피스 사용자가 하나의 역할을 갖고, 역할이 메뉴별 CRUD 권한을 교차 테이블로 가지며, 사용자마다 리프레시 토큰과 로그인 이력이 쌓이는 여섯 테이블의 관계도.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#3b4149"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#0072b3"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#005f96"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#ffffff"/>
+
+      <!-- 관계선 먼저 -->
+      <g>
+        <!-- bo_role 1:N bo_role_menu -->
+        <line x1="336" y1="160" x2="520" y2="160" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <!-- bo_menu 1:N bo_role_menu -->
+        <line x1="768" y1="160" x2="920" y2="160" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <!-- bo_menu self (parent_code) -->
+        <path d="M 1192,136 H 1240 Q 1248,136 1248,144 V 208 Q 1248,216 1240,216 H 1192" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <!-- bo_role 0..1:N bo_menu (exclusive_role_code) -->
+        <path d="M 200,96 V 56 Q 200,48 208,48 H 1048 Q 1056,48 1056,56 V 96" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <!-- bo_role 1:N bo_user (role_code) -->
+        <line x1="248" y1="256" x2="248" y2="400" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <!-- bo_user self (invited_by) -->
+        <path d="M 160,440 H 112 Q 104,440 104,448 V 608 Q 104,616 112,616 H 160" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <!-- bo_user 1:N bo_refresh_token -->
+        <line x1="448" y1="500" x2="608" y2="500" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <!-- bo_user 0..1:N bo_login_history -->
+        <path d="M 312,660 V 716 Q 312,724 320,724 H 1120 Q 1128,724 1128,716 V 580" stroke="#3b4149" stroke-width="1" fill="none"/>
+      </g>
+
+      <!-- 카디널리티 · 관계 라벨 -->
+      <g>
+        <rect x="340" y="138" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="348" y="147" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">1</text>
+        <rect x="500" y="138" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="508" y="147" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">N</text>
+        <rect x="400" y="138" width="56" height="12" rx="2" fill="#ffffff"/>
+        <text x="428" y="147" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">GRANTS</text>
+        <rect x="900" y="138" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="908" y="147" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">1</text>
+        <rect x="772" y="138" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="780" y="147" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">N</text>
+        <rect x="816" y="138" width="56" height="12" rx="2" fill="#ffffff"/>
+        <text x="844" y="147" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">COVERS</text>
+        <rect x="1208" y="114" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="1216" y="123" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">N</text>
+        <rect x="1200" y="194" width="32" height="12" rx="2" fill="#ffffff"/>
+        <text x="1216" y="203" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">0..1</text>
+        <rect x="1256" y="167" width="64" height="12" rx="2" fill="#ffffff"/>
+        <text x="1256" y="176" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">parent_code</text>
+        <rect x="594" y="26" width="68" height="12" rx="2" fill="#ffffff"/>
+        <text x="628" y="35" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">EXCLUSIVE</text>
+        <rect x="208" y="75" width="32" height="12" rx="2" fill="#ffffff"/>
+        <text x="208" y="84" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">0..1</text>
+        <rect x="1064" y="75" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="1064" y="84" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">N</text>
+        <rect x="256" y="267" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="256" y="276" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">1</text>
+        <rect x="256" y="379" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="256" y="388" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">N</text>
+        <rect x="256" y="323" width="60" height="12" rx="2" fill="#ffffff"/>
+        <text x="256" y="332" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">ASSIGNED</text>
+        <rect x="120" y="418" width="32" height="12" rx="2" fill="#ffffff"/>
+        <text x="136" y="427" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">0..1</text>
+        <rect x="128" y="594" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="136" y="603" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">N</text>
+        <rect x="36" y="519" width="60" height="12" rx="2" fill="#ffffff"/>
+        <text x="96" y="528" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end" letter-spacing="0.12em">invited_by</text>
+        <rect x="452" y="478" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="460" y="487" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">1</text>
+        <rect x="588" y="478" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="596" y="487" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">N</text>
+        <rect x="502" y="478" width="52" height="12" rx="2" fill="#ffffff"/>
+        <text x="528" y="487" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">ISSUES</text>
+        <rect x="320" y="683" width="32" height="12" rx="2" fill="#ffffff"/>
+        <text x="320" y="692" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">0..1</text>
+        <rect x="1136" y="607" width="16" height="12" rx="2" fill="#ffffff"/>
+        <text x="1136" y="616" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">N</text>
+        <rect x="700" y="702" width="40" height="12" rx="2" fill="#ffffff"/>
+        <text x="720" y="711" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">LOGS</text>
+      </g>
+
+      <!-- 엔티티 -->
+      <g>
+        <rect x="64" y="96" width="272" height="160" rx="8" fill="#ffffff"/>
+        <rect x="64" y="96" width="272" height="160" rx="8" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>
+        <rect x="64" y="96" width="272" height="40" rx="8" fill="rgba(11,14,18,0.04)"/>
+        <rect x="64" y="128" width="272" height="8" fill="rgba(11,14,18,0.04)"/>
+        <line x1="64" y1="136" x2="336" y2="136" stroke="rgba(11,14,18,0.22)" stroke-width="1"/>
+        <text x="80" y="112" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.14em">ENTITY</text>
+        <text x="80" y="128" fill="#0b0e12" font-size="14" font-weight="600" font-family="'JetBrains Mono', ui-monospace, monospace">bo_role</text>
+        <text x="80" y="156" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace"># code</text>
+        <text x="320" y="156" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
+        <text x="80" y="176" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">name</text>
+        <text x="320" y="176" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · uniq</text>
+        <text x="80" y="196" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">description</text>
+        <text x="320" y="196" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · null</text>
+        <text x="80" y="216" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">is_super</text>
+        <text x="320" y="216" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool · uniq idx</text>
+        <text x="80" y="236" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">created_at / updated_at</text>
+        <text x="320" y="236" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">timestamptz</text>
+
+        <rect x="520" y="96" width="248" height="120" rx="8" fill="#ffffff"/>
+        <rect x="520" y="96" width="248" height="120" rx="8" fill="#f3f5f7" stroke="#3b4149" stroke-width="1"/>
+        <rect x="520" y="96" width="248" height="40" rx="8" fill="rgba(11,14,18,0.06)"/>
+        <rect x="520" y="128" width="248" height="8" fill="rgba(11,14,18,0.06)"/>
+        <line x1="520" y1="136" x2="768" y2="136" stroke="rgba(11,14,18,0.22)" stroke-width="1"/>
+        <text x="536" y="112" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.14em">ENTITY · JUNCTION</text>
+        <text x="536" y="128" fill="#0b0e12" font-size="14" font-weight="600" font-family="'JetBrains Mono', ui-monospace, monospace">bo_role_menu</text>
+        <text x="536" y="156" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace"># → role_code</text>
+        <text x="752" y="156" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · cascade</text>
+        <text x="536" y="176" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace"># → menu_code</text>
+        <text x="752" y="176" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
+        <text x="536" y="196" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">can_c / r / u / d</text>
+        <text x="752" y="196" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool ×4</text>
+
+        <rect x="920" y="96" width="272" height="220" rx="8" fill="#ffffff"/>
+        <rect x="920" y="96" width="272" height="220" rx="8" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>
+        <rect x="920" y="96" width="272" height="40" rx="8" fill="rgba(11,14,18,0.04)"/>
+        <rect x="920" y="128" width="272" height="8" fill="rgba(11,14,18,0.04)"/>
+        <line x1="920" y1="136" x2="1192" y2="136" stroke="rgba(11,14,18,0.22)" stroke-width="1"/>
+        <text x="936" y="112" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.14em">ENTITY</text>
+        <text x="936" y="128" fill="#0b0e12" font-size="14" font-weight="600" font-family="'JetBrains Mono', ui-monospace, monospace">bo_menu</text>
+        <text x="936" y="156" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace"># code</text>
+        <text x="1176" y="156" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
+        <text x="936" y="176" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ parent_code</text>
+        <text x="1176" y="176" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · self</text>
+        <text x="936" y="196" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">name</text>
+        <text x="1176" y="196" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
+        <text x="936" y="216" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">path</text>
+        <text x="1176" y="216" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · uniq</text>
+        <text x="936" y="236" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">sort_order</text>
+        <text x="1176" y="236" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">int</text>
+        <text x="936" y="256" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">visible</text>
+        <text x="1176" y="256" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool</text>
+        <text x="936" y="276" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">use_c / r / u / d</text>
+        <text x="1176" y="276" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool ×4</text>
+        <text x="936" y="296" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ exclusive_role_code</text>
+        <text x="1176" y="296" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · null</text>
+
+        <rect x="160" y="400" width="288" height="260" rx="8" fill="#ffffff"/>
+        <rect x="160" y="400" width="288" height="260" rx="8" fill="rgba(0,114,179,0.06)" stroke="#0072b3" stroke-width="1"/>
+        <rect x="160" y="400" width="288" height="40" rx="8" fill="rgba(0,114,179,0.10)"/>
+        <rect x="160" y="432" width="288" height="8" fill="rgba(0,114,179,0.10)"/>
+        <line x1="160" y1="440" x2="448" y2="440" stroke="rgba(0,114,179,0.40)" stroke-width="1"/>
+        <text x="176" y="416" fill="#0072b3" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.14em">ENTITY · 중심</text>
+        <text x="176" y="432" fill="#0b0e12" font-size="14" font-weight="600" font-family="'JetBrains Mono', ui-monospace, monospace">bo_user</text>
+        <text x="176" y="460" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace"># id</text>
+        <text x="432" y="460" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bigint identity</text>
+        <text x="176" y="480" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">email</text>
+        <text x="432" y="480" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · uniq(lower)</text>
+        <text x="176" y="500" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">name / department</text>
+        <text x="432" y="500" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
+        <text x="176" y="520" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ role_code</text>
+        <text x="432" y="520" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
+        <text x="176" y="540" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">status</text>
+        <text x="432" y="540" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">enum · 4</text>
+        <text x="176" y="560" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">password_hash</text>
+        <text x="432" y="560" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · null</text>
+        <text x="176" y="580" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">failed_login_count</text>
+        <text x="432" y="580" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">int · 0</text>
+        <text x="176" y="600" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">lock_reason</text>
+        <text x="432" y="600" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">enum · 2 · null</text>
+        <text x="176" y="620" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">invite_token_hash</text>
+        <text x="432" y="620" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · uniq</text>
+        <text x="176" y="640" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ invited_by</text>
+        <text x="432" y="640" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bigint · self</text>
+
+        <rect x="608" y="400" width="272" height="180" rx="8" fill="#ffffff"/>
+        <rect x="608" y="400" width="272" height="180" rx="8" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>
+        <rect x="608" y="400" width="272" height="40" rx="8" fill="rgba(11,14,18,0.04)"/>
+        <rect x="608" y="432" width="272" height="8" fill="rgba(11,14,18,0.04)"/>
+        <line x1="608" y1="440" x2="880" y2="440" stroke="rgba(11,14,18,0.22)" stroke-width="1"/>
+        <text x="624" y="416" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.14em">ENTITY</text>
+        <text x="624" y="432" fill="#0b0e12" font-size="14" font-weight="600" font-family="'JetBrains Mono', ui-monospace, monospace">bo_refresh_token</text>
+        <text x="624" y="460" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace"># id</text>
+        <text x="864" y="460" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bigint identity</text>
+        <text x="624" y="480" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ user_id</text>
+        <text x="864" y="480" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bigint · idx</text>
+        <text x="624" y="500" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">token_hash</text>
+        <text x="864" y="500" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · uniq</text>
+        <text x="624" y="520" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">expires_at</text>
+        <text x="864" y="520" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">timestamptz</text>
+        <text x="624" y="540" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">user_agent / ip</text>
+        <text x="864" y="540" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text / inet</text>
+        <text x="624" y="560" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">created_at</text>
+        <text x="864" y="560" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">timestamptz</text>
+
+        <rect x="992" y="400" width="272" height="180" rx="8" fill="#ffffff"/>
+        <rect x="992" y="400" width="272" height="180" rx="8" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>
+        <rect x="992" y="400" width="272" height="40" rx="8" fill="rgba(11,14,18,0.04)"/>
+        <rect x="992" y="432" width="272" height="8" fill="rgba(11,14,18,0.04)"/>
+        <line x1="992" y1="440" x2="1264" y2="440" stroke="rgba(11,14,18,0.22)" stroke-width="1"/>
+        <text x="1008" y="416" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.14em">ENTITY</text>
+        <text x="1008" y="432" fill="#0b0e12" font-size="14" font-weight="600" font-family="'JetBrains Mono', ui-monospace, monospace">bo_login_history</text>
+        <text x="1008" y="460" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace"># id</text>
+        <text x="1248" y="460" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bigint identity</text>
+        <text x="1008" y="480" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ user_id</text>
+        <text x="1248" y="480" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bigint · null</text>
+        <text x="1008" y="500" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">email</text>
+        <text x="1248" y="500" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
+        <text x="1008" y="520" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">result</text>
+        <text x="1248" y="520" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">enum · 3</text>
+        <text x="1008" y="540" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">ip / user_agent</text>
+        <text x="1248" y="540" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">inet / text</text>
+        <text x="1008" y="560" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">created_at</text>
+        <text x="1248" y="560" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">timestamptz · idx</text>
+      </g>
+
+      <!-- 범례 -->
+      <g>
+        <line x1="32" y1="768" x2="1328" y2="768" stroke="#e5e8ec" stroke-width="1"/>
+        <text x="32" y="798" fill="#5e656e" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" letter-spacing="0.14em">LEGEND</text>
+        <rect x="112" y="788" width="16" height="12" rx="2" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>
+        <text x="136" y="798" fill="#3b4149" font-size="9" font-family="'Pretendard Variable', Pretendard, system-ui, sans-serif">엔티티</text>
+        <rect x="240" y="788" width="16" height="12" rx="2" fill="rgba(0,114,179,0.06)" stroke="#0072b3" stroke-width="1"/>
+        <text x="264" y="798" fill="#3b4149" font-size="9" font-family="'Pretendard Variable', Pretendard, system-ui, sans-serif">중심 엔티티 (인증 주체)</text>
+        <rect x="468" y="788" width="16" height="12" rx="2" fill="#f3f5f7" stroke="#3b4149" stroke-width="1"/>
+        <text x="492" y="798" fill="#3b4149" font-size="9" font-family="'Pretendard Variable', Pretendard, system-ui, sans-serif">교차 엔티티 (복합 PK)</text>
+        <text x="672" y="798" fill="#3b4149" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace"># PK</text>
+        <text x="740" y="798" fill="#3b4149" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">→ FK</text>
+        <text x="812" y="798" fill="#3b4149" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">1 · 0..1 · N = 카디널리티</text>
+        <text x="1040" y="798" fill="#5e656e" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">enum = CHECK 제약</text>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>
