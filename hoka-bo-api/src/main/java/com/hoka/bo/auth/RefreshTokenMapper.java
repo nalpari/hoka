@@ -12,7 +12,8 @@ public interface RefreshTokenMapper {
     int insert(@Param("userId") long userId, @Param("tokenHash") String tokenHash,
             @Param("expiresAt") Instant expiresAt, @Param("userAgent") String userAgent, @Param("ip") String ip);
 
-    RefreshToken findByHash(String tokenHash);
+    // 조회와 삭제를 한 문장으로 한다. 동시에 같은 토큰이 들어와도 행을 지운 쪽만 결과를 받는다.
+    RefreshToken consume(String tokenHash);
 
     int deleteByHash(String tokenHash);
 

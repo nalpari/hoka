@@ -43,7 +43,9 @@ public class AuthService {
         this.jwtEncoder = jwtEncoder;
     }
 
-    @Transactional
+    // 실패 횟수·잠금·이력은 예외를 던져도 남아야 한다. 기본 규칙대로 롤백하면 5회 잠금과 감사 기록이
+    // 아예 쌓이지 않아 무제한 대입이 가능해진다.
+    @Transactional(noRollbackFor = ApiException.class)
     public TokenPair login(String email, String password, boolean rememberMe, String ip, String userAgent) {
         Credentials user = authUserMapper.findByEmail(email);
         // 없는 이메일도 비밀번호가 틀린 것과 똑같이 응답해 계정 존재 여부를 숨긴다.
@@ -83,18 +85,20 @@ public class AuthService {
     }
 
     // 쓰인 refresh 토큰은 바로 버리고 새로 발급한다. 만료 시각은 원래 로그인 기준을 유지한다.
-    @Transactional
+    // 조회와 삭제를 나누면 같은 토큰으로 동시에 들어온 두 요청이 모두 통과해 세션이 둘로 갈라진다.
+    // 지운 행을 돌려받는 한 문장으로 소비해 하나만 이기게 한다.
+    // 계정이 비활성이어서 거절하는 경우에도 토큰은 소비된 채로 둔다(noRollbackFor).
+    @Transactional(noRollbackFor = ApiException.class)
     public TokenPair refresh(String refreshToken, String ip, String userAgent) {
-        RefreshToken stored = refreshTokenMapper.findByHash(Tokens.hash(refreshToken));
-        if (stored == null || stored.expiresAt().isBefore(Instant.now())) {
+        RefreshToken consumed = refreshTokenMapper.consume(Tokens.hash(refreshToken));
+        if (consumed == null || consumed.expiresAt().isBefore(Instant.now())) {
             throw ApiException.unauthorized("REFRESH_INVALID", "다시 로그인해 주세요.");
         }
-        refreshTokenMapper.deleteByHash(Tokens.hash(refreshToken));
-        Credentials user = authUserMapper.findById(stored.userId());
+        Credentials user = authUserMapper.findById(consumed.userId());
         if (user == null || !user.isActive()) {
             throw ApiException.unauthorized("REFRESH_INVALID", "다시 로그인해 주세요.");
         }
-        return issue(user.id(), stored.expiresAt(), ip, userAgent);
+        return issue(user.id(), consumed.expiresAt(), ip, userAgent);
     }
 
     @Transactional

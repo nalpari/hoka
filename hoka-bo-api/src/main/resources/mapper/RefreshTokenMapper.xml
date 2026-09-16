@@ -11,8 +11,11 @@
                 </choose>)
     </insert>
 
-    <select id="findByHash" resultType="com.hoka.bo.auth.RefreshToken">
-        select id, user_id, expires_at from bo_refresh_token where token_hash = #{tokenHash}
+    <!-- delete ... returning으로 소비한다. 같은 토큰에 동시 요청이 와도 한 쪽만 행을 받는다.
+         지우면서 결과를 받아야 하므로 insert ... returning과 같이 select로 선언한다. -->
+    <select id="consume" resultType="com.hoka.bo.auth.RefreshToken" flushCache="true">
+        delete from bo_refresh_token where token_hash = #{tokenHash}
+        returning id, user_id, expires_at
     </select>
 
     <delete id="deleteByHash">

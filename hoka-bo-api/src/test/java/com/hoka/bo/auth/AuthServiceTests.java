@@ -3,7 +3,12 @@ package com.hoka.bo.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.hoka.bo.common.ApiException;
 import com.hoka.bo.support.DatabaseTest;
@@ -14,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -218,6 +224,71 @@ class AuthServiceTests extends DatabaseTest {
         assertThat(me.menus()).extracting(MenuAccess::code)
                 .containsExactlyInAnyOrder("OPS_DASHBOARD", "OPS_ORDERS", "OPS_CLAIMS", "OPS_INQUIRIES",
                         "MBR_MEMBERS");
+    }
+
+    // 아래 두 테스트는 테스트 트랜잭션 밖에서 돈다. 감싸는 트랜잭션 안에서 단언하면 커밋되지 않은 값을
+    // 보게 되어, 롤백으로 기록이 사라지는 결함과 동시성 문제를 둘 다 놓친다. 대신 각자 뒷정리를 한다.
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void failureCountersAndLockSurviveTheRejectedRequest() {
+        String email = "persist@hoka.co.kr";
+        long id = activeUser(email, "CS");
+        try {
+            for (int attempt = 1; attempt <= 5; attempt++) {
+                assertThatThrownBy(() -> auth.login(email, "wrong", false, null, null))
+                        .isInstanceOf(ApiException.class);
+            }
+
+            // 요청이 401로 끝나도 실패 횟수·잠금·이력은 커밋돼 있어야 한다.
+            assertThat(jdbc.sql("select failed_login_count from bo_user where id = ?")
+                    .param(id).query(Integer.class).single()).isEqualTo(5);
+            assertThat(status(id)).isEqualTo("LOCKED");
+            assertThat(lockReason(id)).isEqualTo("PASSWORD_FAILED");
+            assertThat(jdbc.sql("select count(*) from bo_login_history where user_id = ?")
+                    .param(id).query(Long.class).single()).isEqualTo(5);
+        } finally {
+            cleanUp(id);
+        }
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void onlyOneOfTwoConcurrentRefreshesSucceeds() throws Exception {
+        String email = "race@hoka.co.kr";
+        long id = activeUser(email, "CS");
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        try {
+            String refreshToken = auth.login(email, PASSWORD, false, null, null).refreshToken();
+            Callable<TokenPair> call = () -> auth.refresh(refreshToken, null, null);
+
+            List<Future<TokenPair>> results = pool.invokeAll(List.of(call, call));
+
+            List<TokenPair> issued = new ArrayList<>();
+            List<Throwable> rejected = new ArrayList<>();
+            for (Future<TokenPair> result : results) {
+                try {
+                    issued.add(result.get());
+                } catch (Exception e) {
+                    rejected.add(e.getCause());
+                }
+            }
+            assertThat(issued).hasSize(1);
+            assertThat(rejected).hasSize(1).first().isInstanceOfSatisfying(ApiException.class,
+                    e -> assertThat(e.getCode()).isEqualTo("REFRESH_INVALID"));
+            // 살아남은 세션도 하나뿐이어야 한다.
+            assertThat(jdbc.sql("select count(*) from bo_refresh_token where user_id = ?")
+                    .param(id).query(Long.class).single()).isEqualTo(1);
+        } finally {
+            pool.shutdownNow();
+            cleanUp(id);
+        }
+    }
+
+    private void cleanUp(long id) {
+        jdbc.sql("delete from bo_refresh_token where user_id = ?").param(id).update();
+        jdbc.sql("delete from bo_login_history where user_id = ?").param(id).update();
+        jdbc.sql("delete from bo_user where id = ?").param(id).update();
     }
 
     private long activeUser(String email, String roleCode) {
