@@ -1,10 +1,14 @@
 package com.hoka.bo.user;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.hoka.bo.auth.LoginHistory;
 import com.hoka.bo.common.ApiException;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,15 +18,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
+    private final AvatarService avatarService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AvatarService avatarService) {
         this.userService = userService;
+        this.avatarService = avatarService;
     }
 
     @GetMapping
@@ -91,6 +99,35 @@ public class UserController {
     public void changeRole(@RequestBody RoleChangeRequest request) {
         request.validate();
         userService.changeRole(request.ids(), request.roleCode());
+    }
+
+    // 항상 128x128 PNG다(AvatarService가 정규화한다). 사진이 바뀌면 avatarUpdatedAt이 바뀌므로
+    // 프론트가 그 값을 쿼리에 달아 캐시를 무효화한다.
+    @GetMapping("/{id}/avatar")
+    public ResponseEntity<byte[]> avatar(@PathVariable long id) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .cacheControl(CacheControl.noCache().cachePrivate())
+                .body(avatarService.find(id));
+    }
+
+    @PostMapping("/{id}/avatar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void uploadAvatar(@PathVariable long id, @RequestParam("file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw ApiException.badRequest("VALIDATION", "사진 파일을 골라 주세요.");
+        }
+        try {
+            avatarService.replace(id, file.getBytes());
+        } catch (IOException e) {
+            throw ApiException.badRequest("AVATAR_UNREADABLE", "사진을 읽지 못했습니다. 다시 시도해 주세요.");
+        }
+    }
+
+    @DeleteMapping("/{id}/avatar")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAvatar(@PathVariable long id) {
+        avatarService.delete(id);
     }
 
     // 메일 발송이 없어 화면에 한 번 보여 주는 값이다.

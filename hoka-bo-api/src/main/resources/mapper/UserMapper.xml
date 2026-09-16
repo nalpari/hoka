@@ -21,7 +21,7 @@
     <!-- 최근 접속 칸은 성공·실패를 가리지 않은 마지막 시도다. -->
     <select id="search" resultType="com.hoka.bo.user.UserRow">
         select u.id, u.email, u.name, u.department, u.role_code, r.name as role_name, u.status,
-               la.created_at as last_attempt_at, la.result as last_attempt_result
+               la.created_at as last_attempt_at, la.result as last_attempt_result, u.avatar_updated_at
         from bo_user u
         join bo_role r on r.code = u.role_code
         left join lateral (
@@ -45,12 +45,26 @@
     <select id="findDetail" resultType="com.hoka.bo.user.UserDetail">
         select u.id, u.email, u.name, u.department, u.role_code, r.name as role_name, u.status,
                u.lock_reason, u.locked_at, u.last_login_at, u.password_changed_at, u.password_change_required,
-               u.created_at, inviter.name as invited_by_name
+               u.created_at, inviter.name as invited_by_name, u.avatar_updated_at
         from bo_user u
         join bo_role r on r.code = u.role_code
         left join bo_user inviter on inviter.id = u.invited_by
         where u.id = #{id}
     </select>
+
+    <select id="findAvatar" resultType="com.hoka.bo.user.Avatar">
+        select avatar as png from bo_user where id = #{id}
+    </select>
+
+    <update id="updateAvatar">
+        update bo_user set
+        <choose>
+            <when test="avatar == null">avatar = null, avatar_updated_at = null</when>
+            <otherwise>avatar = #{avatar}, avatar_updated_at = now()</otherwise>
+        </choose>
+        , updated_at = now()
+        where id = #{id}
+    </update>
 
     <select id="findDepartments" resultType="string">
         select distinct department from bo_user where department is not null order by department

@@ -42,34 +42,50 @@
         where id = #{id}
     </update>
 
-    <!-- 권한을 'MENU_CODE:C' 형태의 authority 문자열로 펼친다. -->
+    <!--
+      권한을 'MENU_CODE:C' 형태의 authority 문자열로 펼친다.
+      역할이 가진 행만으로는 부족하다. 메뉴가 그 동작을 더는 쓰지 않거나 다른 역할 전용이 되면
+      bo_role_menu의 행은 그대로 남아도 그 권한은 이미 무효다(RoleService가 저장 때 막는 규칙과 같다).
+      메뉴 관리에서 제한을 좁힌 순간 반영되도록 여기서 bo_menu를 함께 본다.
+    -->
     <select id="findAuthorities" resultType="string" flushCache="true">
         select rm.menu_code || ':' || a.action
         from bo_user u
         join bo_role_menu rm on rm.role_code = u.role_code
-        cross join lateral (values ('C', rm.can_create), ('R', rm.can_read),
-                                   ('U', rm.can_update), ('D', rm.can_delete)) as a(action, granted)
+        join bo_menu m on m.code = rm.menu_code
+        cross join lateral (values ('C', rm.can_create and m.use_create),
+                                   ('R', rm.can_read   and m.use_read),
+                                   ('U', rm.can_update and m.use_update),
+                                   ('D', rm.can_delete and m.use_delete)) as a(action, granted)
         where u.id = #{id} and a.granted
+          and (m.exclusive_role_code is null or m.exclusive_role_code = u.role_code)
     </select>
 
-    <!-- 슈퍼관리자는 권한 행이 없으므로 메뉴가 쓰는 동작을 그대로 쓴다. -->
+    <!--
+      슈퍼관리자는 권한 행이 없으므로 메뉴가 쓰는 동작을 그대로 쓴다.
+      나머지 역할은 findAuthorities와 같은 규칙을 따른다: 역할이 가진 권한과 메뉴가 지금 쓰는 동작의 교집합이고,
+      전용 메뉴는 그 역할만 본다(슈퍼관리자는 예외 — 모든 메뉴를 봐야 잠기지 않는다).
+    -->
     <select id="findAccessibleMenus" resultType="com.hoka.bo.auth.MenuAccess" flushCache="true">
-        select m.code, m.parent_code, m.name, m.path,
-               case when r.is_super then m.use_create else coalesce(rm.can_create, false) end as can_create,
-               case when r.is_super then m.use_read   else coalesce(rm.can_read, false) end   as can_read,
-               case when r.is_super then m.use_update else coalesce(rm.can_update, false) end as can_update,
-               case when r.is_super then m.use_delete else coalesce(rm.can_delete, false) end as can_delete
+        select m.code, m.parent_code, g.name as group_name, m.name, m.path, m.icon,
+               m.use_create and (r.is_super or coalesce(rm.can_create, false)) as can_create,
+               m.use_read   and (r.is_super or coalesce(rm.can_read, false))   as can_read,
+               m.use_update and (r.is_super or coalesce(rm.can_update, false)) as can_update,
+               m.use_delete and (r.is_super or coalesce(rm.can_delete, false)) as can_delete
         from bo_user u
         join bo_role r on r.code = u.role_code
         join bo_menu m on m.parent_code is not null and m.visible
+        join bo_menu g on g.code = m.parent_code
         left join bo_role_menu rm on rm.role_code = u.role_code and rm.menu_code = m.code
-        where u.id = #{id} and (r.is_super or coalesce(rm.can_read, false))
-        order by m.parent_code, m.sort_order
+        where u.id = #{id}
+          and (r.is_super or (m.use_read and coalesce(rm.can_read, false)))
+          and (r.is_super or m.exclusive_role_code is null or m.exclusive_role_code = u.role_code)
+        order by g.sort_order, m.sort_order
     </select>
 
     <select id="findProfile" resultType="com.hoka.bo.auth.Profile" flushCache="true">
         select u.id, u.email, u.name, u.department, u.role_code, r.name as role_name,
-               r.is_super, u.password_change_required
+               r.is_super, u.password_change_required, u.avatar_updated_at
         from bo_user u join bo_role r on r.code = u.role_code
         where u.id = #{id}
     </select>

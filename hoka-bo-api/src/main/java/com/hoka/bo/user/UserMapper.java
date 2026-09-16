@@ -17,6 +17,11 @@ public interface UserMapper {
 
     UserDetail findDetail(long id);
 
+    Avatar findAvatar(long id);
+
+    /** avatar가 null이면 사진과 갱신 시각을 함께 지운다(bo_user_avatar_pair 제약). */
+    void updateAvatar(@Param("id") long id, @Param("avatar") byte[] avatar);
+
     List<String> findDepartments();
 
     long insertInvited(@Param("email") String email, @Param("name") String name,

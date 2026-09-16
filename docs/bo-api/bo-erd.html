@@ -48,8 +48,10 @@
   <div class="frame">
     <p class="eyebrow">ER · hoka-bo-api</p>
     <h1>백오피스 인증 · 권한 데이터 모델</h1>
-    <p class="sub">Flyway <code>V1__bo_auth_schema.sql</code> 기준. 사용자 → 역할 → 메뉴 권한이 한 줄기, 세션·감사 기록이 다른 줄기다.<br>
-      슈퍼관리자는 <code>bo_role_menu</code> 행 없이 코드에서 전부 허용하고, <code>bo_menu</code>의 그룹 행(경로 없음)에는 권한을 붙이지 않는다.</p>
+    <p class="sub">Flyway <code>V1</code>~<code>V4</code> 기준. 사용자 → 역할 → 메뉴 권한이 한 줄기, 세션·감사 기록이 다른 줄기다.<br>
+      슈퍼관리자는 <code>bo_role_menu</code> 행 없이 코드에서 전부 허용하고, <code>bo_menu</code>의 그룹 행(경로 없음)에는 권한을 붙이지 않는다.<br>
+      <code>bo_menu.icon</code>은 레일이 그릴 아이콘 이름이고(<code>V3</code>), <code>bo_user.avatar</code>는 128×128 PNG로 정규화해 넣는 프로필 사진이다(<code>V4</code>).
+      사진과 <code>avatar_updated_at</code>은 CHECK 제약으로 항상 같이 차거나 같이 빈다.</p>
 
     <svg viewBox="0 0 1360 840" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="bo-erd-title bo-erd-desc">
       <title id="bo-erd-title">hoka-bo-api 인증·권한 데이터 모델</title>
@@ -79,7 +81,7 @@
         <!-- bo_user 1:N bo_refresh_token -->
         <line x1="448" y1="500" x2="608" y2="500" stroke="#3b4149" stroke-width="1" fill="none"/>
         <!-- bo_user 0..1:N bo_login_history -->
-        <path d="M 312,660 V 716 Q 312,724 320,724 H 1120 Q 1128,724 1128,716 V 580" stroke="#3b4149" stroke-width="1" fill="none"/>
+        <path d="M 312,680 V 716 Q 312,724 320,724 H 1120 Q 1128,724 1128,716 V 580" stroke="#3b4149" stroke-width="1" fill="none"/>
       </g>
 
       <!-- 카디널리티 · 관계 라벨 -->
@@ -126,8 +128,8 @@
         <text x="596" y="487" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">N</text>
         <rect x="502" y="478" width="52" height="12" rx="2" fill="#ffffff"/>
         <text x="528" y="487" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.12em">ISSUES</text>
-        <rect x="320" y="683" width="32" height="12" rx="2" fill="#ffffff"/>
-        <text x="320" y="692" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">0..1</text>
+        <rect x="320" y="694" width="32" height="12" rx="2" fill="#ffffff"/>
+        <text x="320" y="703" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">0..1</text>
         <rect x="1136" y="607" width="16" height="12" rx="2" fill="#ffffff"/>
         <text x="1136" y="616" fill="#3b4149" font-size="8" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="start" letter-spacing="0.12em">N</text>
         <rect x="700" y="702" width="40" height="12" rx="2" fill="#ffffff"/>
@@ -168,8 +170,8 @@
         <text x="536" y="196" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">can_c / r / u / d</text>
         <text x="752" y="196" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool ×4</text>
 
-        <rect x="920" y="96" width="272" height="220" rx="8" fill="#ffffff"/>
-        <rect x="920" y="96" width="272" height="220" rx="8" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>
+        <rect x="920" y="96" width="272" height="240" rx="8" fill="#ffffff"/>
+        <rect x="920" y="96" width="272" height="240" rx="8" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>
         <rect x="920" y="96" width="272" height="40" rx="8" fill="rgba(11,14,18,0.04)"/>
         <rect x="920" y="128" width="272" height="8" fill="rgba(11,14,18,0.04)"/>
         <line x1="920" y1="136" x2="1192" y2="136" stroke="rgba(11,14,18,0.22)" stroke-width="1"/>
@@ -183,17 +185,19 @@
         <text x="1176" y="196" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text</text>
         <text x="936" y="216" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">path</text>
         <text x="1176" y="216" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · uniq</text>
-        <text x="936" y="236" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">sort_order</text>
-        <text x="1176" y="236" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">int</text>
-        <text x="936" y="256" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">visible</text>
-        <text x="1176" y="256" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool</text>
-        <text x="936" y="276" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">use_c / r / u / d</text>
-        <text x="1176" y="276" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool ×4</text>
-        <text x="936" y="296" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ exclusive_role_code</text>
-        <text x="1176" y="296" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · null</text>
+        <text x="936" y="236" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">icon / description</text>
+        <text x="1176" y="236" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · null</text>
+        <text x="936" y="256" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">sort_order</text>
+        <text x="1176" y="256" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">int</text>
+        <text x="936" y="276" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">visible</text>
+        <text x="1176" y="276" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool</text>
+        <text x="936" y="296" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">use_c / r / u / d</text>
+        <text x="1176" y="296" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bool ×4</text>
+        <text x="936" y="316" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ exclusive_role_code</text>
+        <text x="1176" y="316" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · null</text>
 
-        <rect x="160" y="400" width="288" height="260" rx="8" fill="#ffffff"/>
-        <rect x="160" y="400" width="288" height="260" rx="8" fill="rgba(0,114,179,0.06)" stroke="#0072b3" stroke-width="1"/>
+        <rect x="160" y="400" width="288" height="280" rx="8" fill="#ffffff"/>
+        <rect x="160" y="400" width="288" height="280" rx="8" fill="rgba(0,114,179,0.06)" stroke="#0072b3" stroke-width="1"/>
         <rect x="160" y="400" width="288" height="40" rx="8" fill="rgba(0,114,179,0.10)"/>
         <rect x="160" y="432" width="288" height="8" fill="rgba(0,114,179,0.10)"/>
         <line x1="160" y1="440" x2="448" y2="440" stroke="rgba(0,114,179,0.40)" stroke-width="1"/>
@@ -219,6 +223,8 @@
         <text x="432" y="620" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">text · uniq</text>
         <text x="176" y="640" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">→ invited_by</text>
         <text x="432" y="640" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bigint · self</text>
+        <text x="176" y="660" fill="#0b0e12" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">avatar / avatar_updated_at</text>
+        <text x="432" y="660" fill="#5e656e" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace" text-anchor="end">bytea / tstz</text>
 
         <rect x="608" y="400" width="272" height="180" rx="8" fill="#ffffff"/>
         <rect x="608" y="400" width="272" height="180" rx="8" fill="#ffffff" stroke="#0b0e12" stroke-width="1"/>

@@ -115,7 +115,7 @@ public class AuthService {
         }
         return new Me(profile.id(), profile.email(), profile.name(), profile.department(), profile.roleCode(),
                 profile.roleName(), profile.isSuper(), profile.passwordChangeRequired(),
-                authUserMapper.findAccessibleMenus(id));
+                profile.avatarUpdatedAt(), authUserMapper.findAccessibleMenus(id));
     }
 
     // 요청마다 다시 읽어 잠금·역할 변경·권한 저장이 즉시 반영되게 한다.

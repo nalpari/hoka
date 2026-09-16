@@ -11,5 +11,6 @@ public record Me(
         String roleName,
         boolean isSuper,
         boolean passwordChangeRequired,
+        java.time.Instant avatarUpdatedAt,
         List<MenuAccess> menus) {
 }

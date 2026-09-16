@@ -285,6 +285,30 @@ class AuthServiceTests extends DatabaseTest {
         }
     }
 
+    // 메뉴 관리에서 제한을 좁히면 이미 나가 있던 역할 권한도 그 순간 효력을 잃어야 한다.
+    // bo_role_menu의 행은 그대로 남으므로, 판정이 bo_menu를 보지 않으면 권한이 계속 살아 있다.
+    @Test
+    void dropsAuthoritiesTheMenuNoLongerUses() {
+        long id = activeUser("narrow@hoka.co.kr", "OPS_ADMIN");
+        assertThat(auth.authorities(id)).contains("OPS_ORDERS:U", "OPS_ORDERS:R");
+
+        jdbc.sql("update bo_menu set use_update = false where code = 'OPS_ORDERS'").update();
+
+        assertThat(auth.authorities(id)).doesNotContain("OPS_ORDERS:U").contains("OPS_ORDERS:R");
+    }
+
+    @Test
+    void dropsAuthoritiesOnAMenuMadeExclusive() {
+        long id = activeUser("exclusive@hoka.co.kr", "OPS_ADMIN");
+        assertThat(auth.authorities(id)).contains("SYS_USERS:R");
+
+        jdbc.sql("update bo_menu set exclusive_role_code = 'SUPER_ADMIN' where code = 'SYS_USERS'").update();
+
+        assertThat(auth.authorities(id)).doesNotContain("SYS_USERS:R");
+        login(id);
+        assertThat(auth.me().menus()).extracting(MenuAccess::code).doesNotContain("SYS_USERS");
+    }
+
     private void cleanUp(long id) {
         jdbc.sql("delete from bo_refresh_token where user_id = ?").param(id).update();
         jdbc.sql("delete from bo_login_history where user_id = ?").param(id).update();

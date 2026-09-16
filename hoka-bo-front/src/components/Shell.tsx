@@ -45,3 +45,20 @@ export function Shell({
     </div>
   );
 }
+
+// 레일이 숨겨 둔 화면에 주소로 직접 들어온 경우. 권한 판단은 API가 내려 준 me.menus를 그대로 쓴다.
+export function NoAccess({ what }: { what: string }) {
+  return (
+    <main className="page">
+      <section className="panel">
+        <div className="empty">
+          <span className="empty__mark">
+            <Icon name="lock" size={20} />
+          </span>
+          <h3>{what}를 볼 권한이 없습니다</h3>
+          <p>이 화면은 해당 메뉴의 조회 권한이 있는 역할에만 열립니다. 필요하면 권한 관리자에게 요청하세요.</p>
+        </div>
+      </section>
+    </main>
+  );
+}

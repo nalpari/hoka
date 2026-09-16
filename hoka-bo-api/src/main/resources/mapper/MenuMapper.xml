@@ -3,11 +3,73 @@
 <mapper namespace="com.hoka.bo.menu.MenuMapper">
 
     <!-- 컬럼 순서가 Menu record의 생성자 순서와 같아야 한다. -->
+    <sql id="columns">
+        code, parent_code, name, path, icon, description, sort_order, visible,
+        use_create, use_read, use_update, use_delete, exclusive_role_code
+    </sql>
+
+    <sql id="prefixed">
+        m.code, m.parent_code, m.name, m.path, m.icon, m.description, m.sort_order, m.visible,
+        m.use_create, m.use_read, m.use_update, m.use_delete, m.exclusive_role_code
+    </sql>
+
+    <!-- 트리 순서: 그룹은 자기 sort_order 자리에, 메뉴는 속한 그룹 바로 뒤에 그 그룹 안 sort_order로 온다. -->
     <select id="findAll" resultType="com.hoka.bo.menu.Menu">
-        select code, parent_code, name, path, sort_order, visible,
-               use_create, use_read, use_update, use_delete, exclusive_role_code
-        from bo_menu
-        order by case when parent_code is null then code else parent_code end, parent_code nulls first, sort_order
+        select <include refid="prefixed" />
+        from bo_menu m left join bo_menu g on g.code = m.parent_code
+        order by coalesce(g.sort_order, m.sort_order),
+                 case when m.parent_code is null then 0 else 1 end,
+                 m.sort_order
+    </select>
+
+    <select id="findByCode" resultType="com.hoka.bo.menu.Menu">
+        select <include refid="columns" /> from bo_menu where code = #{code}
+    </select>
+
+    <select id="findByPath" resultType="com.hoka.bo.menu.Menu">
+        select <include refid="columns" /> from bo_menu where path = #{path}
+    </select>
+
+    <insert id="insert">
+        insert into bo_menu (code, parent_code, name, path, icon, description, sort_order, visible,
+                             use_create, use_read, use_update, use_delete, exclusive_role_code)
+        values (#{code}, #{parentCode}, #{name}, #{path}, #{icon}, #{description}, #{sortOrder}, #{visible},
+                #{useCreate}, #{useRead}, #{useUpdate}, #{useDelete}, #{exclusiveRoleCode})
+    </insert>
+
+    <!-- 코드와 순서는 여기서 바꾸지 않는다. 순서는 updateSortOrder가, 코드는 아무도 바꾸지 않는다. -->
+    <update id="update">
+        update bo_menu
+        set parent_code = #{parentCode}, name = #{name}, path = #{path}, icon = #{icon},
+            description = #{description}, visible = #{visible},
+            use_create = #{useCreate}, use_read = #{useRead},
+            use_update = #{useUpdate}, use_delete = #{useDelete},
+            exclusive_role_code = #{exclusiveRoleCode}, updated_at = now()
+        where code = #{code}
+    </update>
+
+    <delete id="delete">
+        delete from bo_menu where code = #{code}
+    </delete>
+
+    <select id="nextSortOrder" resultType="int">
+        select coalesce(max(sort_order), 0) + 1 from bo_menu
+        <choose>
+            <when test="parentCode == null">where parent_code is null</when>
+            <otherwise>where parent_code = #{parentCode}</otherwise>
+        </choose>
+    </select>
+
+    <update id="updateSortOrder">
+        update bo_menu set sort_order = #{sortOrder}, updated_at = now() where code = #{code}
+    </update>
+
+    <select id="countChildren" resultType="int">
+        select count(*) from bo_menu where parent_code = #{parentCode}
+    </select>
+
+    <select id="countGrants" resultType="int">
+        select count(*) from bo_role_menu where menu_code = #{menuCode}
     </select>
 
 </mapper>
