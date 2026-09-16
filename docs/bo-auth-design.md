@@ -262,15 +262,34 @@ create index on bo_login_history (user_id, created_at desc);
 | `BO_FRONT_BASE_URL` | `http://localhost:3000` |
 
 - Flyway history 테이블: `spring.flyway.table: bo_flyway_schema_history`
+- Flyway baseline: `baseline-on-migrate: true` + **`baseline-version: 0`**. `public`에 다른 프로젝트 테이블(`sample`, `users`)이 이미 있어 baseline 없이는 기동이 멈춘다. baseline 버전을 기본값 1로 두면 `V1`이 적용된 것으로 기록돼 `bo_*` 테이블이 생기지 않는다.
 - 로컬 실행: `./mvnw spring-boot:run -Dspring-boot.run.profiles=local`
 
 ## 9. 구현 순서
 
-1. BO sample 삭제 → `./mvnw test` 통과 → 커밋
-2. 의존성(Flyway, OAuth2 Resource Server, Testcontainers)·`local` 프로파일·Flyway V1/V2 → local 기동 시 테이블·시드 생성 확인
-3. Service TDD: menu/role → user → auth(로그인·토큰). 규칙마다 실패하는 테스트 먼저
-4. SecurityConfig(JWT)·Controller·부트스트랩 → curl 수동 확인
+1. ✅ BO sample 삭제 → `./mvnw test` 통과 → 커밋
+2. ✅ 의존성(Flyway, OAuth2 Resource Server, Testcontainers)·`local` 프로파일·Flyway V1/V2 → local 기동 시 테이블·시드 생성 확인
+3. ✅ Service TDD: menu/role → user → auth(로그인·토큰). 규칙마다 실패하는 테스트 먼저 (테스트 47개)
+4. ✅ SecurityConfig(JWT)·Controller·부트스트랩 → curl 수동 확인
 5. 문서 갱신 → `uv run --with pyyaml python okf/.okf/okf_check.py okf`
+
+### 4단계 curl 확인 절차
+
+`./mvnw spring-boot:run -Dspring-boot.run.profiles=local`로 띄운 뒤 순서대로 확인한다. 괄호는 2026-09-16 확인 결과다.
+
+| # | 확인 | 기대 |
+|---|---|---|
+| 1 | 토큰 없이 `GET /api/roles` | 401 ✅ |
+| 2 | `POST /api/auth/login` (부트스트랩 관리자) | 200, 토큰 쌍 ✅ |
+| 3 | `GET /api/auth/me` | 200 ✅ |
+| 4 | 임시 비밀번호 상태에서 `GET /api/roles` | 403 ✅ |
+| 5 | `PUT /api/auth/password` | 204 ✅ |
+| 6~9 | 새 비밀번호로 로그인 후 `/api/roles`·`/api/menus`·`/api/users` | 200 ✅ |
+| 10 | `POST /api/auth/refresh` | 200, 새 토큰 ✅ |
+| 11 | 방금 쓴 refresh 재사용 | 401 ✅ |
+| 12 | 잘못된 access 토큰 | 401 ✅ |
+
+확인 과정에서 로컬 관리자 비밀번호를 바꾸므로, 로컬 DB를 유지한 채 다시 확인하려면 5단계에서 정한 비밀번호를 쓰거나 `bo_user` 행을 지우고 재기동한다(부트스트랩이 다시 만든다).
    - `okf/projects/hoka-bo-api.md`(Stack·Commands·Notes)
    - `okf/architecture/sample-crud.md`(FO 전용으로)
    - `okf/architecture/system-overview.md`(인증 방식)
