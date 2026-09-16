@@ -54,7 +54,7 @@
 
     <!-- 슈퍼관리자는 권한 행이 없으므로 메뉴가 쓰는 동작을 그대로 쓴다. -->
     <select id="findAccessibleMenus" resultType="com.hoka.bo.auth.MenuAccess" flushCache="true">
-        select m.code, m.parent_code, m.name, m.path,
+        select m.code, m.parent_code, g.name as group_name, m.name, m.path, m.icon,
                case when r.is_super then m.use_create else coalesce(rm.can_create, false) end as can_create,
                case when r.is_super then m.use_read   else coalesce(rm.can_read, false) end   as can_read,
                case when r.is_super then m.use_update else coalesce(rm.can_update, false) end as can_update,
@@ -62,14 +62,15 @@
         from bo_user u
         join bo_role r on r.code = u.role_code
         join bo_menu m on m.parent_code is not null and m.visible
+        join bo_menu g on g.code = m.parent_code
         left join bo_role_menu rm on rm.role_code = u.role_code and rm.menu_code = m.code
         where u.id = #{id} and (r.is_super or coalesce(rm.can_read, false))
-        order by m.parent_code, m.sort_order
+        order by g.sort_order, m.sort_order
     </select>
 
     <select id="findProfile" resultType="com.hoka.bo.auth.Profile" flushCache="true">
         select u.id, u.email, u.name, u.department, u.role_code, r.name as role_name,
-               r.is_super, u.password_change_required
+               r.is_super, u.password_change_required, u.avatar_updated_at
         from bo_user u join bo_role r on r.code = u.role_code
         where u.id = #{id}
     </select>
