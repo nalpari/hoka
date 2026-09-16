@@ -115,6 +115,9 @@ Windows에서 Claude Code의 Bash 도구는 Git Bash를 쓴다. 1단계의 Git f
 
 ### 3. graft CLI
 
+공식 안내는 <https://trailhq.com/graft#start>에 있다. **다만 그 페이지가 알려주는 두 번째 명령 `graft init`은
+이 저장소에서 실행하지 않는다**(아래 5단계 참고). 전역 설치만 하고 넘어간다.
+
 `graft`를 `PATH`에서 찾는다. `.mcp.json`의 MCP 서버와 `.claude/settings.json`의 훅·상태줄이 여기에 해당한다.
 macOS에서 nvm을 쓰면 **1단계에서 설치한 Node 24가 활성화된 셸에서** 전역 설치한다.
 
@@ -162,15 +165,18 @@ foreach ($d in 'hoka-fo-api','hoka-bo-api','hoka-batch') {
 
 ### 5. graft 그래프 생성
 
-`graft/` 디렉터리는 로컬 캐시라 git에 없다. 클론한 뒤 한 번 만든다. API 키가 필요 없고 비용도 들지 않는다.
-이후에는 훅이 편집할 때마다 갱신한다.
+**`graft init`은 절대 실행하지 않는다. `graft build`만 실행한다.**
+
+`graft init`이 만드는 파일(`.mcp.json`, `.claude/settings.json`, `.claude/helpers/*.cjs`)은 이미 저장소에
+커밋되어 있다. 다시 실행하면 헬퍼 스크립트에 자기 PC의 절대 경로가 새겨져 다른 사람 환경을 깨는 diff가 생긴다.
+이 경로를 못 찾아도 헬퍼는 `npm root -g`로 graft를 찾으므로 직접 고칠 일도 없다.
+
+`graft/` 디렉터리는 로컬 캐시라 git에 없다. 클론한 뒤 `graft build`로 한 번 만든다. API 키가 필요 없고
+비용도 들지 않는다. 이후에는 훅이 편집할 때마다 갱신한다.
 
 ```bash
 graft build
 ```
-
-`graft init`은 이미 적용돼 커밋되어 있으니 다시 실행하지 않는다. 다시 실행하면 `.claude/helpers/*.cjs`에
-자기 PC 경로가 새겨져 불필요한 diff가 생긴다. 이 경로를 못 찾아도 헬퍼는 `npm root -g`로 graft를 찾는다.
 
 ### 6. Claude Code 실행
 
