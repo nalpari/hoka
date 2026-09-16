@@ -64,4 +64,23 @@ function entry(name) {
   return path.join(dir, 'dist', 'claude', name); // last-ditch; import will no-op if absent
 }
 
-import(pathToFileURL(entry("statusline.js")).href).then((m) => m.main()).catch(() => { /* graft unavailable — no-op */ });
+// The current branch, or the short sha when HEAD is detached; empty outside a repo.
+function branch() {
+  const git = (...args) => execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  try { return git('branch', '--show-current') || git('rev-parse', '--short', 'HEAD'); } catch { return ''; }
+}
+
+// graft writes its bar straight to stdout, so buffer it and append the branch to the first line.
+let buf = '';
+const write = process.stdout.write.bind(process.stdout);
+process.stdout.write = (chunk) => { buf += chunk; return true; };
+
+function flush() {
+  process.stdout.write = write;
+  const b = branch();
+  const lines = buf.split('\n');
+  if (b) lines[0] = (lines[0] ? lines[0] + '\x1b[38;5;244m · \x1b[0m' : '') + `\x1b[38;5;244m\u2387 \x1b[0m\x1b[38;5;251m${b}\x1b[0m`;
+  write(lines.join('\n'));
+}
+
+import(pathToFileURL(entry("statusline.js")).href).then((m) => m.main()).catch(() => { /* graft unavailable — no-op */ }).finally(flush);
