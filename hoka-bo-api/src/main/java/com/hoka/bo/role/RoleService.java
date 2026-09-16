@@ -35,6 +35,12 @@ public class RoleService {
     }
 
     @PreAuthorize("hasAnyAuthority('SUPER', 'SYS_ROLES:R')")
+    public RoleDetail findDetail(String code) {
+        Role role = required(code);
+        return new RoleDetail(role, roleMapper.findMembers(code), roleMapper.findPermissions(code));
+    }
+
+    @PreAuthorize("hasAnyAuthority('SUPER', 'SYS_ROLES:R')")
     public List<MenuPermission> findPermissions(String code) {
         required(code);
         return roleMapper.findPermissions(code);

@@ -31,7 +31,8 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-16T00:40:00Z }
 - 각 프론트는 같은 영역의 API를 호출한다고 가정한다. 이는 프로젝트 이름에서 추론한 것이며 연동 코드는 아직 없다.
 - 두 API와 배치는 MyBatis로 PostgreSQL에 접속하도록 설정돼 있다. 로컬 접속 대상은 모두 `localhost:5432/appdb`(계정 `app`)이며, 운영 DB 구성은 미정. hoka-bo-api만 기본값 없이 `local` 프로파일이나 환경변수로 받는다.
 - 배치 배포 위치(cron을 돌릴 리눅스 서버)와 운영 경로는 미정.
-- 공유 DB 여부, 인증 방식, 배포 구성은 미정.
+- 공유 DB 여부와 배포 구성은 미정. 백오피스 인증은 [BO 인증·권한](/architecture/bo-auth.md)으로 정해졌다(JWT Bearer). FO 인증은 미정.
+- 백오피스 프론트는 Next.js BFF로 토큰을 HttpOnly 쿠키에 보관하고 API에는 Bearer 헤더로 전달하는 것을 전제로 설계했다. 프론트 연동 코드는 아직 없다.
 
 # Local ports (현재 기본값)
 

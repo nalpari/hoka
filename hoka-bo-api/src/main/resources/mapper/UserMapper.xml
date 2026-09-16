@@ -117,6 +117,23 @@
         where id = #{id}
     </update>
 
+    <select id="findInvitation" resultType="com.hoka.bo.user.InvitationInfo">
+        select email, name from bo_user
+        where invite_token_hash = #{tokenHash} and invite_expires_at > #{now} and status = 'INVITED'
+    </select>
+
+    <select id="countSuperAdmins" resultType="int" flushCache="true">
+        select count(*) from bo_user u join bo_role r on r.code = u.role_code where r.is_super
+    </select>
+
+    <!-- 역할 코드를 박아 두지 않고 is_super로 찾는다. -->
+    <insert id="insertSuperAdmin">
+        insert into bo_user (email, name, role_code, status, password_hash, password_changed_at,
+                             password_change_required)
+        select #{email}, #{name}, r.code, 'ACTIVE', #{passwordHash}, now(), true
+        from bo_role r where r.is_super
+    </insert>
+
     <select id="countActiveSupersExcept" resultType="int">
         select count(*)
         from bo_user u join bo_role r on r.code = u.role_code

@@ -47,4 +47,11 @@ public interface UserMapper {
     // 잠금·비활성화·역할 변경 뒤에도 슈퍼관리자가 한 명은 남아야 한다.
     int countActiveSupersExcept(@Param("ids") List<Long> ids);
 
+    InvitationInfo findInvitation(@Param("tokenHash") String tokenHash, @Param("now") Instant now);
+
+    int countSuperAdmins();
+
+    int insertSuperAdmin(@Param("email") String email, @Param("name") String name,
+            @Param("passwordHash") String passwordHash);
+
 }

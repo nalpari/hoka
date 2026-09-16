@@ -8,6 +8,10 @@ spring:
   flyway:
     # appdb를 FO·배치와 함께 쓰므로 이력 테이블 이름을 BO 전용으로 둔다.
     table: bo_flyway_schema_history
+    # public에는 이미 다른 프로젝트의 테이블이 있다. 그대로 두면 Flyway가 기동을 멈춘다.
+    # baseline-version을 0으로 낮춰야 V1부터 적용된다(기본값 1이면 V1을 건너뛴다).
+    baseline-on-migrate: true
+    baseline-version: 0
   mvc:
     problemdetails:
       enabled: true

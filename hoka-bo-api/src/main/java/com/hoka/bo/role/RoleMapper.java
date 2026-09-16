@@ -20,6 +20,8 @@ public interface RoleMapper {
 
     int touch(String code);
 
+    List<RoleMember> findMembers(String roleCode);
+
     List<MenuPermission> findPermissions(String roleCode);
 
     int deletePermissions(String roleCode);

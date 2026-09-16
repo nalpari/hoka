@@ -92,6 +92,15 @@ public class UserService {
         return new Invitation(id, inviteUrl(token));
     }
 
+    // 로그인 전에 초대 링크가 살아 있는지 확인한다.
+    public InvitationInfo findInvitation(String token) {
+        InvitationInfo invitation = userMapper.findInvitation(Tokens.hash(token), Instant.now());
+        if (invitation == null) {
+            throw ApiException.badRequest("INVITE_INVALID", "만료되었거나 이미 사용한 초대 링크입니다.");
+        }
+        return invitation;
+    }
+
     @Transactional
     public void acceptInvite(String token, String password) {
         Long id = userMapper.findIdByInviteToken(Tokens.hash(token), Instant.now());

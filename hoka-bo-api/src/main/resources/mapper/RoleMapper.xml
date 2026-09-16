@@ -31,6 +31,10 @@
         update bo_role set updated_at = now() where code = #{code}
     </update>
 
+    <select id="findMembers" resultType="com.hoka.bo.role.RoleMember">
+        select id, name, department, status from bo_user where role_code = #{roleCode} order by name
+    </select>
+
     <select id="findPermissions" resultType="com.hoka.bo.role.MenuPermission">
         select menu_code, can_create, can_read, can_update, can_delete
         from bo_role_menu where role_code = #{roleCode} order by menu_code
