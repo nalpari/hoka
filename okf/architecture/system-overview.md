@@ -4,7 +4,7 @@ title: System overview
 description: 프론트오피스/백오피스 각각 Next.js 프론트와 Spring Boot API 한 쌍, 그리고 셸에서 실행하는 배치 jar로 구성된 시스템.
 tags: [architecture, fo, bo, batch]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-15T01:22:11Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-16T00:40:00Z }
 ---
 
 # Components
@@ -16,10 +16,20 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-15T01:22:11Z }
 
 [hoka-batch](/projects/hoka-batch.md)는 FO/BO 어느 쪽에도 속하지 않는다. cron이 `java -jar`로 실행하며, 다른 프로젝트를 호출하지 않고 DB만 읽고 쓴다. Spring Batch 메타 테이블(`BATCH_*`)은 `appdb`의 `public` 스키마에 둔다.
 
+# Schema ownership
+
+`appdb`의 `public` 스키마를 세 프로젝트가 나눠 쓴다. 이름으로 주인을 가른다.
+
+| 접두사 | 주인 | 관리 방법 |
+|---|---|---|
+| `bo_` | [hoka-bo-api](/projects/hoka-bo-api.md) | Flyway(`db/migration`), 이력 테이블 `bo_flyway_schema_history` |
+| `BATCH_` | [hoka-batch](/projects/hoka-batch.md) | 로컬은 `initialize-schema: always`, 운영은 DDL 수동 적용 |
+| `sample` | [hoka-fo-api](/projects/hoka-fo-api.md) | 관리 도구 없음. DDL이 저장소에 없다 |
+
 # Assumptions (미검증)
 
 - 각 프론트는 같은 영역의 API를 호출한다고 가정한다. 이는 프로젝트 이름에서 추론한 것이며 연동 코드는 아직 없다.
-- 두 API와 배치는 MyBatis로 PostgreSQL에 접속하도록 설정돼 있다. 기본 접속 대상은 모두 `localhost:5432/appdb`(계정 `app`)이며, 운영 DB 구성은 미정.
+- 두 API와 배치는 MyBatis로 PostgreSQL에 접속하도록 설정돼 있다. 로컬 접속 대상은 모두 `localhost:5432/appdb`(계정 `app`)이며, 운영 DB 구성은 미정. hoka-bo-api만 기본값 없이 `local` 프로파일이나 환경변수로 받는다.
 - 배치 배포 위치(cron을 돌릴 리눅스 서버)와 운영 경로는 미정.
 - 공유 DB 여부, 인증 방식, 배포 구성은 미정.
 

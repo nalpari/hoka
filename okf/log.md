@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-09-16
+* **Update**: hoka-bo-api에 Flyway·OAuth2 Resource Server·Testcontainers 도입과 `local` 프로파일 분리에 맞춰 [hoka-bo-api](/projects/hoka-bo-api.md)의 Stack·Commands·Notes 갱신. [System overview](/architecture/system-overview.md)에 `# Schema ownership` 추가하고 DB 기본값 가정 수정.
 * **Update**: hoka-bo-api의 샘플 CRUD 삭제에 맞춰 [Sample CRUD](/architecture/sample-crud.md)를 FO 전용으로, [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes를 갱신. [Architecture](/architecture/index.md) 설명 갱신.
 
 ## 2026-09-15
