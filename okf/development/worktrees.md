@@ -1,10 +1,10 @@
 ---
 type: Development Procedure
 title: Worktrees
-description: 명시적으로 요청된 워크트리를 만들고 진입·설정·정리하는 절차.
+description: 명시적으로 요청된 워크트리를 만들고 설정·정리하는 절차. 만든 뒤 진입하지 않는다.
 tags: [development, git, worktrees]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-15T00:31:50Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-16T03:15:04Z }
 ---
 
 # Worktrees
@@ -17,11 +17,12 @@ generated: { by: claude-code/claude-opus-5, at: 2026-09-15T00:31:50Z }
 `hoka/`를 루트로 하는 git 저장소(`main` 브랜치)와 `origin` 원격(`https://github.com/nalpari/hoka.git`)을 쓴다.
 절차가 기준으로 삼는 `origin/main`은 첫 푸시 이후에 생긴다.
 
-# 생성과 진입
+# 생성
 
-`EnterWorktree`를 `name`으로 호출하면 위치가 저장소 안 `.claude/worktrees/`로 고정되어
-[CLAUDE.md의 경로 규칙](../../CLAUDE.md#worktrees)을 지킬 수 없다. 직접 만든 뒤 `path`로 진입한다.
-`path`는 `git worktree list`에 등록된 경로만 받는다.
+**만들기만 하고 진입하지 않는다.** `EnterWorktree`를 호출하지 않는다. `name`으로 부르면 위치가
+저장소 안 `.claude/worktrees/`로 고정되어 [CLAUDE.md의 경로 규칙](../../CLAUDE.md#worktrees)을
+지킬 수 없고, `path`로 부르면 세션이 그 워크트리로 옮겨 가 요청하지 않은 작업 디렉터리 변경이 된다.
+진입은 사용자가 직접 정한다.
 
 아래는 macOS / Linux용 예시이고, 저장소 루트(`hoka/`)에서 실행한다. Windows에서는 CLAUDE.md의
 Windows 경로를 사용한다.
@@ -45,7 +46,7 @@ done
 (cd "$WT/hoka-bo-front" && pnpm install --frozen-lockfile)
 ```
 
-그 다음 `EnterWorktree`에 `$WT` 경로를 `path`로 넘긴다.
+여기서 끝낸다. 만든 경로와 브랜치 이름을 알려주고, 이어지는 작업은 사용자의 다음 지시를 기다린다.
 
 # 복사 대상
 
@@ -76,5 +77,5 @@ pnpm dev -p 3001
 
 # 정리
 
-`path`로 진입한 워크트리는 `ExitWorktree`가 지우지 못한다(`keep`만 가능). 작업이 끝나면
-`ExitWorktree`의 `keep`으로 나온 뒤 `git worktree remove <경로>`로 직접 정리한다.
+작업이 끝나면 `git worktree remove <경로>`로 정리한다. 워크트리 안에서 세션이 돌고 있으면
+먼저 그 세션을 닫는다.

@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-09-16
+* **Update**: 워크트리를 만든 뒤 진입하지 않도록 [Worktrees](/development/worktrees.md)의 생성·정리 절과 [CLAUDE.md](../CLAUDE.md)의 Worktrees 규칙 갱신.
 * **Update**: PR #2 적대적 리뷰에서 나온 인증 결함 3건(로그인 실패 기록 롤백, refresh 토큰 동시 재사용, 거절된 세션의 리다이렉트 루프) 수정에 맞춰 [BO 인증·권한](/architecture/bo-auth.md)의 토큰·로그인 규칙과 프론트 연동 절, [hoka-bo-front](/projects/hoka-bo-front.md)의 proxy 설명 갱신.
 * **Update**: hoka-bo-front에 대시보드 화면과 공용 셸(레일·톱바)이 생겨 [hoka-bo-front](/projects/hoka-bo-front.md)의 Notes 갱신. 로그인 성공 시 착지가 `/dashboard`로 바뀌었다.
 * **Update**: hoka-bo-front 디자인 시안에 기획전·콘텐츠 목록과 기획전 전시 구성 화면이 추가돼 [hoka-bo-front](/projects/hoka-bo-front.md)의 Notes 갱신.

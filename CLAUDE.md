@@ -21,7 +21,8 @@ The root is the git repository but not a build. It holds five separate projects,
 ## Worktrees
 
 **사용자가 명시적으로 요청할 때만 만든다.** 브랜치를 새로 파거나 기능 작업을 해달라는 요청은
-평소대로 git으로 처리한다.
+평소대로 git으로 처리한다. **만들기만 하고 진입하지 않는다** — `EnterWorktree`를 호출하지 말고,
+만든 경로와 브랜치를 알려준 뒤 멈춘다.
 
 | 플랫폼 | 위치 |
 | --- | --- |
@@ -31,7 +32,7 @@ The root is the git repository but not a build. It holds five separate projects,
 - **워크트리 디렉터리 이름은 세계 관광명소**, 소문자 kebab-case: `machu-picchu`, `santorini`, `angkor-wat`
 - **브랜치 이름은 포켓몬**, 소문자: `snorlax`, `gengar`, `lapras`
 
-워크트리 생성·진입·정리 전에 [워크트리 절차](okf/development/worktrees.md)를 읽는다.
+워크트리 생성·정리 전에 [워크트리 절차](okf/development/worktrees.md)를 읽는다.
 추적하지 않는 설정 파일을 추가하면 같은 변경에서 그 문서의 복사 목록도 갱신한다.
 
 ## Shared knowledge (`okf/`)
