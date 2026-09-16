@@ -1,7 +1,8 @@
 # HOKA
 
 프론트오피스(고객용)와 백오피스(관리자용)가 각각 Next.js 프론트와 Spring Boot API 한 쌍으로 이뤄지고,
-셸에서 실행하는 Spring Batch jar가 하나 붙은 모노레포다. 모든 프로젝트가 스캐폴딩 직후 상태라 아직 비즈니스 코드는 없다.
+셸에서 실행하는 Spring Batch jar가 하나 붙은 모노레포다. 백오피스는 로그인과 사용자·역할·메뉴 관리가 동작하고,
+프론트오피스는 아직 스캐폴딩 직후 상태다.
 
 ## 구성
 
@@ -19,7 +20,8 @@
 - 루트는 git 저장소일 뿐 빌드가 아니다. **명령은 각 프로젝트 디렉터리 안에서 실행한다.**
 - FO/BO 쌍은 같은 스캐폴딩에서 출발했지만 지금은 다르다. 백오피스에만 로그인·권한 기능이 들어가 있다.
   한쪽만 바꾸는 변경이 아니면 두 쪽을 같이 맞춘다.
-- 각 프론트가 같은 영역의 API를 호출한다는 연결은 아직 가정이다. 연동 코드는 없다.
+- `hoka-bo-front`는 자기 Next 서버(BFF)를 거쳐 `hoka-bo-api`를 호출한다. 브라우저가 API를 직접 부르지 않는다.
+  `hoka-fo-front`가 `hoka-fo-api`를 호출한다는 것은 이름에서 추론한 가정일 뿐이고, FO에는 아직 연동 코드가 없다.
 
 ## 처음 설치하기 (Claude Code 기준)
 
@@ -222,6 +224,11 @@ pnpm lint         # ESLint flat config (next core-web-vitals + typescript)
 - 경로 별칭 `@/*` → `src/*`.
 - `.env*` 파일은 git이 무시한다. `hoka-bo-front`는 `.env.local`에 `BO_API_BASE_URL`이 필요하다(추적되는 `.env.example` 참고).
   기본값이 없어서 없으면 API를 부르지 못한다. `hoka-fo-front`는 아직 필요한 환경 변수가 없다.
+- **`hoka-bo-front`에 구현된 화면**은 `/login`, `/dashboard`(`/`가 여기로 보낸다), `/menus`, `/roles`, `/users`다.
+  대시보드 숫자는 집계 API가 생기기 전까지 `src/app/dashboard/mock.ts`의 가짜 데이터다.
+  브라우저는 API를 직접 부르지 않는다 — Next 서버가 토큰을 HttpOnly 쿠키로 들고 Bearer 헤더로 옮겨 붙이고,
+  경로 보호는 `src/proxy.ts`에 있다(Next 16에서 `middleware`가 `proxy`로 바뀌었다).
+  `hoka-fo-front`는 아직 스캐폴드 그대로다.
 
 ### API (`hoka-fo-api`, `hoka-bo-api`)
 
@@ -256,7 +263,8 @@ cd hoka-bo-api
     curl -u user:<비밀번호> http://localhost:8080/actuator/health
     curl -u user:<비밀번호> http://localhost:8080/api/samples
     ```
-  - BO는 JWT 리소스 서버다. 로그인·갱신·로그아웃, 초대, `/actuator/health`만 공개이고 나머지는 Bearer 토큰이 필요하다.
+  - BO는 JWT 리소스 서버다. 로그인·갱신·로그아웃, 초대, `/actuator/health`, Swagger 경로가 공개이고
+    나머지는 Bearer 토큰이 필요하다(Swagger는 `local` 밖에서 springdoc이 꺼져 있어 404다).
     첫 슈퍼관리자는 기동할 때 만들어진다(`local` 기본값 `admin@hoka.co.kr` / `admin1234!`).
     ```bash
     curl -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' \
@@ -346,8 +354,9 @@ Claude Code에서는 `/hoka-cnp`로 이 규칙대로 커밋하고 푸시할 수 
 ## 커밋하지 않는 파일
 
 - `**/.claude/settings.local.json`: 이 PC의 절대 경로가 들어 있다
-- `hoka-*-front/.env*`
+- `hoka-*-front/.env*` (단 `hoka-bo-front/.env.example`은 추적한다)
 - `**/.agent/`
+- `/graft/`: graft 그래프 캐시. `graft build`로 다시 만든다
 
 ## Claude Code 사용 시
 
