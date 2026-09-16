@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>기획전·콘텐츠 · HOKA 백오피스</title>
+    <link rel="stylesheet" href="assets/hoka.css" />
+    <script>
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t = q || localStorage.getItem("hoka-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-page="contents">
+    <!-- HOKA 백오피스 디자인 시안 · 기획전·콘텐츠
+         기획전은 기간과 자리를 먹는다. 목록은 "언제부터 언제까지, 어느 자리에 걸려 있나"를 먼저 보여준다.
+         데이터와 사진은 전부 시안용 합성 자료다. -->
+    <div class="app">
+      <aside class="rail" id="rail"></aside>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="btn btn--ghost btn--icon btn--sm railtoggle" data-railtoggle aria-label="메뉴 열기"></button>
+          <span class="topbar__title">
+            <span class="crumb">마케팅 <svg width="13" height="13" aria-hidden="true"><use href="#i-right" /></svg></span>
+            기획전·콘텐츠
+          </span>
+          <div class="topbar__actions" data-topact></div>
+        </header>
+
+        <div class="scopebar">
+          <span class="scopebar__lead" data-icon="image" data-icon-size="14">전시 주체</span>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-store" /></svg>
+            <b>호카코리아</b> 브랜드스토어
+          </button>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-calendar" /></svg>
+            2026-09-16 노출 기준
+          </button>
+          <button class="scope" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-tag" /></svg>
+            진행 <b>4</b> · 예약 2 · 초안 1 · 종료 3
+          </button>
+          <span class="scopebar__spacer"></span>
+          <div class="seg" role="group" aria-label="유형">
+            <button type="button" aria-pressed="true">전체</button>
+            <button type="button" aria-pressed="false">기획전</button>
+            <button type="button" aria-pressed="false">콘텐츠</button>
+          </div>
+          <button class="btn btn--secondary btn--sm" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-download" /></svg>
+            CSV 내보내기
+          </button>
+          <button class="btn btn--primary btn--sm" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-plus" /></svg>
+            기획전 만들기
+          </button>
+        </div>
+
+        <main class="page">
+          <div class="split split--wide">
+            <!-- 좌측 : 기획전 목록 -->
+            <section class="panel">
+              <dl class="figures">
+                <div>
+                  <dt>진행 중 기획전</dt>
+                  <dd>
+                    <span class="figure">4</span><span class="unit">건</span>
+                    <span class="delta">종료 예정 2건</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>기획전 유입</dt>
+                  <dd>
+                    <span class="figure">82,140</span><span class="unit">명</span>
+                    <span class="delta delta--up">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-upright" /></svg>14.2%
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>기획전 매출</dt>
+                  <dd>
+                    <span class="figure">244,180,000</span><span class="unit">원</span>
+                    <span class="delta delta--up">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-upright" /></svg>9.6%
+                    </span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>유입당 구매</dt>
+                  <dd>
+                    <span class="figure">3.4</span><span class="unit">%</span>
+                    <span class="delta delta--down">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-downright" /></svg>0.3%p
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+
+              <div class="toolbar">
+                <div class="toolbar__search">
+                  <svg width="14" height="14" aria-hidden="true"><use href="#i-search" /></svg>
+                  <input type="search" placeholder="기획전명 · 주소 · 담당자" aria-label="기획전 검색" />
+                </div>
+                <div class="chips">
+                  <span class="chip">
+                    상태 <b>진행 · 예약 · 초안</b>
+                    <button type="button" aria-label="상태 조건 지우기">
+                      <svg width="12" height="12" aria-hidden="true"><use href="#i-x" /></svg>
+                    </button>
+                  </span>
+                  <button class="btn btn--ghost btn--sm" type="button">
+                    <svg width="14" height="14" aria-hidden="true"><use href="#i-filter" /></svg>
+                    기간 · 담당자
+                  </button>
+                </div>
+                <span class="grow"></span>
+                <span class="toolbar__count">10건 중 10건</span>
+              </div>
+
+              <div class="tablewrap">
+                <table class="table" data-selectable>
+                  <thead>
+                    <tr>
+                      <th style="width: 36px">
+                        <label class="check"><input type="checkbox" data-checkall aria-label="전체 선택" /></label>
+                      </th>
+                      <th style="width: 300px">기획전</th>
+                      <th style="width: 152px">
+                        노출 기간
+                        <span class="sortmark"><svg width="12" height="12" aria-hidden="true"><use href="#i-down" /></svg></span>
+                      </th>
+                      <th style="width: 104px">상태</th>
+                      <th style="width: 132px">노출 자리</th>
+                      <th class="num" style="width: 86px">유입</th>
+                      <th class="num" style="width: 68px">구매</th>
+                      <th class="num" style="width: 116px">매출</th>
+                      <th style="width: 96px">담당</th>
+                      <th style="width: 44px"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="is-selected" data-row aria-current="true">
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="가을 트레일 시즌 오프 선택" checked /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/promo-trail.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">가을 트레일 시즌 오프</span>
+                            <small class="mono nowrap">/event/fall-trail-2026</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">09-08 ~ 09-28</td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>진행 중</span></td>
+                      <td><span class="badge badge--accent">홈 히어로</span></td>
+                      <td class="num">48,210</td>
+                      <td class="num">3.8%</td>
+                      <td class="num">128,400,000</td>
+                      <td>정하람</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="추석 러닝 기획전 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/shoe-clifton.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">추석 러닝 기획전</span>
+                            <small class="mono nowrap">/event/chuseok-run</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">08-28 ~ 09-22</td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>진행 중</span></td>
+                      <td><span class="badge">기획전 목록</span></td>
+                      <td class="num">21,470</td>
+                      <td class="num">4.1%</td>
+                      <td class="num">62,910,000</td>
+                      <td>오세진</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="워크 앤 데일리 컬렉션 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/promo-recovery.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">워크 앤 데일리 컬렉션</span>
+                            <small class="mono nowrap">/event/walk-daily</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">09-01 ~ 09-30</td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>진행 중</span></td>
+                      <td><span class="badge badge--accent">홈 중간 배너</span></td>
+                      <td class="num">9,860</td>
+                      <td class="num">2.6%</td>
+                      <td class="num">31,240,000</td>
+                      <td>오세진</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="사이즈 가이드 개편 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/shoe-arahi.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">사이즈 가이드 개편</span>
+                            <small class="mono nowrap">/guide/sizing</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">09-05 ~ 상시</td>
+                      <td><span class="flex gap-2"><i class="dot dot--live"></i>진행 중</span></td>
+                      <td><span class="badge badge--outline">상품 상세 하단</span></td>
+                      <td class="num">14,320</td>
+                      <td class="num dim">-</td>
+                      <td class="num dim">-</td>
+                      <td>정하람</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="쿠셔닝 3종 신상 발매 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/promo-cushion.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">쿠셔닝 3종 신상 발매</span>
+                            <small class="mono nowrap">/event/cushion-launch</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">09-18 ~ 10-05</td>
+                      <td><span class="badge badge--warn">검수 대기</span></td>
+                      <td><span class="badge badge--accent">홈 중간 배너</span></td>
+                      <td class="num dim">-</td>
+                      <td class="num dim">-</td>
+                      <td class="num dim">-</td>
+                      <td>오세진</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="트레일 레이스 후원 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/shoe-speedgoat.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">트레일 레이스 후원</span>
+                            <small class="mono nowrap">/event/trail-race</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">10-10 ~ 10-20</td>
+                      <td><span class="badge badge--accent">예약</span></td>
+                      <td><span class="badge">기획전 목록</span></td>
+                      <td class="num dim">-</td>
+                      <td class="num dim">-</td>
+                      <td class="num dim">-</td>
+                      <td>정하람</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="is-risk" data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="키즈 라인 첫 출시 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/shoe-mach.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">키즈 라인 첫 출시</span>
+                            <small class="mono nowrap">/event/kids-launch</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">09-12 ~ 09-25</td>
+                      <td><span class="badge badge--risk">중단</span></td>
+                      <td class="dim">내려감</td>
+                      <td class="num">3,110</td>
+                      <td class="num">1.2%</td>
+                      <td class="num">4,180,000</td>
+                      <td>오세진</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="한강 나이트런 클럽 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/promo-nightrun.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary">한강 나이트런 클럽</span>
+                            <small class="dim">주소 미정</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="dim">미정</td>
+                      <td><span class="badge badge--outline">초안</span></td>
+                      <td class="dim">-</td>
+                      <td class="num dim">-</td>
+                      <td class="num dim">-</td>
+                      <td class="num dim">-</td>
+                      <td>오세진</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="is-muted" data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="리커버리 위크 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/promo-recovery.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary" style="color: var(--ink-subtle)">리커버리 위크</span>
+                            <small class="mono nowrap">/event/recovery-week</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">08-11 ~ 08-24</td>
+                      <td><span class="badge badge--outline">종료</span></td>
+                      <td class="dim">-</td>
+                      <td class="num">18,640</td>
+                      <td class="num">4.6%</td>
+                      <td class="num">57,320,000</td>
+                      <td>정하람</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                    <tr class="is-muted" data-row>
+                      <td><label class="check rowcheck"><input type="checkbox" aria-label="여름 세일 앵콜 선택" /></label></td>
+                      <td>
+                        <div class="cellmedia">
+                          <img class="thumb" src="assets/img/shoe-bondi.webp" alt="" />
+                          <div class="cellstack">
+                            <span class="primary" style="color: var(--ink-subtle)">여름 세일 앵콜</span>
+                            <small class="mono nowrap">/event/summer-encore</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="num">07-15 ~ 08-02</td>
+                      <td><span class="badge badge--outline">종료</span></td>
+                      <td class="dim">-</td>
+                      <td class="num">37,920</td>
+                      <td class="num">5.2%</td>
+                      <td class="num">141,660,000</td>
+                      <td>오세진</td>
+                      <td class="right">
+                        <button class="btn btn--ghost btn--icon btn--sm rowact" type="button" aria-label="더 보기">
+                          <svg width="15" height="15" aria-hidden="true"><use href="#i-dots" /></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="pager">
+                <span>1건 선택</span>
+                <button class="btn btn--ghost btn--sm" type="button">기간 변경</button>
+                <button class="btn btn--ghost btn--sm" type="button">복제</button>
+                <span class="grow"></span>
+                <span>10건 중 1 ~ 10</span>
+                <div class="pagenums">
+                  <a href="#" aria-current="page">1</a>
+                </div>
+              </div>
+            </section>
+
+            <!-- 우측 : 선택한 기획전 -->
+            <section class="panel">
+              <img
+                src="assets/img/promo-trail.webp"
+                alt="가을 트레일 시즌 오프 대표 배너"
+                style="width: 100%; aspect-ratio: 16 / 9; object-fit: cover"
+              />
+
+              <div class="panel__body">
+                <div class="flex flex--between">
+                  <div class="t-h3">가을 트레일 시즌 오프</div>
+                  <span class="badge badge--accent">D-12</span>
+                </div>
+                <div class="t-xs mono dim mt-1">smartstore.naver.com/hoka/event/fall-trail-2026</div>
+                <div class="flex gap-1 flex--wrap mt-3">
+                  <span class="flex gap-2"><i class="dot dot--live"></i><span class="t-sm">진행 중</span></span>
+                  <span class="badge">기획전</span>
+                  <span class="badge badge--accent">홈 히어로</span>
+                  <span class="badge badge--outline">쿠폰 연결</span>
+                </div>
+
+                <div class="note note--warn mt-4">
+                  <svg width="16" height="16" aria-hidden="true"><use href="#i-smartphone" /></svg>
+                  <div>
+                    <strong>모바일 배너가 없어 PC 배너를 잘라 씁니다</strong>
+                    유입의 78%가 모바일입니다. 1200×1500 배너를 올리면 문구가 잘리지 않습니다.
+                    <div class="flex gap-2 mt-3">
+                      <a class="btn btn--primary btn--sm" href="contents-edit.html">
+                        <svg width="14" height="14" aria-hidden="true"><use href="#i-upload" /></svg>
+                        모바일 배너 등록
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel__body" style="border-top: 1px solid var(--hairline)">
+                <dl class="deflist">
+                  <dt>노출 기간</dt>
+                  <dd class="num">09-08 09:00 ~ 09-28 23:59</dd>
+                  <dt>노출 자리</dt>
+                  <dd>홈 히어로 · 기획전 목록 1번</dd>
+                  <dt>대상</dt>
+                  <dd>전체 고객 <span class="dim">· 등급 조건 없음</span></dd>
+                  <dt>연결 쿠폰</dt>
+                  <dd><a href="#">트레일 15% 쿠폰</a> <span class="dim">· 1,240장 남음</span></dd>
+                  <dt>담은 상품</dt>
+                  <dd>11개 <span class="dim">· 품절 1</span></dd>
+                  <dt>담당</dt>
+                  <dd>정하람 <span class="dim">· MD팀</span></dd>
+                  <dt>마지막 수정</dt>
+                  <dd class="num">09-15 16:22 <span class="dim">· 정하람</span></dd>
+                </dl>
+              </div>
+
+              <div class="panel__body" style="border-top: 1px solid var(--hairline)">
+                <div class="sechead">
+                  <h2>유입 경로</h2>
+                  <span class="t-xs dim">09-08 이후 · 48,210명</span>
+                </div>
+                <div class="hbar" style="grid-template-columns: 96px minmax(0, 1fr) 64px">
+                  <span>홈 히어로</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 54%"></i></span>
+                  <span class="num right">54.1%</span>
+                </div>
+                <div class="hbar" style="grid-template-columns: 96px minmax(0, 1fr) 64px">
+                  <span>알림톡</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 22%"></i></span>
+                  <span class="num right">21.8%</span>
+                </div>
+                <div class="hbar" style="grid-template-columns: 96px minmax(0, 1fr) 64px">
+                  <span>검색 유입</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 16%"></i></span>
+                  <span class="num right">15.7%</span>
+                </div>
+                <div class="hbar" style="grid-template-columns: 96px minmax(0, 1fr) 64px">
+                  <span>기획전 목록</span>
+                  <span class="hbar__track"><i class="hbar__fill" style="width: 8%"></i></span>
+                  <span class="num right">8.4%</span>
+                </div>
+              </div>
+
+              <div class="panel__body" style="border-top: 1px solid var(--hairline); padding-bottom: var(--s-2)">
+                <div class="sechead">
+                  <h2>최근 변경</h2>
+                  <a class="t-xs muted" href="#">전체 이력</a>
+                </div>
+              </div>
+              <ul class="stack" style="margin-top: calc(var(--s-2) * -1)">
+                <li style="grid-template-columns: minmax(0, 1fr) auto; padding: 8px var(--s-4)">
+                  <span class="cellstack">
+                    <span class="primary">상품 슬롯에 스피드고트 6 추가</span>
+                    <small>09-15 16:22 · 정하람</small>
+                  </span>
+                  <span class="badge badge--accent">반영됨</span>
+                </li>
+                <li style="grid-template-columns: minmax(0, 1fr) auto; padding: 8px var(--s-4)">
+                  <span class="cellstack">
+                    <span class="primary">종료일 09-24에서 09-28로 연장</span>
+                    <small>09-14 11:05 · 오세진</small>
+                  </span>
+                  <span class="badge">기간</span>
+                </li>
+                <li style="grid-template-columns: minmax(0, 1fr) auto; padding: 8px var(--s-4)">
+                  <span class="cellstack">
+                    <span class="primary">공개</span>
+                    <small>09-08 09:00 · 정하람</small>
+                  </span>
+                  <span class="badge badge--ok">공개</span>
+                </li>
+              </ul>
+
+              <div class="panel__foot">
+                <button class="btn btn--secondary btn--sm" type="button">
+                  <svg width="14" height="14" aria-hidden="true"><use href="#i-external" /></svg>
+                  스토어에서 보기
+                </button>
+                <span class="grow"></span>
+                <a class="btn btn--primary btn--sm" href="contents-edit.html">
+                  <svg width="14" height="14" aria-hidden="true"><use href="#i-layers" /></svg>
+                  전시 구성 편집
+                </a>
+              </div>
+            </section>
+          </div>
+
+          <!-- 노출 자리 점검 : 기획전 관리의 진짜 어려움은 자리와 기간이 겹치는 것 -->
+          <section class="panel">
+            <div class="panel__head">
+              <h3>홈 노출 자리</h3>
+              <span class="t-xs dim">2026-09-16 기준 · 자리마다 한 번에 하나만 걸립니다</span>
+              <div class="right-slot">
+                <button class="btn btn--ghost btn--sm" type="button">
+                  <svg width="14" height="14" aria-hidden="true"><use href="#i-calendar" /></svg>
+                  노출 일정
+                </button>
+                <button class="btn btn--secondary btn--sm" type="button">자리 관리</button>
+              </div>
+            </div>
+
+            <div class="panel__body">
+              <div class="slots">
+                <div class="slot">
+                  <span class="slot__tag badge badge--accent">홈 히어로</span>
+                  <div class="slot__act">
+                    <button class="btn btn--secondary btn--icon btn--sm" type="button" aria-label="교체">
+                      <svg width="14" height="14" aria-hidden="true"><use href="#i-refresh" /></svg>
+                    </button>
+                  </div>
+                  <img class="slot__media" src="assets/img/promo-trail.webp" alt="" />
+                  <div class="slot__body">
+                    <span class="grow">
+                      <span class="slot__name">가을 트레일 시즌 오프</span>
+                      <span class="slot__meta">09-08 ~ 09-28 · 다음 예약 없음</span>
+                    </span>
+                    <i class="dot dot--live"></i>
+                  </div>
+                </div>
+
+                <div class="slot">
+                  <span class="slot__tag badge badge--warn">홈 중간 배너</span>
+                  <div class="slot__act">
+                    <button class="btn btn--secondary btn--icon btn--sm" type="button" aria-label="교체">
+                      <svg width="14" height="14" aria-hidden="true"><use href="#i-refresh" /></svg>
+                    </button>
+                  </div>
+                  <img class="slot__media" src="assets/img/promo-recovery.webp" alt="" />
+                  <div class="slot__body">
+                    <span class="grow">
+                      <span class="slot__name">워크 앤 데일리 컬렉션</span>
+                      <span class="slot__meta">09-01 ~ 09-30 · 09-18 예약과 겹침</span>
+                    </span>
+                    <svg width="15" height="15" aria-hidden="true" style="color: var(--warn)"><use href="#i-warn" /></svg>
+                  </div>
+                </div>
+
+                <div class="slot slot--empty">
+                  <span class="empty__mark">
+                    <svg width="18" height="18" aria-hidden="true"><use href="#i-image" /></svg>
+                  </span>
+                  <span>
+                    <b>카테고리 상단</b>이 09-23부터 빕니다
+                    <span class="slot__meta">트레일 레이스 후원은 10-10 시작</span>
+                  </span>
+                  <button class="btn btn--secondary btn--sm" type="button">
+                    <svg width="14" height="14" aria-hidden="true"><use href="#i-plus" /></svg>
+                    기획전 걸기
+                  </button>
+                </div>
+              </div>
+
+              <div class="note note--warn mt-4">
+                <svg width="16" height="16" aria-hidden="true"><use href="#i-warn" /></svg>
+                <div>
+                  <strong>홈 중간 배너에 09-18부터 두 기획전이 겹칩니다</strong>
+                  쿠셔닝 3종 신상 발매가 09-18에 시작하는데 워크 앤 데일리 컬렉션이 09-30까지 걸려 있습니다. 나중에 시작한
+                  기획전이 자리를 덮으니, 워크 앤 데일리를 09-17에 끝내거나 다른 자리로 옮기세요.
+                  <div class="flex gap-2 mt-3">
+                    <button class="btn btn--primary btn--sm" type="button">09-17 종료로 변경</button>
+                    <button class="btn btn--secondary btn--sm" type="button">자리 옮기기</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <script src="assets/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>기획전 전시 구성 · HOKA 백오피스</title>
+    <link rel="stylesheet" href="assets/hoka.css" />
+    <script>
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t = q || localStorage.getItem("hoka-theme");
+        if (t) document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-page="contents">
+    <!-- HOKA 백오피스 디자인 시안 · 기획전 전시 구성
+         왼쪽에서 섹션 순서를 잡고, 가운데서 고치고, 오른쪽에서 고객이 보는 화면을 바로 확인한다.
+         데이터와 사진은 전부 시안용 합성 자료다. -->
+    <div class="app">
+      <aside class="rail" id="rail"></aside>
+
+      <div class="main">
+        <header class="topbar">
+          <button class="btn btn--ghost btn--icon btn--sm railtoggle" data-railtoggle aria-label="메뉴 열기"></button>
+          <span class="topbar__title">
+            <span class="crumb">
+              마케팅 <svg width="13" height="13" aria-hidden="true"><use href="#i-right" /></svg>
+              <a href="contents.html" style="color: inherit">기획전·콘텐츠</a>
+              <svg width="13" height="13" aria-hidden="true"><use href="#i-right" /></svg>
+            </span>
+            가을 트레일 시즌 오프
+          </span>
+          <div class="topbar__actions" data-topact></div>
+        </header>
+
+        <div class="scopebar">
+          <span class="scopebar__lead" data-icon="layers" data-icon-size="14">편집 중</span>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-branch" /></svg>
+            초안 <b>3</b> <span class="dim">저장 안 된 변경 2</span>
+          </button>
+          <button class="scope is-set" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-calendar" /></svg>
+            09-08 ~ 09-28 <span class="dim">진행 중</span>
+          </button>
+          <button class="scope" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-history" /></svg>
+            공개본 09-15 16:22
+          </button>
+          <span class="scopebar__spacer"></span>
+          <div class="seg" role="group" aria-label="미리보기 기기">
+            <button type="button" aria-pressed="true">모바일</button>
+            <button type="button" aria-pressed="false">PC</button>
+          </div>
+          <button class="btn btn--ghost btn--sm" type="button">초안 버리기</button>
+          <button class="btn btn--secondary btn--sm" type="button">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-external" /></svg>
+            미리보기 링크
+          </button>
+          <button class="btn btn--primary btn--sm" type="button">변경 공개</button>
+        </div>
+
+        <main class="page">
+          <div class="editor">
+            <!-- 1열 : 섹션 순서 -->
+            <section class="panel">
+              <div class="panel__head">
+                <h3>섹션</h3>
+                <span class="badge">7</span>
+                <div class="right-slot">
+                  <button class="btn btn--ghost btn--icon btn--sm" type="button" aria-label="섹션 추가" title="섹션 추가">
+                    <svg width="15" height="15" aria-hidden="true"><use href="#i-plus" /></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="tree" data-selectable>
+                <div class="treeitem is-selected" data-row aria-current="true">
+                  <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                  <span class="treeitem__icon"><svg width="16" height="16" aria-hidden="true"><use href="#i-image" /></svg></span>
+                  <span class="treeitem__label"><span>대표 배너</span></span>
+                  <span class="treeitem__meta">
+                    <svg width="14" height="14" aria-hidden="true" style="color: var(--warn)" title="모바일 배너 없음">
+                      <use href="#i-warn" />
+                    </svg>
+                  </span>
+                </div>
+                <div class="treeitem" data-row>
+                  <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                  <span class="treeitem__icon"><svg width="16" height="16" aria-hidden="true"><use href="#i-tag" /></svg></span>
+                  <span class="treeitem__label"><span>쿠폰 받기</span></span>
+                  <span class="treeitem__meta"><span class="badge badge--accent">수정</span></span>
+                </div>
+                <div class="treeitem" data-row>
+                  <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                  <span class="treeitem__icon"><svg width="16" height="16" aria-hidden="true"><use href="#i-box" /></svg></span>
+                  <span class="treeitem__label"><span>상품 슬롯</span><span class="treeitem__path">11</span></span>
+                  <span class="treeitem__meta"></span>
+                </div>
+                <div class="treeitem" data-row>
+                  <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                  <span class="treeitem__icon"><svg width="16" height="16" aria-hidden="true"><use href="#i-file" /></svg></span>
+                  <span class="treeitem__label"><span>트레일 입문 가이드</span></span>
+                  <span class="treeitem__meta"></span>
+                </div>
+                <div class="treeitem" data-row>
+                  <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                  <span class="treeitem__icon"><svg width="16" height="16" aria-hidden="true"><use href="#i-ruler" /></svg></span>
+                  <span class="treeitem__label"><span>사이즈 가이드</span></span>
+                  <span class="treeitem__meta"><span class="badge badge--outline">공용</span></span>
+                </div>
+                <div class="treeitem" data-row>
+                  <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                  <span class="treeitem__icon"><svg width="16" height="16" aria-hidden="true"><use href="#i-star" /></svg></span>
+                  <span class="treeitem__label"><span>구매 후기</span></span>
+                  <span class="treeitem__meta"></span>
+                </div>
+                <div class="treeitem is-hidden" data-row>
+                  <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                  <span class="treeitem__icon"><svg width="16" height="16" aria-hidden="true"><use href="#i-smartphone" /></svg></span>
+                  <span class="treeitem__label"><span>레이스 신청 폼</span></span>
+                  <span class="treeitem__meta">
+                    <span class="badge badge--accent">추가</span>
+                    <svg width="14" height="14" aria-hidden="true" title="미노출"><use href="#i-eyeoff" /></svg>
+                  </span>
+                </div>
+              </div>
+
+              <div class="panel__foot" style="display: block">
+                <span class="t-xs dim">
+                  손잡이를 끌어 순서를 바꿉니다. 눈 감김은 미노출 섹션이고, 공개할 때까지 초안에만 남습니다.
+                </span>
+              </div>
+            </section>
+
+            <!-- 2열 : 선택한 섹션 편집 -->
+            <div class="col gap-4">
+              <section class="panel">
+                <div class="panel__head">
+                  <h3>대표 배너</h3>
+                  <span class="badge badge--accent">1번 섹션</span>
+                  <div class="right-slot">
+                    <label class="check">
+                      <input class="switch" type="checkbox" checked />
+                      노출
+                    </label>
+                  </div>
+                </div>
+
+                <div class="panel__body">
+                  <div class="slots" style="grid-template-columns: repeat(2, minmax(0, 1fr))">
+                    <div class="slot">
+                      <span class="slot__tag badge">PC 1920×640</span>
+                      <div class="slot__act">
+                        <button class="btn btn--secondary btn--icon btn--sm" type="button" aria-label="교체">
+                          <svg width="14" height="14" aria-hidden="true"><use href="#i-refresh" /></svg>
+                        </button>
+                        <button class="btn btn--secondary btn--icon btn--sm" type="button" aria-label="삭제">
+                          <svg width="14" height="14" aria-hidden="true"><use href="#i-trash" /></svg>
+                        </button>
+                      </div>
+                      <img class="slot__media" src="assets/img/promo-trail.webp" alt="" />
+                      <div class="slot__body">
+                        <span class="grow">
+                          <span class="slot__name">fall-trail-hero-pc.jpg</span>
+                          <span class="slot__meta">1920×640 · 284KB</span>
+                        </span>
+                        <span class="badge badge--ok">
+                          <svg width="12" height="12" aria-hidden="true"><use href="#i-check" /></svg>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="slot slot--empty">
+                      <span class="empty__mark">
+                        <svg width="18" height="18" aria-hidden="true"><use href="#i-smartphone" /></svg>
+                      </span>
+                      <span>
+                        <b>모바일 1200×1500</b> 없음
+                        <span class="slot__meta">지금은 PC 배너를 가운데 기준으로 자릅니다</span>
+                      </span>
+                      <button class="btn btn--primary btn--sm" type="button">
+                        <svg width="14" height="14" aria-hidden="true"><use href="#i-upload" /></svg>
+                        이미지 올리기
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="note note--warn mt-4">
+                    <svg width="16" height="16" aria-hidden="true"><use href="#i-smartphone" /></svg>
+                    <div>
+                      <strong>유입의 78%가 모바일입니다</strong>
+                      PC 배너를 자르면 오른쪽 여백에 넣은 문구가 사라집니다. 오른쪽 미리보기가 지금 잘린 결과입니다.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel__body" style="border-top: 1px solid var(--hairline); padding-top: 0; padding-bottom: 0">
+                  <div class="formrow">
+                    <div class="lbl">배너 문구<small>배너 위에 겹쳐 나옵니다</small></div>
+                    <div class="col gap-4">
+                      <div class="field">
+                        <label for="b-title">제목 <span class="req">*</span></label>
+                        <input class="input" id="b-title" type="text" value="가을, 산으로 갑니다" />
+                        <span class="hint">모바일에서는 12자가 넘으면 두 줄로 내려갑니다. 지금 9자.</span>
+                      </div>
+                      <div class="field">
+                        <label for="b-sub">부제</label>
+                        <input class="input" id="b-sub" type="text" value="트레일 전 모델 15% · 09-28까지" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="formrow">
+                    <div class="lbl">버튼</div>
+                    <div class="formgrid">
+                      <div class="field">
+                        <label for="b-cta">버튼 글자</label>
+                        <input class="input" id="b-cta" type="text" value="쿠폰 받고 보기" />
+                      </div>
+                      <div class="field">
+                        <label for="b-link">연결 주소</label>
+                        <div class="inputwrap inputwrap--prefix">
+                          <span class="prefix">/event</span>
+                          <input class="input mono" id="b-link" type="text" value="/fall-trail-2026#coupon" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="formrow">
+                    <div class="lbl">문구 위치<small>배너 사진의 빈 곳에 둡니다</small></div>
+                    <div class="col gap-3">
+                      <div class="seg" role="group" aria-label="문구 위치">
+                        <button type="button" aria-pressed="false">왼쪽</button>
+                        <button type="button" aria-pressed="false">가운데</button>
+                        <button type="button" aria-pressed="true">오른쪽</button>
+                      </div>
+                      <label class="check">
+                        <input class="switch" type="checkbox" checked />
+                        사진 아래쪽에 어두운 그라데이션
+                        <span class="t-xs dim">밝은 사진에서 글자가 묻히지 않게</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel__foot">
+                  <span class="t-xs muted">저장하면 초안 3에만 반영됩니다. 고객에게 보이려면 변경을 공개하세요.</span>
+                  <span class="grow"></span>
+                  <button class="btn btn--secondary btn--sm" type="button">임시 저장</button>
+                  <button class="btn btn--primary btn--sm" type="button">저장</button>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="panel__head">
+                  <h3>상품 슬롯</h3>
+                  <span class="badge">11개 담김</span>
+                  <span class="t-xs dim">3번 섹션 · 2열 격자로 나옵니다</span>
+                  <div class="right-slot">
+                    <button class="btn btn--ghost btn--sm" type="button">
+                      <svg width="14" height="14" aria-hidden="true"><use href="#i-sliders" /></svg>
+                      정렬
+                    </button>
+                    <button class="btn btn--secondary btn--sm" type="button">
+                      <svg width="14" height="14" aria-hidden="true"><use href="#i-plus" /></svg>
+                      상품 담기
+                    </button>
+                  </div>
+                </div>
+
+                <div class="panel__body">
+                  <div class="pslots">
+                    <div class="pslot">
+                      <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                      <img src="assets/img/shoe-speedgoat.webp" alt="" />
+                      <span class="cellstack">
+                        <span class="primary">스피드고트 6</span>
+                        <small>189,000원 · 재고 283</small>
+                      </span>
+                    </div>
+                    <div class="pslot">
+                      <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                      <img src="assets/img/shoe-clifton.webp" alt="" />
+                      <span class="cellstack">
+                        <span class="primary">클리프톤 10</span>
+                        <small>169,000원 · 재고 685</small>
+                      </span>
+                    </div>
+                    <div class="pslot">
+                      <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                      <img src="assets/img/shoe-mach.webp" alt="" />
+                      <span class="cellstack">
+                        <span class="primary">마하 6</span>
+                        <small>179,000원 · 275 품절</small>
+                      </span>
+                    </div>
+                    <div class="pslot">
+                      <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                      <img src="assets/img/shoe-arahi.webp" alt="" />
+                      <span class="cellstack">
+                        <span class="primary">아라히 8</span>
+                        <small>169,000원 · 재고 260</small>
+                      </span>
+                    </div>
+                    <div class="pslot">
+                      <svg class="grip" width="14" height="14" aria-hidden="true"><use href="#i-grip" /></svg>
+                      <img src="assets/img/shoe-bondi.webp" alt="" />
+                      <span class="cellstack">
+                        <span class="primary">본디 9</span>
+                        <small>209,000원 · 280 품절</small>
+                      </span>
+                    </div>
+                    <div class="pslot pslot--empty">
+                      <span>
+                        여기에 상품을 끌어다 놓으면 6번째 자리에 들어갑니다
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="flex gap-3 mt-4">
+                    <span class="t-xs dim">나머지 6개는 담은 순서대로 이어 붙습니다.</span>
+                    <span class="grow"></span>
+                    <button class="btn btn--ghost btn--sm" type="button">전체 11개 보기</button>
+                  </div>
+
+                  <div class="note note--risk mt-4">
+                    <svg width="16" height="16" aria-hidden="true"><use href="#i-ruler" /></svg>
+                    <div>
+                      <strong>담긴 상품 2개에 품절 사이즈가 있습니다</strong>
+                      마하 6 275, 본디 9 280이 0족입니다. 기획전에서 품절 사이즈는 회색으로 나오고 장바구니에 담기지 않습니다.
+                      <div class="flex gap-2 mt-3">
+                        <a class="btn btn--secondary btn--sm" href="#">재고·사이즈에서 보기</a>
+                        <button class="btn btn--ghost btn--sm" type="button">품절 상품 내리기</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- 3열 : 고객이 보는 화면 -->
+            <div class="col gap-4 editor__preview">
+              <section class="panel">
+                <div class="panel__head">
+                  <h3>고객 화면</h3>
+                  <span class="badge badge--outline">초안 3</span>
+                  <div class="right-slot">
+                    <button class="btn btn--ghost btn--icon btn--sm" type="button" aria-label="새로 그리기">
+                      <svg width="15" height="15" aria-hidden="true"><use href="#i-refresh" /></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="preview">
+                  <div class="phone">
+                    <div class="phone__bar">
+                      <span>9:41</span>
+                      <span>hoka / event</span>
+                    </div>
+                    <div class="phone__scroll">
+                      <figure class="phone__hero">
+                        <img src="assets/img/promo-trail.webp" alt="가을 트레일 시즌 오프 배너" />
+                        <figcaption>
+                          <b>가을, 산으로 갑니다</b>
+                          <span>트레일 전 모델 15% · 09-28까지</span>
+                        </figcaption>
+                      </figure>
+
+                      <div class="phone__coupon">
+                        <svg width="14" height="14" aria-hidden="true" style="color: var(--accent)"><use href="#i-tag" /></svg>
+                        <span class="grow">트레일 15% 쿠폰</span>
+                        <b>받기</b>
+                      </div>
+
+                      <div class="phone__grid">
+                        <div class="phone__card">
+                          <img src="assets/img/shoe-speedgoat.webp" alt="" />
+                          <b>스피드고트 6</b>
+                          <span>160,650원</span>
+                        </div>
+                        <div class="phone__card">
+                          <img src="assets/img/shoe-clifton.webp" alt="" />
+                          <b>클리프톤 10</b>
+                          <span>143,650원</span>
+                        </div>
+                        <div class="phone__card">
+                          <img src="assets/img/shoe-mach.webp" alt="" />
+                          <b>마하 6</b>
+                          <span>152,150원</span>
+                        </div>
+                        <div class="phone__card">
+                          <img src="assets/img/shoe-arahi.webp" alt="" />
+                          <b>아라히 8</b>
+                          <span>143,650원</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="panel__foot" style="display: block">
+                  <span class="t-xs dim">
+                    모바일 배너가 없어 PC 배너의 가운데를 4:3으로 잘랐습니다. 오른쪽에 넣은 문구 자리가 사라져 글자를
+                    사진 위에 얹고 있습니다.
+                  </span>
+                </div>
+              </section>
+
+              <section class="panel">
+                <div class="panel__head">
+                  <h3>공개 전 확인</h3>
+                  <span class="badge badge--warn">2</span>
+                </div>
+                <ul class="stack">
+                  <li style="grid-template-columns: 22px minmax(0, 1fr) auto">
+                    <span class="queue__icon is-warn">
+                      <svg width="13" height="13" aria-hidden="true"><use href="#i-smartphone" /></svg>
+                    </span>
+                    <span class="cellstack">
+                      <span class="primary">모바일 배너 없음</span>
+                      <small>대표 배너 섹션</small>
+                    </span>
+                    <span class="badge badge--warn">권장</span>
+                  </li>
+                  <li style="grid-template-columns: 22px minmax(0, 1fr) auto">
+                    <span class="queue__icon is-risk">
+                      <svg width="13" height="13" aria-hidden="true"><use href="#i-ruler" /></svg>
+                    </span>
+                    <span class="cellstack">
+                      <span class="primary">품절 사이즈 있는 상품 2개</span>
+                      <small>마하 6 275 · 본디 9 280</small>
+                    </span>
+                    <span class="badge badge--risk">확인</span>
+                  </li>
+                  <li style="grid-template-columns: 22px minmax(0, 1fr) auto">
+                    <span class="queue__icon is-accent">
+                      <svg width="13" height="13" aria-hidden="true"><use href="#i-check" /></svg>
+                    </span>
+                    <span class="cellstack">
+                      <span class="primary">쿠폰 잔여 1,240장</span>
+                      <small>종료일까지 충분합니다</small>
+                    </span>
+                    <span class="badge badge--ok">문제 없음</span>
+                  </li>
+                </ul>
+                <div class="panel__foot">
+                  <span class="t-xs muted">권장 항목은 남겨두고 공개할 수 있습니다.</span>
+                  <span class="grow"></span>
+                  <button class="btn btn--primary btn--sm" type="button">변경 공개</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <script src="assets/app.js"></script>
+  </body>
+</html>
