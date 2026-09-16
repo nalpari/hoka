@@ -1,0 +1,25 @@
+# 로컬 개발용 기본값. 운영은 이 파일 없이 환경변수로 같은 키를 채운다.
+# 실행: ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/appdb
+    username: app
+    password: app
+
+# http://localhost:8080/swagger-ui.html
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    persist-authorization: true
+
+hoka:
+  jwt:
+    secret: hoka-bo-local-development-secret-key-32bytes-min
+  admin:
+    email: admin@hoka.co.kr
+    password: admin1234!
+  front:
+    base-url: http://localhost:3000

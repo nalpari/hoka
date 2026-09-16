@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoka.bo.user.UserMapper">
+
+    <sql id="searchWhere">
+        <where>
+            <if test="s.q != null and s.q != ''">
+                and (u.name ilike '%' || #{s.q} || '%'
+                     or u.email ilike '%' || #{s.q} || '%'
+                     or u.department ilike '%' || #{s.q} || '%')
+            </if>
+            <if test="s.statuses != null and s.statuses.size() > 0">
+                and u.status in
+                <foreach item="status" collection="s.statuses" open="(" separator="," close=")">#{status}</foreach>
+            </if>
+            <if test="s.roleCode != null and s.roleCode != ''">and u.role_code = #{s.roleCode}</if>
+            <if test="s.department != null and s.department != ''">and u.department = #{s.department}</if>
+        </where>
+    </sql>
+
+    <!-- 최근 접속 칸은 성공·실패를 가리지 않은 마지막 시도다. -->
+    <select id="search" resultType="com.hoka.bo.user.UserRow">
+        select u.id, u.email, u.name, u.department, u.role_code, r.name as role_name, u.status,
+               la.created_at as last_attempt_at, la.result as last_attempt_result
+        from bo_user u
+        join bo_role r on r.code = u.role_code
+        left join lateral (
+            select h.created_at, h.result from bo_login_history h
+            where h.user_id = u.id order by h.created_at desc limit 1
+        ) la on true
+        <include refid="searchWhere"/>
+        order by la.created_at desc nulls last, u.id
+        limit #{s.size} offset #{s.offset}
+    </select>
+
+    <select id="countSearch" resultType="int">
+        select count(*) from bo_user u
+        <include refid="searchWhere"/>
+    </select>
+
+    <select id="countByStatus" resultType="com.hoka.bo.user.StatusCount">
+        select status, count(*) from bo_user group by status
+    </select>
+
+    <select id="findDetail" resultType="com.hoka.bo.user.UserDetail">
+        select u.id, u.email, u.name, u.department, u.role_code, r.name as role_name, u.status,
+               u.lock_reason, u.locked_at, u.last_login_at, u.password_changed_at, u.password_change_required,
+               u.created_at, inviter.name as invited_by_name
+        from bo_user u
+        join bo_role r on r.code = u.role_code
+        left join bo_user inviter on inviter.id = u.invited_by
+        where u.id = #{id}
+    </select>
+
+    <select id="findDepartments" resultType="string">
+        select distinct department from bo_user where department is not null order by department
+    </select>
+
+    <select id="insertInvited" resultType="long" flushCache="true">
+        insert into bo_user (email, name, department, role_code, status, invite_token_hash, invite_expires_at, invited_by)
+        values (#{email}, #{name}, #{department}, #{roleCode}, 'INVITED', #{tokenHash}, #{expiresAt}, #{invitedBy})
+        returning id
+    </select>
+
+    <select id="existsByEmail" resultType="boolean">
+        select exists (select 1 from bo_user where lower(email) = lower(#{email}))
+    </select>
+
+    <update id="updateInviteToken">
+        update bo_user
+        set invite_token_hash = #{tokenHash}, invite_expires_at = #{expiresAt}, updated_at = now()
+        where id = #{id}
+    </update>
+
+    <select id="findIdByInviteToken" resultType="long">
+        select id from bo_user
+        where invite_token_hash = #{tokenHash} and invite_expires_at > #{now} and status = 'INVITED'
+    </select>
+
+    <update id="acceptInvite">
+        update bo_user
+        set password_hash = #{passwordHash}, password_changed_at = now(), status = 'ACTIVE',
+            invite_token_hash = null, invite_expires_at = null, updated_at = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateProfile">
+        update bo_user
+        set name = #{name}, department = #{department}, role_code = #{roleCode}, updated_at = now()
+        where id = #{id}
+    </update>
+
+    <update id="changeRole">
+        update bo_user set role_code = #{roleCode}, updated_at = now()
+        where id in <foreach item="id" collection="ids" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <update id="deactivate">
+        update bo_user
+        set status = 'INACTIVE', lock_reason = null, locked_at = null, updated_at = now()
+        where id in <foreach item="id" collection="ids" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <!-- 잠금을 풀면 임시 비밀번호로 바꾸고 첫 로그인 때 새로 정하게 한다. -->
+    <update id="unlock">
+        update bo_user
+        set status = 'ACTIVE', lock_reason = null, locked_at = null, failed_login_count = 0,
+            password_hash = #{passwordHash}, password_changed_at = now(), password_change_required = true,
+            updated_at = now()
+        where id = #{id}
+    </update>
+
+    <update id="resetPassword">
+        update bo_user
+        set password_hash = #{passwordHash}, password_changed_at = now(), password_change_required = true,
+            failed_login_count = 0, updated_at = now()
+        where id = #{id}
+    </update>
+
+    <select id="findInvitation" resultType="com.hoka.bo.user.InvitationInfo">
+        select email, name from bo_user
+        where invite_token_hash = #{tokenHash} and invite_expires_at > #{now} and status = 'INVITED'
+    </select>
+
+    <select id="countSuperAdmins" resultType="int" flushCache="true">
+        select count(*) from bo_user u join bo_role r on r.code = u.role_code where r.is_super
+    </select>
+
+    <!-- 역할 코드를 박아 두지 않고 is_super로 찾는다. -->
+    <insert id="insertSuperAdmin">
+        insert into bo_user (email, name, role_code, status, password_hash, password_changed_at,
+                             password_change_required)
+        select #{email}, #{name}, r.code, 'ACTIVE', #{passwordHash}, now(), true
+        from bo_role r where r.is_super
+    </insert>
+
+    <select id="countActiveSupersExcept" resultType="int">
+        select count(*)
+        from bo_user u join bo_role r on r.code = u.role_code
+        where r.is_super and u.status = 'ACTIVE'
+        <if test="ids != null and ids.size() > 0">
+            and u.id not in <foreach item="id" collection="ids" open="(" separator="," close=")">#{id}</foreach>
+        </if>
+    </select>
+
+</mapper>

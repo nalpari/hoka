@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoka.bo.auth.RefreshTokenMapper">
+
+    <insert id="insert">
+        insert into bo_refresh_token (user_id, token_hash, expires_at, user_agent, ip)
+        values (#{userId}, #{tokenHash}, #{expiresAt}, #{userAgent},
+                <choose>
+                    <when test="ip != null">#{ip}::inet</when>
+                    <otherwise>null</otherwise>
+                </choose>)
+    </insert>
+
+    <!-- delete ... returning으로 소비한다. 같은 토큰에 동시 요청이 와도 한 쪽만 행을 받는다.
+         지우면서 결과를 받아야 하므로 insert ... returning과 같이 select로 선언한다. -->
+    <select id="consume" resultType="com.hoka.bo.auth.RefreshToken" flushCache="true">
+        delete from bo_refresh_token where token_hash = #{tokenHash}
+        returning id, user_id, expires_at
+    </select>
+
+    <delete id="deleteByHash">
+        delete from bo_refresh_token where token_hash = #{tokenHash}
+    </delete>
+
+    <delete id="deleteByUserIds">
+        delete from bo_refresh_token
+        where user_id in <foreach item="id" collection="ids" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+
+</mapper>

@@ -1,5 +1,16 @@
 # Directory Update Log
 
+## 2026-09-16
+* **Update**: PR #2 적대적 리뷰에서 나온 인증 결함 3건(로그인 실패 기록 롤백, refresh 토큰 동시 재사용, 거절된 세션의 리다이렉트 루프) 수정에 맞춰 [BO 인증·권한](/architecture/bo-auth.md)의 토큰·로그인 규칙과 프론트 연동 절, [hoka-bo-front](/projects/hoka-bo-front.md)의 proxy 설명 갱신.
+* **Update**: hoka-bo-front에 대시보드 화면과 공용 셸(레일·톱바)이 생겨 [hoka-bo-front](/projects/hoka-bo-front.md)의 Notes 갱신. 로그인 성공 시 착지가 `/dashboard`로 바뀌었다.
+* **Update**: hoka-bo-front 디자인 시안에 기획전·콘텐츠 목록과 기획전 전시 구성 화면이 추가돼 [hoka-bo-front](/projects/hoka-bo-front.md)의 Notes 갱신.
+* **Update**: hoka-bo-front에 로그인 화면과 BFF 인증 배관이 생겨 [hoka-bo-front](/projects/hoka-bo-front.md)의 Stack·Commands·Notes, [hoka-fo-front](/projects/hoka-fo-front.md)의 쌍둥이 문장, [BO 인증·권한](/architecture/bo-auth.md)의 프론트 연동 절, [System overview](/architecture/system-overview.md)의 BFF 절과 가정, [Worktrees](/development/worktrees.md)의 `.env` 복사 행 갱신.
+* **Update**: hoka-bo-api에 springdoc(Swagger UI) 추가에 맞춰 [hoka-bo-api](/projects/hoka-bo-api.md)의 Stack·Notes와 [BO 인증·권한](/architecture/bo-auth.md)의 공개 경로 갱신.
+* **Creation**: [BO 인증·권한](/architecture/bo-auth.md) 추가. [Architecture](/architecture/index.md) 갱신. 인증 방식이 정해져 [System overview](/architecture/system-overview.md)의 가정도 수정.
+* **Update**: SecurityConfig가 HTTP Basic에서 JWT Resource Server로 바뀌고 Flyway baseline 설정이 추가돼 [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes 갱신.
+* **Update**: hoka-bo-api에 Flyway·OAuth2 Resource Server·Testcontainers 도입과 `local` 프로파일 분리에 맞춰 [hoka-bo-api](/projects/hoka-bo-api.md)의 Stack·Commands·Notes 갱신. [System overview](/architecture/system-overview.md)에 `# Schema ownership` 추가하고 DB 기본값 가정 수정.
+* **Update**: hoka-bo-api의 샘플 CRUD 삭제에 맞춰 [Sample CRUD](/architecture/sample-crud.md)를 FO 전용으로, [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes를 갱신. [Architecture](/architecture/index.md) 설명 갱신.
+
 ## 2026-09-15
 * **Creation**: [Resilience4j](/conventions/resilience4j.md) 추가. [Conventions](/conventions/index.md) 갱신.
 * **Update**: hoka-fo-api의 Resilience4j 도입에 맞춰 [hoka-fo-api](/projects/hoka-fo-api.md)의 Stack·Notes와 [Sample CRUD](/architecture/sample-crud.md)의 `GET /api/samples/{id}` 응답(FO 503) 갱신.

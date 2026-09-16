@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoka.bo.auth.AuthUserMapper">
+
+    <!--
+      이 매퍼의 조회는 모두 flushCache="true"다. 잠금·역할 변경·권한 저장이 즉시 반영돼야 하는데,
+      MyBatis 1차 캐시는 같은 세션에서 같은 조회를 두 번 하면 처음 결과를 그대로 돌려준다.
+      MyBatis 밖에서 바뀐 행(다른 서비스, 배치, 직접 SQL)은 캐시가 비워지지도 않는다.
+    -->
+    <sql id="credentials">
+        select u.id, u.email, u.password_hash, u.status, u.lock_reason, u.failed_login_count,
+               u.last_login_at, u.password_changed_at, u.password_change_required, r.is_super
+        from bo_user u join bo_role r on r.code = u.role_code
+    </sql>
+
+    <select id="findByEmail" resultType="com.hoka.bo.auth.Credentials" flushCache="true">
+        <include refid="credentials"/> where lower(u.email) = lower(#{email})
+    </select>
+
+    <select id="findById" resultType="com.hoka.bo.auth.Credentials" flushCache="true">
+        <include refid="credentials"/> where u.id = #{id}
+    </select>
+
+    <update id="increaseFailedCount">
+        update bo_user set failed_login_count = failed_login_count + 1, updated_at = now() where id = #{id}
+    </update>
+
+    <update id="lock">
+        update bo_user
+        set status = 'LOCKED', lock_reason = #{reason}, locked_at = now(), updated_at = now()
+        where id = #{id}
+    </update>
+
+    <update id="recordSuccess">
+        update bo_user set failed_login_count = 0, last_login_at = now(), updated_at = now() where id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update bo_user
+        set password_hash = #{passwordHash}, password_changed_at = now(), password_change_required = false,
+            updated_at = now()
+        where id = #{id}
+    </update>
+
+    <!-- 권한을 'MENU_CODE:C' 형태의 authority 문자열로 펼친다. -->
+    <select id="findAuthorities" resultType="string" flushCache="true">
+        select rm.menu_code || ':' || a.action
+        from bo_user u
+        join bo_role_menu rm on rm.role_code = u.role_code
+        cross join lateral (values ('C', rm.can_create), ('R', rm.can_read),
+                                   ('U', rm.can_update), ('D', rm.can_delete)) as a(action, granted)
+        where u.id = #{id} and a.granted
+    </select>
+
+    <!-- 슈퍼관리자는 권한 행이 없으므로 메뉴가 쓰는 동작을 그대로 쓴다. -->
+    <select id="findAccessibleMenus" resultType="com.hoka.bo.auth.MenuAccess" flushCache="true">
+        select m.code, m.parent_code, m.name, m.path,
+               case when r.is_super then m.use_create else coalesce(rm.can_create, false) end as can_create,
+               case when r.is_super then m.use_read   else coalesce(rm.can_read, false) end   as can_read,
+               case when r.is_super then m.use_update else coalesce(rm.can_update, false) end as can_update,
+               case when r.is_super then m.use_delete else coalesce(rm.can_delete, false) end as can_delete
+        from bo_user u
+        join bo_role r on r.code = u.role_code
+        join bo_menu m on m.parent_code is not null and m.visible
+        left join bo_role_menu rm on rm.role_code = u.role_code and rm.menu_code = m.code
+        where u.id = #{id} and (r.is_super or coalesce(rm.can_read, false))
+        order by m.parent_code, m.sort_order
+    </select>
+
+    <select id="findProfile" resultType="com.hoka.bo.auth.Profile" flushCache="true">
+        select u.id, u.email, u.name, u.department, u.role_code, r.name as role_name,
+               r.is_super, u.password_change_required
+        from bo_user u join bo_role r on r.code = u.role_code
+        where u.id = #{id}
+    </select>
+
+</mapper>

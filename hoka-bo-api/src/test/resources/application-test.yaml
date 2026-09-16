@@ -1,0 +1,9 @@
+# 테스트 값. DB 접속은 Testcontainers가 @ServiceConnection으로 덮어쓰므로 자리만 채운다.
+DB_URL: jdbc:postgresql://testcontainers/ignored
+DB_USERNAME: test
+DB_PASSWORD: test
+
+BO_JWT_SECRET: hoka-bo-test-secret-key-at-least-32-bytes
+BO_ADMIN_EMAIL: admin@hoka.co.kr
+BO_ADMIN_PASSWORD: test1234!
+BO_FRONT_BASE_URL: http://localhost:3000

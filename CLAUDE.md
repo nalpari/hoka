@@ -14,7 +14,7 @@ The root is the git repository but not a build. It holds five separate projects,
 | `hoka-bo-api` | same as above | Back office API (`com.hoka.bo`) |
 | `hoka-batch` | Spring Boot 4.1.1 + Spring Batch 6, Java 21, Maven | Batch jobs run from the shell with `java -jar` (`com.hoka.batch`) |
 
-- The FO/BO pairs are identical apart from their names, with one exception: only `hoka-fo-api` has Resilience4j (dependencies, `application.yaml` settings, the sample `GET /api/samples/{id}`, its tests, and the okf rule in its `CLAUDE.md`). Keep them in step unless a change is meant for only one side.
+- The FO/BO pairs are no longer identical. On the frontend side, only `hoka-bo-front` has the login screen, the BFF auth plumbing (`src/proxy.ts`, cookies, `BO_API_BASE_URL`) and the design stylesheet `src/app/hoka.css`; `hoka-fo-front` is still the bare scaffold. On the API side the differences are as follows. Only `hoka-fo-api` has Resilience4j (dependencies, `application.yaml` settings, the sample `GET /api/samples/{id}`, its tests, and the okf rule in its `CLAUDE.md`), and only `hoka-fo-api` still has the sample CRUD — `hoka-bo-api`'s copy was removed when its auth/permission work started. Keep them in step unless a change is meant for only one side.
 - Each project has its own build. Run commands from inside that project's directory.
 - Git: one repository rooted here (branch `main`, remote `origin` = `https://github.com/nalpari/hoka.git`). The projects have no `.git` of their own. `origin/main`, which the [worktree policy](#worktrees) branches from, exists only after the first push.
 
@@ -77,26 +77,30 @@ pnpm lint       # eslint (flat config: next core-web-vitals + typescript)
 
 - **Read `AGENTS.md` in each frontend first.** This Next.js version has breaking changes compared with your training data. Before writing Next.js code, check the bundled docs in `node_modules/next/dist/docs/`. `next dev` rewrites that block in `AGENTS.md`, so don't remove it.
 - React Compiler is on (`reactCompiler: true` in `next.config.ts`, via `babel-plugin-react-compiler`). Don't add `useMemo`/`useCallback` just to memoize.
-- Tailwind v4 has no `tailwind.config`. Theme tokens live in `src/app/globals.css` under `@theme inline`.
+- Tailwind v4 has no `tailwind.config`. In `hoka-fo-front`, theme tokens live in `src/app/globals.css` under `@theme inline`. In `hoka-bo-front`, the design system `src/app/hoka.css` (a copy of `ref/design/assets/hoka.css`) owns the tokens and component classes, and Tailwind is only used for one-off utilities.
 - Path alias: `@/*` maps to `src/*`.
 - There is no test runner yet.
+- `hoka-bo-front` needs `BO_API_BASE_URL` in `.env.local` (see the tracked `.env.example`); it has no default, and the app fails to reach the API without it. The browser never calls `hoka-bo-api` directly — the Next server (BFF) holds the tokens in HttpOnly cookies and forwards them as a Bearer header. Route protection lives in `src/proxy.ts` (Next 16 renamed `middleware` to `proxy`). Implemented screens: `/login` and `/dashboard` (`/` redirects there); the shared shell is `src/components/Shell.tsx` + `Rail.tsx`, and the dashboard's numbers are mock data in `src/app/dashboard/mock.ts` until the aggregation APIs exist. Contract: `okf/architecture/bo-auth.md`.
 - pnpm 11 is the package manager (`packageManager: pnpm@11.18.0`, `pnpm-lock.yaml`). Don't run `npm install`; it creates a `package-lock.json`.
 - pnpm blocks dependency build scripts by default. The allowlist is `allowBuilds` in each frontend's `pnpm-workspace.yaml` (currently `unrs-resolver`). On `ERR_PNPM_IGNORED_BUILDS`, add the package there as `true`/`false`; `pnpm approve-builds` is interactive and hangs in agent sessions.
 
 ## APIs (`hoka-*-api`)
 
 ```bash
-./mvnw spring-boot:run
-./mvnw test
+./mvnw spring-boot:run                                   # FO. BO needs a profile, see below
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local   # BO only: without it the app has no env vars and fails to start
+./mvnw test                                              # BO tests need Docker (Testcontainers)
 ./mvnw test -Dtest=HokaFoApiApplicationTests             # single test class
 ./mvnw test -Dtest=HokaFoApiApplicationTests#contextLoads  # single method
 ./mvnw package
 ```
 
-- Starters: `webmvc`, `security`, `actuator`, `devtools`, MyBatis (`mybatis-spring-boot-starter` 4.1.0, which brings `spring-boot-starter-jdbc`), plus the PostgreSQL runtime driver. `hoka-fo-api` also has `spring-boot-starter-aspectj` and `resilience4j-spring-boot4` 2.4.0; rules in `okf/conventions/resilience4j.md`.
-- Spring Security is configured in `config/SecurityConfig`: every request needs HTTP Basic auth with Spring's generated default user (`user`, password printed at startup), sessions are stateless, and CSRF is off.
-- Sample CRUD lives in the `sample` package (`/api/samples`, MyBatis XML at `mapper/SampleMapper.xml`). `SampleControllerTests` hits the real local `appdb`, so `./mvnw test` needs the DB running.
-- Config is `src/main/resources/application.yaml`, which sets `spring.application.name`, the datasource (env vars `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, defaulting to `jdbc:postgresql://localhost:5432/appdb` with `app`/`app`), and MyBatis (mapper XML at `classpath:mapper/**/*.xml`, underscore-to-camelCase on). `@Mapper` interfaces are auto-scanned under the application package.
+- Starters: `webmvc`, `security`, `actuator`, `devtools`, MyBatis (`mybatis-spring-boot-starter` 4.1.0, which brings `spring-boot-starter-jdbc`), plus the PostgreSQL runtime driver. `hoka-fo-api` also has `spring-boot-starter-aspectj` and `resilience4j-spring-boot4` 2.4.0; rules in `okf/conventions/resilience4j.md`. `hoka-bo-api` also has `spring-boot-starter-security-oauth2-resource-server`, `spring-boot-starter-flyway` (+ `flyway-database-postgresql`), and Testcontainers for tests.
+- Spring Security is configured in `config/SecurityConfig`. Sessions are stateless and CSRF is off in both APIs. `hoka-fo-api` still uses HTTP Basic with Spring's generated default user (`user`, password printed at startup). `hoka-bo-api` is a JWT resource server: only login/refresh/logout, invitations and `/actuator/health` are public, authorization rules live on `@PreAuthorize`-annotated service methods, and the first super admin is created at startup from `BO_ADMIN_EMAIL`/`BO_ADMIN_PASSWORD`. Contract: `okf/architecture/bo-auth.md`.
+- Sample CRUD lives in `hoka-fo-api` only, in the `sample` package (`/api/samples`, MyBatis XML at `mapper/SampleMapper.xml`). `SampleControllerTests` hits the real local `appdb`, so its `./mvnw test` needs the DB running. `hoka-bo-api` no longer has it.
+- Config is `src/main/resources/application.yaml`, which sets `spring.application.name`, the datasource (env vars `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`), and MyBatis (mapper XML at `classpath:mapper/**/*.xml`, underscore-to-camelCase on). `@Mapper` interfaces are auto-scanned under the application package. `hoka-fo-api` still defaults those env vars to `jdbc:postgresql://localhost:5432/appdb` with `app`/`app`; `hoka-bo-api` does not — its local values live in `application-local.yaml` (with `BO_JWT_SECRET`, `BO_ADMIN_EMAIL`/`BO_ADMIN_PASSWORD`, `BO_FRONT_BASE_URL`), and other environments pass env vars. `dev`/`stg`/`prod` profiles are planned.
+- `hoka-bo-api` manages its schema with Flyway (`src/main/resources/db/migration`, history table `bo_flyway_schema_history`). Back-office tables are prefixed `bo_`. Design record: `docs/bo-auth-design.md`.
+- `hoka-bo-api` has springdoc (Swagger UI at `/swagger-ui.html`), but only under the `local` profile — `springdoc.*.enabled` is false in `application.yaml` so internal API docs are not exposed unauthenticated elsewhere.
 - No `server.port` is set, so both APIs default to 8080. Both frontends also default to 3000. To run FO and BO at the same time, set different ports.
 
 ## Batch (`hoka-batch`)

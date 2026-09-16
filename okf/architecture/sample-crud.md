@@ -1,10 +1,10 @@
 ---
 type: Architecture
 title: Sample CRUD
-description: sample 테이블과 hoka-fo-api·hoka-bo-api가 제공하는 /api/samples CRUD 샘플 코드. FO 단건 조회만 Resilience4j 적용.
-tags: [api, fo, bo, mybatis, sample]
+description: sample 테이블과 hoka-fo-api가 제공하는 /api/samples CRUD 샘플 코드. 단건 조회에 Resilience4j 적용.
+tags: [api, fo, mybatis, sample]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-15T05:25:00Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-16T00:20:00Z }
 sources:
   - id: fo-controller
     resource: ../../hoka-fo-api/src/main/java/com/hoka/fo/sample/SampleController.java
@@ -12,9 +12,6 @@ sources:
   - id: fo-mapper
     resource: ../../hoka-fo-api/src/main/resources/mapper/SampleMapper.xml
     title: SampleMapper.xml (FO)
-  - id: bo-controller
-    resource: ../../hoka-bo-api/src/main/java/com/hoka/bo/sample/SampleController.java
-    title: SampleController.java (BO)
   - id: security
     resource: ../../hoka-fo-api/src/main/java/com/hoka/fo/config/SecurityConfig.java
     title: SecurityConfig.java (FO)
@@ -32,12 +29,12 @@ sources:
 
 # Endpoints
 
-[hoka-fo-api](/projects/hoka-fo-api.md)와 [hoka-bo-api](/projects/hoka-bo-api.md)가 패키지명만 다르고 같은 계약을 제공한다. 단, FO의 `GET /api/samples/{id}`만 DB 장애 시 503을 반환할 수 있다.[^fo-controller][^bo-controller] 기본 설정에서는 둘 다 같은 `appdb`를 보므로 한쪽에서 바꾼 데이터가 다른 쪽에도 보인다.
+[hoka-fo-api](/projects/hoka-fo-api.md)만 제공한다. [hoka-bo-api](/projects/hoka-bo-api.md)에도 같은 코드가 있었으나 백오피스 인증·권한 기능을 만들며 삭제했다. `sample` 테이블의 DDL이 저장소에 없어 새 로컬 DB에서 BO 테스트가 실패했기 때문이다.[^fo-controller]
 
 | 메서드 | 경로 | 요청 본문 | 응답 |
 |---|---|---|---|
 | GET | `/api/samples` | - | 200, `id` 순 배열 |
-| GET | `/api/samples/{id}` | - | 200 / 404 / 503(FO만. 재시도 소진·브레이커 OPEN) |
+| GET | `/api/samples/{id}` | - | 200 / 404 / 503(재시도 소진·브레이커 OPEN) |
 | POST | `/api/samples` | `{"name": "..."}` | 201, 생성된 행 / 400(`name` 누락·공백) |
 | PUT | `/api/samples/{id}` | `{"name": "..."}` | 200, 수정된 행 / 404 / 400 |
 | DELETE | `/api/samples/{id}` | - | 204 / 404 |
@@ -54,9 +51,8 @@ sources:
 - INSERT/UPDATE는 PostgreSQL `returning`으로 결과 행을 한 번에 받기 위해 XML에서 `<select flushCache="true">`로 선언한다.[^fo-mapper]
 - record는 컬럼 순서(`id, name, created_at`)대로 생성자에 매핑된다. 조회 컬럼 순서를 바꾸면 매핑이 깨진다.
 - `SampleControllerTests`는 로컬 `appdb`에 실제로 접속해 행 하나를 만들고 지운다.
-- FO의 단건 조회에는 `@Retry`·`@CircuitBreaker`(인스턴스 `sample`)가 붙어 있다. 규칙과 설정 값은 [Resilience4j](/conventions/resilience4j.md).[^fo-controller]
+- 단건 조회에는 `@Retry`·`@CircuitBreaker`(인스턴스 `sample`)가 붙어 있다. 규칙과 설정 값은 [Resilience4j](/conventions/resilience4j.md).[^fo-controller]
 
 [^fo-controller]: SampleController.java (FO)
-[^bo-controller]: SampleController.java (BO)
 [^fo-mapper]: SampleMapper.xml (FO)
 [^security]: SecurityConfig.java (FO)

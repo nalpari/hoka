@@ -2710,3 +2710,298 @@ table {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- 25. 기획전 전시 (기획전·콘텐츠) ------------------------------------
+   전시는 글이 아니라 그림이다. 슬롯에 무엇이 걸려 있는지, 스토어에서 어떻게
+   보이는지를 표가 아니라 실제 이미지로 보여준다. */
+.editor {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr) 356px;
+  gap: var(--s-4);
+  align-items: start;
+}
+
+/* 배너 슬롯 — 노출 자리 하나 = 카드 하나 */
+.slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.slot {
+  position: relative;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.slot__media {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--surface-3);
+}
+
+.slot--wide .slot__media {
+  aspect-ratio: 3 / 1;
+}
+
+.slot__body {
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.slot__name {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slot__meta {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ink-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.slot__tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+.slot__act {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.14s var(--ease);
+}
+
+.slot:hover .slot__act,
+.slot:focus-within .slot__act {
+  opacity: 1;
+}
+
+.slot--empty {
+  border-style: dashed;
+  background: none;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-height: 136px;
+  padding: var(--s-4);
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-tertiary);
+}
+
+/* 상품 슬롯 — 기획전에 담긴 상품 자리 */
+.pslots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.pslot {
+  display: grid;
+  grid-template-columns: 14px 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px 8px 6px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.pslot img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--surface-3);
+}
+
+.pslot .grip {
+  color: var(--hairline-tertiary);
+  cursor: grab;
+}
+
+.pslot:hover .grip {
+  color: var(--ink-tertiary);
+}
+
+.pslot--empty {
+  grid-template-columns: minmax(0, 1fr);
+  border-style: dashed;
+  background: none;
+  place-items: center;
+  min-height: 60px;
+  font-size: 12.5px;
+  color: var(--ink-tertiary);
+}
+
+/* 스토어 미리보기 — 고객이 보는 화면 */
+.preview {
+  display: grid;
+  place-items: center;
+  padding: var(--s-4);
+  background: var(--surface-sunken);
+}
+
+.phone {
+  width: 100%;
+  max-width: 296px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 20px;
+  background: var(--canvas);
+  overflow: hidden;
+  box-shadow: var(--lift-2);
+}
+
+.phone__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 26px;
+  padding: 0 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  border-bottom: 1px solid var(--hairline);
+  background: var(--surface-1);
+}
+
+.phone__scroll {
+  max-height: 496px;
+  overflow-y: auto;
+  /* 잘린 카드가 그대로 끊기면 지저분하다 — 아래쪽을 흐리게 해 더 있다는 것만 알린다 */
+  mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 90%, transparent 100%);
+}
+
+.phone__hero {
+  position: relative;
+  margin: 0;
+}
+
+.phone__hero img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.phone__hero figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 26px 14px 13px;
+  background: linear-gradient(180deg, rgba(5, 6, 8, 0) 0%, rgba(5, 6, 8, 0.82) 72%);
+  color: #f4f6f8;
+}
+
+.phone__hero b {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+.phone__hero span {
+  display: block;
+  font-size: 11.5px;
+  opacity: 0.78;
+  margin-top: 3px;
+}
+
+.phone__coupon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px;
+  padding: 9px 11px;
+  border: 1px dashed var(--accent-quiet);
+  border-radius: var(--r-md);
+  background: var(--accent-wash);
+  font-size: 11.5px;
+  color: var(--ink);
+}
+
+.phone__coupon b {
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+
+.phone__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  padding: 0 12px 14px;
+}
+
+.phone__card img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: var(--r-sm);
+  object-fit: cover;
+  background: var(--surface-3);
+}
+
+.phone__card b {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 500;
+  margin-top: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.phone__card span {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1400px) {
+  .editor {
+    grid-template-columns: 244px minmax(0, 1fr);
+  }
+  .editor > .editor__preview {
+    grid-column: span 2;
+  }
+  .preview .phone {
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 960px) {
+  .editor {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .editor > .editor__preview {
+    grid-column: auto;
+  }
+  .slots,
+  .pslots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .slots,
+  .pslots {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

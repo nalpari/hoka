@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoka.bo.role.RoleMapper">
+
+    <select id="findAllSummaries" resultType="com.hoka.bo.role.RoleSummary">
+        select r.code, r.name, r.description, r.is_super,
+               (select count(*) from bo_user u where u.role_code = r.code) as user_count,
+               (select count(*) from bo_role_menu rm where rm.role_code = r.code) as granted_menu_count
+        from bo_role r
+        order by r.is_super desc, r.name
+    </select>
+
+    <select id="findByCode" resultType="com.hoka.bo.role.Role">
+        select code, name, description, is_super from bo_role where code = #{code}
+    </select>
+
+    <insert id="insert">
+        insert into bo_role (code, name, description) values (#{code}, #{name}, #{description})
+    </insert>
+
+    <update id="update">
+        update bo_role set name = #{name}, description = #{description}, updated_at = now() where code = #{code}
+    </update>
+
+    <delete id="delete">
+        delete from bo_role where code = #{code}
+    </delete>
+
+    <!-- 권한을 저장하면 행 단위 시각 대신 역할의 updated_at을 올린다. -->
+    <update id="touch">
+        update bo_role set updated_at = now() where code = #{code}
+    </update>
+
+    <select id="findMembers" resultType="com.hoka.bo.role.RoleMember">
+        select id, name, department, status from bo_user where role_code = #{roleCode} order by name
+    </select>
+
+    <select id="findPermissions" resultType="com.hoka.bo.role.MenuPermission">
+        select menu_code, can_create, can_read, can_update, can_delete
+        from bo_role_menu where role_code = #{roleCode} order by menu_code
+    </select>
+
+    <delete id="deletePermissions">
+        delete from bo_role_menu where role_code = #{roleCode}
+    </delete>
+
+    <insert id="insertPermissions">
+        insert into bo_role_menu (role_code, menu_code, can_create, can_read, can_update, can_delete) values
+        <foreach item="p" collection="permissions" separator=",">
+            (#{roleCode}, #{p.menuCode}, #{p.canCreate}, #{p.canRead}, #{p.canUpdate}, #{p.canDelete})
+        </foreach>
+    </insert>
+
+    <select id="countUsers" resultType="int">
+        select count(*) from bo_user where role_code = #{roleCode}
+    </select>
+
+    <select id="countExclusiveMenus" resultType="int">
+        select count(*) from bo_menu where exclusive_role_code = #{roleCode}
+    </select>
+
+</mapper>

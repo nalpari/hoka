@@ -144,7 +144,7 @@
       label: "마케팅",
       items: [
         { id: "promotions", href: "#", icon: "tag", text: "프로모션·쿠폰" },
-        { id: "contents", href: "#", icon: "image", text: "기획전·콘텐츠" },
+        { id: "contents", href: "contents.html", icon: "image", text: "기획전·콘텐츠" },
       ],
     },
     {

@@ -54,7 +54,7 @@ done
 
 | 대상 | 처리 | 이유 |
 |---|---|---|
-| `hoka-*-front/.env*` | 복사 | 프론트 `.gitignore`가 `.env*`를 무시한다. 2026-09-14 기준 실제 파일은 없다. |
+| `hoka-*-front/.env*` | 복사 | 프론트 `.gitignore`가 `.env*`를 무시한다. `hoka-bo-front/.env.local`에 `BO_API_BASE_URL`이 있어야 로그인이 동작한다(예시는 추적되는 `.env.example`). |
 | `hoka-*-front/node_modules` | `pnpm install --frozen-lockfile`로 새로 설치 | 추적하지 않는 디렉터리라 딸려오지 않는다. `AGENTS.md`가 읽으라는 `node_modules/next/dist/docs/`도 설치 후에 생긴다. |
 | `hoka-*/.claude/settings.local.json` | 복사하지 않음 | 메인 체크아웃의 `okf/`를 절대 경로로 가리킨다. 워크트리에서 쓰면 번들 수정이 메인 체크아웃에 들어간다. 워크트리 루트에서 세션을 시작하면 `okf/`가 작업 디렉터리 안이라 필요 없다. |
 | API 설정 | 없음 | `application.yaml`은 추적 중이라 딸려오고, API `.gitignore`가 무시하는 설정 파일은 없다. Maven 의존성은 `~/.m2`를 공유한다. |

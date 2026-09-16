@@ -2,11 +2,38 @@ spring:
   application:
     name: hoka-bo-api
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/appdb}
-    username: ${DB_USERNAME:app}
-    password: ${DB_PASSWORD:app}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  flyway:
+    # appdb를 FO·배치와 함께 쓰므로 이력 테이블 이름을 BO 전용으로 둔다.
+    table: bo_flyway_schema_history
+    # public에는 이미 다른 프로젝트의 테이블이 있다. 그대로 두면 Flyway가 기동을 멈춘다.
+    # baseline-version을 0으로 낮춰야 V1부터 적용된다(기본값 1이면 V1을 건너뛴다).
+    baseline-on-migrate: true
+    baseline-version: 0
+  mvc:
+    problemdetails:
+      enabled: true
+
+# 내부 API 문서를 인증 없이 열어 두지 않는다. 필요한 환경에서만 켠다(local은 켜져 있다).
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
+# 기본값을 두지 않는다. 로컬은 application-local.yaml, 그 외 환경은 환경변수로 준다.
+hoka:
+  jwt:
+    secret: ${BO_JWT_SECRET}
+  admin:
+    email: ${BO_ADMIN_EMAIL}
+    password: ${BO_ADMIN_PASSWORD}
+  front:
+    base-url: ${BO_FRONT_BASE_URL}

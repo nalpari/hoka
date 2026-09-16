@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoka.bo.menu.MenuMapper">
+
+    <!-- 컬럼 순서가 Menu record의 생성자 순서와 같아야 한다. -->
+    <select id="findAll" resultType="com.hoka.bo.menu.Menu">
+        select code, parent_code, name, path, sort_order, visible,
+               use_create, use_read, use_update, use_delete, exclusive_role_code
+        from bo_menu
+        order by case when parent_code is null then code else parent_code end, parent_code nulls first, sort_order
+    </select>
+
+</mapper>

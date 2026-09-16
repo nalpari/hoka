@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hoka.bo.auth.LoginHistoryMapper">
+
+    <insert id="insert">
+        insert into bo_login_history (user_id, email, result, ip, user_agent)
+        values (#{userId}, #{email}, #{result},
+                <choose>
+                    <when test="ip != null">#{ip}::inet</when>
+                    <otherwise>null</otherwise>
+                </choose>,
+                #{userAgent})
+    </insert>
+
+    <select id="findRecent" resultType="com.hoka.bo.auth.LoginHistory">
+        select id, user_id, email, result, host(ip) as ip, user_agent, created_at
+        from bo_login_history
+        where user_id = #{userId}
+        order by created_at desc
+        limit #{limit}
+    </select>
+
+</mapper>
