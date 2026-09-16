@@ -23,8 +23,12 @@
 
 ## 처음 설치하기 (Claude Code 기준)
 
-macOS + [Homebrew](https://brew.sh) 기준이다. 위에서부터 순서대로 실행한다. 이미 설치된 도구는 건너뛴다.
-확인된 환경: Node 24.15, pnpm 11.18, OpenJDK 21.0.11, graft 0.18.0.
+위에서부터 순서대로 실행한다. 각 단계에서 **자기 OS 블록만** 실행하고, 이미 설치된 도구는 건너뛴다.
+macOS는 [Homebrew](https://brew.sh), Windows는 Windows 10 1809+/11에 기본으로 들어 있는
+[winget](https://learn.microsoft.com/windows/package-manager/winget/)을 쓴다.
+
+실제로 확인한 환경은 macOS다(Node 24.15, pnpm 11.18, OpenJDK 21.0.11, graft 0.18.0).
+Windows 절차는 같은 버전을 winget으로 설치하도록 옮긴 것이고, 아직 그대로 돌려본 적은 없다.
 
 
 | 도구                                                         | 용도                                                                 |
@@ -36,9 +40,12 @@ macOS + [Homebrew](https://brew.sh) 기준이다. 위에서부터 순서대로 �
 | [uv](https://docs.astral.sh/uv/)                           | `okf/` 적합성 검사                                                      |
 | [Claude Code](https://docs.claude.com/en/docs/claude-code) | 에이전트 CLI                                                           |
 | [graft](https://www.npmjs.com/package/@nanonets/graft)     | 코드 그래프. MCP 서버·훅·스킬이 이 CLI를 부른다                                    |
+| [Git for Windows](https://git-scm.com/downloads/win) (Windows만) | Git과 Git Bash. Stop 훅 `okf-sync-check.sh`와 `hoka-batch/bin/run-job.sh`가 bash 스크립트라 필요하다 |
 
 
 ### 1. 기본 도구
+
+**macOS**
 
 ```bash
 # Node.js 24 (nvm)
@@ -58,24 +65,75 @@ source ~/.zshrc
 node -v && pnpm -v && java -version && jq --version && uv --version
 ```
 
+**Windows (PowerShell)**
+
+관리자 권한은 필요 없다. `winget install`은 한 번에 하나씩 받는다.
+
+```powershell
+winget install -e --id OpenJS.NodeJS.LTS                # Node.js 24 LTS
+winget install -e --id EclipseAdoptium.Temurin.21.JDK   # JDK 21
+winget install -e --id jqlang.jq
+winget install -e --id astral-sh.uv
+winget install -e --id Git.Git                          # Git + Git Bash
+```
+
+**여기서 PowerShell을 닫고 새로 연다.** 설치한 도구의 `PATH`는 새 터미널부터 적용된다.
+
+```powershell
+# pnpm (프론트 package.json의 packageManager와 같은 버전)
+npm install -g pnpm@11.18.0
+
+# 확인
+node -v; pnpm -v; java -version; jq --version; uv --version; git --version
+```
+
 ### 2. Claude Code
+
+**macOS**
 
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash
 claude --version
 ```
 
+**Windows (PowerShell)**
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+claude --version
+```
+
+winget으로 받아도 된다(`winget install -e --id Anthropic.ClaudeCode`). 대신 자동 업데이트가 되지 않아
+`winget upgrade Anthropic.ClaudeCode`를 직접 돌려야 한다.
+
+Windows에서 Claude Code의 Bash 도구는 Git Bash를 쓴다. 1단계의 Git for Windows를 기본 경로가 아닌 곳에
+설치했으면 `~/.claude/settings.json`에 경로를 적는다.
+
+```json
+{ "env": { "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe" } }
+```
+
 ### 3. graft CLI
 
 `graft`를 `PATH`에서 찾는다. `.mcp.json`의 MCP 서버와 `.claude/settings.json`의 훅·상태줄이 여기에 해당한다.
-nvm을 쓰면 **1단계에서 설치한 Node 24가 활성화된 셸에서** 전역 설치한다.
+macOS에서 nvm을 쓰면 **1단계에서 설치한 Node 24가 활성화된 셸에서** 전역 설치한다.
 
 ```bash
 DO_NOT_TRACK=1 npm install -g @nanonets/graft
 graft --version
 ```
 
+Windows PowerShell에서는 환경 변수를 앞에 붙이는 문법이 달라 따로 넣는다.
+
+```powershell
+$env:DO_NOT_TRACK = 1
+npm install -g @nanonets/graft
+graft --version
+```
+
 ### 4. 저장소 클론과 의존성 설치
+
+**macOS**
 
 ```bash
 git clone https://github.com/nalpari/hoka.git
@@ -86,6 +144,20 @@ cd hoka
 (cd hoka-fo-api && ./mvnw -q dependency:go-offline)
 (cd hoka-bo-api && ./mvnw -q dependency:go-offline)
 (cd hoka-batch && ./mvnw -q dependency:go-offline)
+```
+
+**Windows (PowerShell)**
+
+```powershell
+git clone https://github.com/nalpari/hoka.git
+cd hoka
+
+foreach ($d in 'hoka-fo-front','hoka-bo-front') {
+  Push-Location $d; pnpm install --frozen-lockfile; Pop-Location
+}
+foreach ($d in 'hoka-fo-api','hoka-bo-api','hoka-batch') {
+  Push-Location $d; .\mvnw.cmd -q dependency:go-offline; Pop-Location
+}
 ```
 
 ### 5. graft 그래프 생성
@@ -109,6 +181,15 @@ claude
 - 처음 실행하면 프로젝트 MCP 서버 `graft`(`.mcp.json`)를 허용할지 묻는다. 허용한다.
 - `/mcp`로 `graft`가 connected인지 확인한다.
 - 프로젝트 스킬 `/hoka-cnp`(커밋·푸시)와 `graft`는 `.claude/skills/`에 들어 있어 따로 설치하지 않는다.
+
+### Windows에서 이 문서의 나머지를 읽는 법
+
+아래 명령은 모두 macOS 기준으로 적혀 있다. Windows에서는 이렇게 바꿔 읽는다.
+
+- **`./mvnw` → `.\mvnw.cmd`** (PowerShell·CMD 기준). Git Bash에서는 `./mvnw` 그대로 쓴다.
+- **`bin/run-job.sh`는 bash 스크립트라 Git Bash에서 실행한다.** 날짜 계산에 GNU `date`를 쓰는데
+  Git Bash에 들어 있어서 그대로 동작한다.
+- 환경 변수는 `export X=y` 대신 `$env:X = 'y'`(PowerShell)로 넣는다.
 
 ## 시작하기
 
@@ -270,6 +351,7 @@ Claude Code에서는 `/hoka-cnp`로 이 규칙대로 커밋하고 푸시할 수 
 프로젝트 파일은 바뀌었는데 `okf/`가 그대로인지 확인한다. 동작하려면 `jq`가 필요하다.
 - graft 훅(`.claude/helpers/graft-hooks.cjs`)은 세션 시작, 프롬프트 제출, 편집 후에 그래프를 갱신하고 컨텍스트를 붙인다.
 graft CLI가 없으면 아무 일도 하지 않으므로 [처음 설치하기](#처음-설치하기-claude-code-기준) 3단계를 확인한다.
-- 워크트리는 명시적으로 요청할 때만 만든다. 위치는 `~/.worktrees/hoka/<관광명소>`, 브랜치 이름은 포켓몬으로 짓는다.
+- 워크트리는 명시적으로 요청할 때만 만든다. 위치는 macOS/Linux가 `~/.worktrees/hoka/<관광명소>`,
+Windows가 `C:\workspace\.worktrees\hoka\<관광명소>`이고, 브랜치 이름은 포켓몬으로 짓는다.
 절차는 [`okf/development/worktrees.md`](okf/development/worktrees.md)를 따른다.
 
