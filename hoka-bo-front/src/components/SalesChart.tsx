@@ -58,11 +58,9 @@ export function SalesChart({
           height={Math.max(1, (value / max) * innerHeight)}
           rx={1.5}
         >
-          <title>
-            {labels?.[index] ? `${labels[index]}일 ` : ""}
-            {format(value)}
-            {suffix}
-          </title>
+          {/* React는 <title>을 메타데이터로 다뤄 자식이 여러 개면 SSR에서 내용을 버린다.
+              나눠 쓰면 서버는 빈 <title>, 브라우저는 채워진 값이 돼 하이드레이션이 어긋난다. */}
+          <title>{`${labels?.[index] ? `${labels[index]}일 ` : ""}${format(value)}${suffix}`}</title>
         </rect>
       ))}
 
