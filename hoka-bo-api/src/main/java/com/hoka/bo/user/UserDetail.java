@@ -16,5 +16,6 @@ public record UserDetail(
         Instant passwordChangedAt,
         boolean passwordChangeRequired,
         Instant createdAt,
-        String invitedByName) {
+        String invitedByName,
+        Instant avatarUpdatedAt) {
 }

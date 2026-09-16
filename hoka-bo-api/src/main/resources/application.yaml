@@ -15,6 +15,12 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  servlet:
+    multipart:
+      # 프로필 사진 업로드. 요즘 휴대폰 사진이 이 언저리라 넉넉히 받아 서버가 128x128로 줄인다.
+      # 메모리를 좌우하는 건 파일 크기가 아니라 픽셀 수라, 실제 방어선은 AvatarService의 픽셀 상한이다.
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 # 내부 API 문서를 인증 없이 열어 두지 않는다. 필요한 환경에서만 켠다(local은 켜져 있다).
 springdoc:

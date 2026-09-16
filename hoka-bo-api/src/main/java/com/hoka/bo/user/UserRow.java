@@ -12,5 +12,6 @@ public record UserRow(
         String roleName,
         String status,
         Instant lastAttemptAt,
-        String lastAttemptResult) {
+        String lastAttemptResult,
+        Instant avatarUpdatedAt) {
 }

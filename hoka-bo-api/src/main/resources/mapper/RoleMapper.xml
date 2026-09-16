@@ -32,7 +32,8 @@
     </update>
 
     <select id="findMembers" resultType="com.hoka.bo.role.RoleMember">
-        select id, name, department, status from bo_user where role_code = #{roleCode} order by name
+        select id, name, department, status, avatar_updated_at
+        from bo_user where role_code = #{roleCode} order by name
     </select>
 
     <select id="findPermissions" resultType="com.hoka.bo.role.MenuPermission">

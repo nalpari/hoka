@@ -9,5 +9,6 @@ public record Profile(
         String roleCode,
         String roleName,
         boolean isSuper,
-        boolean passwordChangeRequired) {
+        boolean passwordChangeRequired,
+        java.time.Instant avatarUpdatedAt) {
 }
