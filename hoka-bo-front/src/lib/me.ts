@@ -5,9 +5,11 @@ import { readTokens } from "@/lib/session";
 
 export type MenuAccess = {
   code: string;
-  parentCode: string | null;
+  parentCode: string;
+  groupName: string;
   name: string;
   path: string;
+  icon: string | null;
   canCreate: boolean;
   canRead: boolean;
   canUpdate: boolean;
@@ -23,6 +25,7 @@ export type Me = {
   roleName: string;
   isSuper: boolean;
   passwordChangeRequired: boolean;
+  avatarUpdatedAt: string | null;
   menus: MenuAccess[];
 };
 

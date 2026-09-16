@@ -83,3 +83,8 @@ export const ICON_PATHS = {
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;
+
+// 메뉴 아이콘은 DB에 문자열로 들어 있어 세트에 없는 이름이 올 수 있다.
+export function isIconName(value: string | null): value is IconName {
+  return value !== null && value in ICON_PATHS;
+}

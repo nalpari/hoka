@@ -29,7 +29,9 @@ type CallOptions = {
 };
 
 export async function callApi<T>(path: string, options: CallOptions = {}): Promise<T> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  // 파일 업로드는 FormData로 온다. 이때 Content-Type을 직접 넣으면 multipart 경계가 빠져 서버가 못 읽는다.
+  const multipart = options.body instanceof FormData;
+  const headers: Record<string, string> = multipart ? {} : { "Content-Type": "application/json" };
   if (options.accessToken) headers.Authorization = `Bearer ${options.accessToken}`;
   if (options.clientIp) headers["X-Forwarded-For"] = options.clientIp;
   if (options.userAgent) headers["User-Agent"] = options.userAgent;
@@ -37,7 +39,7 @@ export async function callApi<T>(path: string, options: CallOptions = {}): Promi
   const response = await fetch(`${apiBaseUrl()}${path}`, {
     method: options.method ?? "GET",
     headers,
-    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    body: options.body === undefined ? undefined : multipart ? (options.body as FormData) : JSON.stringify(options.body),
     cache: "no-store",
   });
 
