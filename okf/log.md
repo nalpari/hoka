@@ -1,5 +1,8 @@
 # Directory Update Log
 
+## 2026-09-16
+* **Update**: hoka-bo-api의 샘플 CRUD 삭제에 맞춰 [Sample CRUD](/architecture/sample-crud.md)를 FO 전용으로, [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes를 갱신. [Architecture](/architecture/index.md) 설명 갱신.
+
 ## 2026-09-15
 * **Creation**: [Resilience4j](/conventions/resilience4j.md) 추가. [Conventions](/conventions/index.md) 갱신.
 * **Update**: hoka-fo-api의 Resilience4j 도입에 맞춰 [hoka-fo-api](/projects/hoka-fo-api.md)의 Stack·Notes와 [Sample CRUD](/architecture/sample-crud.md)의 `GET /api/samples/{id}` 응답(FO 503) 갱신.

@@ -5,7 +5,7 @@ description: 백오피스 Spring Boot 4 API 서버 (패키지 com.hoka.bo).
 resource: ../../hoka-bo-api/
 tags: [backend, bo, spring-boot, java]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-15T01:23:47Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-16T00:20:00Z }
 sources:
   - id: pom
     resource: ../../hoka-bo-api/pom.xml
@@ -42,7 +42,8 @@ sources:
 - DB 접속은 환경변수 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`로 받고, 없으면 `jdbc:postgresql://localhost:5432/appdb`, `app`/`app`를 쓴다.[^app-yaml]
 - MyBatis: 매퍼 XML은 `classpath:mapper/**/*.xml`, `map-underscore-to-camel-case: true`. `@Mapper` 인터페이스는 애플리케이션 패키지 아래에서 자동 스캔한다(`@MapperScan` 없음).
 - `config/SecurityConfig`: 모든 요청에 HTTP Basic 인증(Spring 기본 생성 사용자 `user`)을 요구하고, 세션을 만들지 않으며 CSRF는 끈다.[^security]
-- 샘플 CRUD `/api/samples`(`sample` 테이블). 계약은 [Sample CRUD](/architecture/sample-crud.md). `./mvnw test`의 `SampleControllerTests`는 로컬 `appdb`가 떠 있어야 통과한다.
+- 샘플 CRUD(`sample` 패키지, `mapper/SampleMapper.xml`, `SampleControllerTests`)는 삭제했다. 백오피스 인증·권한 기능을 시작하며 정리한 것으로, 남은 테스트는 `HokaBoApiApplicationTests` 하나다. FO에는 그대로 있다([Sample CRUD](/architecture/sample-crud.md)).
+- 매퍼 XML이 없어 기동·테스트 때 `No MyBatis mapper was found` 경고가 난다. 첫 매퍼를 추가하면 사라진다.
 - `server.port` 미설정 → 기본 8080. [hoka-fo-api](/projects/hoka-fo-api.md)와 동시 실행 시 포트 분리 필요.
 - 소비자로 [hoka-bo-front](/projects/hoka-bo-front.md)를 가정한다. [System overview](/architecture/system-overview.md) 참고.
 
