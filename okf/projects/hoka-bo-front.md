@@ -5,7 +5,7 @@ description: 백오피스(관리자용) Next.js 16 웹 앱.
 resource: ../../hoka-bo-front/
 tags: [frontend, bo, nextjs]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-16T07:30:00Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-16T08:10:00Z }
 sources:
   - id: pkg
     resource: ../../hoka-bo-front/package.json
@@ -32,6 +32,7 @@ sources:
 | UI | React 19.2.8, Tailwind CSS v4, 시안 디자인 시스템 `src/app/hoka.css`(`ref/design/assets/hoka.css` 복사본) |
 | Language | TypeScript (strict), alias `@/*` → `src/*` |
 | React Compiler | 활성 (`reactCompiler: true`)[^next-config] |
+| Server Actions | 본문 한도 11MB (`experimental.serverActions.bodySizeLimit`). 기본값 1MB로는 프로필 사진 업로드가 action에 닿기 전에 잘린다[^next-config] |
 | Package manager | pnpm 11.18.0 (`packageManager`)[^pkg], 빌드 스크립트 허용 목록 `allowBuilds`[^pnpm-ws] |
 | Git | 루트 `hoka/` 저장소에 포함 (자체 `.git` 없음) |
 
@@ -61,7 +62,7 @@ pnpm lint
 - 세 화면 다 조회는 `SYS_MENUS:R`·`SYS_ROLES:R`·`SYS_USERS:R`, 변경은 `SUPER`가 필요하다(API가 강제한다). 그래서 화면은 `me.isSuper`로만 읽기/쓰기를 가른다 — 시드에서 두 메뉴는 `use_read`만 켜져 있어 "수정 권한" 같은 개념이 없다. 슈퍼관리자가 아니면 쓰기 버튼과 선택칸을 아예 그리지 않는다. 메뉴 조회 권한이 없으면 `NoAccess`를 보여 준다.
 - `/menus`는 시안 `ref/design/menus.html`을 따르되 세 곳이 다르다. 손잡이 드래그는 **같은 그룹 안 위/아래 버튼**으로 옮겼고(키보드로도 순서를 바꾼다), 시안의 '접근 가능한 역할' 체크박스는 권한 관리 격자와 같은 일이라 **메뉴가 쓰는 동작(`use_*`)과 전용 역할**로 바꿨다. 초안·배포 버전(v13)과 변경 이력은 API가 없어 뺐다.
 - 상세 폼은 `action={save}` 대신 `onSubmit`으로 직접 제출한다. `action`으로 넘기면 React가 성공·실패를 가리지 않고 폼을 비워, 경로 중복 같은 이유로 거절당했을 때 입력한 값이 전부 사라진다.
-- 아바타는 `components/Avatar.tsx` 하나가 목록·상세·역할 구성원·레일 네 곳을 덮는다. 사진이 없으면 이름 첫 글자다. `<img>`는 API를 직접 못 부르므로 `app/avatar/[id]/route.ts`가 중계하고, 주소에 `?v=<avatarUpdatedAt>`을 붙여 캐시를 무효화한다. 사진 올리기·지우기는 `/users` 상세에 있고 슈퍼관리자이거나 본인일 때만 보인다. 파일을 고르면 바로 올라간다.
+- 아바타는 `components/Avatar.tsx` 하나가 목록·상세·역할 구성원·레일 네 곳을 덮는다. 사진이 없으면 이름 첫 글자다. `<img>`는 API를 직접 못 부르므로 `app/avatar/[id]/route.ts`가 중계하고, 주소에 `?v=<avatarUpdatedAt>`을 붙여 캐시를 무효화한다. 사진 올리기·지우기는 `/users` 상세에 있고 슈퍼관리자이거나 본인일 때만 보인다. 파일을 고르면 바로 올라간다. 업로드는 Server Action의 multipart라 `next.config.ts`의 본문 한도가 화면이 약속한 10MB를 덮어야 한다 — 이 한도는 action 함수보다 먼저 걸려서, 넘치면 앱의 크기 검증도 에러 문구도 돌지 않는다.
 - 권한 격자(`app/roles/role-editor.tsx`)만 클라이언트 상태다. 조회(R)를 끄면 등록·수정·삭제가 같이 꺼지고 잠긴다 — API가 `READ_REQUIRED`로 거절할 조합을 만들지 않는다. 저장 전에 다른 역할을 누르면 `<Link onNavigate>`로 막고 스코프바 아래 배너를 띄운다.
 - 사용자 상세는 목록 결과와 무관하게 `GET /api/users/{id}`로 부른다. 잠금 해제·비활성화는 그 사용자를 현재 필터에서 밀어내는데, 목록에 있을 때만 상세를 그리면 패널이 사라지면서 **한 번만 보여 주는 임시 비밀번호까지 같이 없어진다**.
 - 초대 링크와 임시 비밀번호는 응답 본문에만 있다. 상세·초대 패널의 `.note` 블록에 복사 버튼과 함께 보여 준다. 잃어버리면 다시 초대·다시 초기화하면 된다.
