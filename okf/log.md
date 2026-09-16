@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-09-16
+* **Update**: hoka-bo-api에 springdoc(Swagger UI) 추가에 맞춰 [hoka-bo-api](/projects/hoka-bo-api.md)의 Stack·Notes와 [BO 인증·권한](/architecture/bo-auth.md)의 공개 경로 갱신.
 * **Creation**: [BO 인증·권한](/architecture/bo-auth.md) 추가. [Architecture](/architecture/index.md) 갱신. 인증 방식이 정해져 [System overview](/architecture/system-overview.md)의 가정도 수정.
 * **Update**: SecurityConfig가 HTTP Basic에서 JWT Resource Server로 바뀌고 Flyway baseline 설정이 추가돼 [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes 갱신.
 * **Update**: hoka-bo-api에 Flyway·OAuth2 Resource Server·Testcontainers 도입과 `local` 프로파일 분리에 맞춰 [hoka-bo-api](/projects/hoka-bo-api.md)의 Stack·Commands·Notes 갱신. [System overview](/architecture/system-overview.md)에 `# Schema ownership` 추가하고 DB 기본값 가정 수정.

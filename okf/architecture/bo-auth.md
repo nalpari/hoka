@@ -4,7 +4,7 @@ title: BO 인증·권한
 description: hoka-bo-api의 로그인(JWT), 역할×메뉴 CRUD 권한, 사용자 관리 API 계약과 운영 절차.
 tags: [api, bo, auth, security, jwt]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-16T01:00:00Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-16T01:20:00Z }
 sources:
   - id: security-config
     resource: ../../hoka-bo-api/src/main/java/com/hoka/bo/config/SecurityConfig.java
@@ -63,6 +63,7 @@ sources:
 | 메서드 | 경로 | 권한 |
 |---|---|---|
 | POST | `/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout` | 공개 |
+| GET | `/swagger-ui.html`, `/v3/api-docs/**` | 공개. 단 springdoc이 켜진 환경(`local`)에만 존재한다 |
 | GET | `/api/invitations/{token}` · POST `/api/invitations/{token}/accept` | 공개 |
 | GET | `/api/auth/me` · PUT `/api/auth/password` | 로그인 |
 | GET | `/api/menus`, `/api/roles`, `/api/roles/{code}` | `SYS_ROLES:R` |

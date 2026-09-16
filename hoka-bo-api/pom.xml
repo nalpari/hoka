@@ -55,6 +55,12 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>4.1.0</version>
         </dependency>
+        <!-- Boot 4용은 3.x 계열이다. 2.x는 Spring Framework 6까지다. -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.1.1</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

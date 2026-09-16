@@ -6,6 +6,15 @@ spring:
     username: app
     password: app
 
+# http://localhost:8080/swagger-ui.html
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    persist-authorization: true
+
 hoka:
   jwt:
     secret: hoka-bo-local-development-secret-key-32bytes-min

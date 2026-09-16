@@ -16,6 +16,13 @@ spring:
     problemdetails:
       enabled: true
 
+# 내부 API 문서를 인증 없이 열어 두지 않는다. 필요한 환경에서만 켠다(local은 켜져 있다).
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   configuration:
