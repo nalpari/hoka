@@ -17,7 +17,8 @@
 
 
 - 루트는 git 저장소일 뿐 빌드가 아니다. **명령은 각 프로젝트 디렉터리 안에서 실행한다.**
-- FO/BO 쌍은 이름만 다르고 설정이 같다. 한쪽만 바꾸는 게 아니면 두 쪽을 같이 맞춘다.
+- FO/BO 쌍은 같은 스캐폴딩에서 출발했지만 지금은 다르다. 백오피스에만 로그인·권한 기능이 들어가 있다.
+  한쪽만 바꾸는 변경이 아니면 두 쪽을 같이 맞춘다.
 - 각 프론트가 같은 영역의 API를 호출한다는 연결은 아직 가정이다. 연동 코드는 없다.
 
 ## 처음 설치하기 (Claude Code 기준)
@@ -129,9 +130,11 @@ pnpm lint         # ESLint flat config (next core-web-vitals + typescript)
   설치 중 `ERR_PNPM_IGNORED_BUILDS`가 나오면 그 패키지를 `true`/`false`로 추가하고 다시 `pnpm install`한다.
 - **이 Next.js 버전은 이전 버전과 API가 다르다.** 코드를 쓰기 전에 `node_modules/next/dist/docs/`의 문서를 확인한다.
 - React Compiler가 켜져 있다(`next.config.ts`의 `reactCompiler: true`). 메모이제이션만을 위한 `useMemo`/`useCallback`은 넣지 않는다.
-- Tailwind v4라 `tailwind.config`가 없다. 테마 토큰은 `src/app/globals.css`의 `@theme inline`에 둔다.
+- Tailwind v4라 `tailwind.config`가 없다. `hoka-fo-front`의 테마 토큰은 `src/app/globals.css`의 `@theme inline`에 있고,
+  `hoka-bo-front`는 디자인 시스템 `src/app/hoka.css`가 토큰과 컴포넌트 클래스를 갖는다.
 - 경로 별칭 `@/*` → `src/*`.
-- `.env*` 파일은 git이 무시한다. 현재 필요한 환경 변수는 없다.
+- `.env*` 파일은 git이 무시한다. `hoka-bo-front`는 `.env.local`에 `BO_API_BASE_URL`이 필요하다(추적되는 `.env.example` 참고).
+  기본값이 없어서 없으면 API를 부르지 못한다. `hoka-fo-front`는 아직 필요한 환경 변수가 없다.
 
 ### API (`hoka-fo-api`, `hoka-bo-api`)
 
@@ -144,18 +147,40 @@ cd hoka-fo-api
 ./mvnw package
 ```
 
-백오피스는 클래스 이름이 `HokaBoApiApplicationTests`다.
+```bash
+cd hoka-bo-api
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local     # 프로파일을 빼면 환경변수가 없어 기동에 실패한다
+./mvnw test                                                 # Testcontainers: Docker가 떠 있어야 한다
+./mvnw test -Dtest=HokaBoApiApplicationTests#contextLoads
+./mvnw package
+```
 
-- 설정 파일은 `src/main/resources/application.yaml`이고, `spring.application.name`, datasource(환경변수 `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`, 기본값 `jdbc:postgresql://localhost:5432/appdb`, `app`/`app`), MyBatis 설정이 있다.
-- Starter: `webmvc`, `security`, `actuator`, `devtools`, MyBatis(`mybatis-spring-boot-starter` 4.1.0)와 PostgreSQL 드라이버.
-- **모든 엔드포인트가 HTTP Basic 인증을 요구한다**(`config/SecurityConfig`, 세션 없음·CSRF 끔). 사용자 이름은 `user`이고,
-비밀번호는 기동할 때마다 콘솔에 `Using generated security password: ...`로 찍힌다.
-  ```bash
-  curl -u user:<비밀번호> http://localhost:8080/actuator/health
-  curl -u user:<비밀번호> http://localhost:8080/api/samples
-  curl -u user:<비밀번호> -X POST -H 'Content-Type: application/json' -d '{"name":"hello"}' http://localhost:8080/api/samples
-  ```
-- 샘플 CRUD는 `/api/samples`(`sample` 테이블)다. `SampleControllerTests`는 로컬 `appdb`에 실제로 접속하므로 `./mvnw test` 전에 DB가 떠 있어야 한다.
+**두 API는 더 이상 같지 않다.** 공통점과 차이는 다음과 같다.
+
+- 설정 파일은 둘 다 `src/main/resources/application.yaml`이고 `spring.application.name`, datasource(환경변수 `DB_URL`/`DB_USERNAME`/`DB_PASSWORD`), MyBatis 설정이 있다.
+  FO는 이 환경변수에 기본값(`jdbc:postgresql://localhost:5432/appdb`, `app`/`app`)이 있고, **BO는 기본값이 없다.**
+  BO의 로컬 값은 `application-local.yaml`에 있어서 `local` 프로파일로 띄워야 하고, 다른 환경은 환경변수로 채운다
+  (`DB_*` 외에 `BO_JWT_SECRET`, `BO_ADMIN_EMAIL`/`BO_ADMIN_PASSWORD`, `BO_FRONT_BASE_URL`).
+- 공통 Starter: `webmvc`, `security`, `actuator`, `devtools`, MyBatis(`mybatis-spring-boot-starter` 4.1.0)와 PostgreSQL 드라이버.
+  FO는 `aspectj`와 Resilience4j가, BO는 `oauth2-resource-server`, Flyway, springdoc, Testcontainers가 더 있다.
+- **인증 방식이 다르다**(둘 다 세션 없음·CSRF 끔, `config/SecurityConfig`).
+  - FO는 HTTP Basic이고 사용자 이름은 `user`, 비밀번호는 기동할 때마다 콘솔에 `Using generated security password: ...`로 찍힌다.
+    ```bash
+    curl -u user:<비밀번호> http://localhost:8080/actuator/health
+    curl -u user:<비밀번호> http://localhost:8080/api/samples
+    ```
+  - BO는 JWT 리소스 서버다. 로그인·갱신·로그아웃, 초대, `/actuator/health`만 공개이고 나머지는 Bearer 토큰이 필요하다.
+    첫 슈퍼관리자는 기동할 때 만들어진다(`local` 기본값 `admin@hoka.co.kr` / `admin1234!`).
+    ```bash
+    curl -X POST http://localhost:8080/api/auth/login -H 'Content-Type: application/json' \
+      -d '{"email":"admin@hoka.co.kr","password":"admin1234!","rememberMe":false}'
+    curl -H "Authorization: Bearer <accessToken>" http://localhost:8080/api/auth/me
+    ```
+    계약은 [`okf/architecture/bo-auth.md`](okf/architecture/bo-auth.md), 스키마는 [`docs/bo-api/`](docs/bo-api/)에 있다.
+- 샘플 CRUD `/api/samples`(`sample` 테이블)는 **FO에만 있다.** `SampleControllerTests`가 로컬 `appdb`에 실제로 접속하므로 FO의 `./mvnw test` 전에는 DB가 떠 있어야 한다.
+  BO의 테스트는 Testcontainers가 빈 PostgreSQL을 띄우므로 로컬 `appdb`를 건드리지 않고, 대신 Docker가 필요하다.
+- BO는 스키마를 Flyway로 관리한다(`src/main/resources/db/migration`, 이력 테이블 `bo_flyway_schema_history`, 테이블 접두사 `bo_`).
+  Swagger UI는 `local`에서만 열린다(<http://localhost:8080/swagger-ui.html>).
 
 ### 배치 (`hoka-batch`)
 
@@ -183,7 +208,7 @@ bin/run-job.sh --recover sampleJob 2026-09-14  # kill -9 등으로 멈춘 실행
 pnpm dev -p 3001
 
 # hoka-bo-api
-./mvnw spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local -Dspring-boot.run.arguments=--server.port=8081
 ```
 
 ## 공유 지식 문서 (`okf/`)
