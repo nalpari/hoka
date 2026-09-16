@@ -53,6 +53,7 @@ pnpm lint
 - [hoka-fo-front](/projects/hoka-fo-front.md)와 스캐폴드는 같지만 더 이상 쌍둥이가 아니다. 로그인·BFF 인증 배관, 시안 스타일시트, `BO_API_BASE_URL` 설정은 BO에만 있다.
 - [hoka-bo-api](/projects/hoka-bo-api.md)를 호출한다. 브라우저는 API를 직접 부르지 않고 Next 서버(BFF)만 부른다. 토큰은 HttpOnly 쿠키(`bo_at`·`bo_rt`·`bo_rm`)에 두고 API에는 Bearer로 전달한다. 계약과 규칙은 [BO 인증·권한](/architecture/bo-auth.md).
 - `src/proxy.ts`가 보호 라우트를 지킨다(Next 16에서 `middleware`는 `proxy`로 이름이 바뀌었다). 쿠키만 보는 낙관적 검사이고, 실제 검증은 페이지가 `/api/auth/me`로 한다. access 쿠키가 만료돼 사라지면 여기서 refresh로 갱신한다 — 쿠키 쓰기는 Server Action·Route Handler·proxy에서만 되기 때문이다.
+- API가 세션을 거절하면 페이지는 `/session/clear`(Route Handler)로 보낸다. 거기서 쿠키를 지우고 `/login?expired=1`로 넘긴다. 곧장 `/login`으로 보내면 proxy가 남은 쿠키를 보고 대시보드로 되돌려 무한 왕복이 되므로, 이 경로만 쿠키가 있어도 통과시킨다.
 - 환경변수는 `BO_API_BASE_URL` 하나이고 기본값이 없다. 서버에서만 쓰므로 `NEXT_PUBLIC_` 접두사를 붙이지 않는다. 예시는 추적되는 `.env.example`, 실제 값은 `.env.local`.
 - 구현된 화면은 `/login`과 `/dashboard`다. `/`는 `/dashboard`로 보낸다. 공용 셸(`components/Shell`·`Rail`)은 좌측 레일과 톱바를 그리고, 레일 메뉴는 `me.menus`에 있는 것만 보여 준다(권한 판단은 API가 한 것을 그대로 쓴다).
 - 대시보드의 수치·목록은 시안의 합성 데이터다(`app/dashboard/mock.ts`). 집계 API가 생기면 이 파일을 걷어낸다. 차트는 시안 `app.js`의 `draw()`를 서버 렌더 SVG로 옮긴 `components/SalesChart`다.

@@ -5,7 +5,14 @@ import { Brandmark, Icon } from "@/components/Icon";
 import { LoginForm } from "./login-form";
 
 // 시안 ref/design/login.html 기준. OTP 안내와 비밀번호 찾기는 해당 기능이 없어 뺐다.
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // 세션이 끊겨 /session/clear를 거쳐 온 경우. 아무 말 없이 로그인 화면만 뜨면 영문을 모른다.
+  const expired = (await searchParams).expired === "1";
+
   return (
     <div className="auth">
       <div className="auth__form">
@@ -23,6 +30,16 @@ export default function LoginPage() {
         <p className="muted mt-3" style={{ maxWidth: "44ch", fontSize: 16 }}>
           주문과 출고, 재고와 사이즈, 프로모션과 정산까지. 호카코리아 운영팀의 하루가 여기서 시작됩니다.
         </p>
+
+        {expired ? (
+          <div className="note note--warn mt-4">
+            <Icon name="alert" size={16} />
+            <div>
+              <strong>로그인이 풀렸습니다</strong>
+              계정 상태나 권한이 바뀌었을 수 있습니다. 다시 로그인해 주세요.
+            </div>
+          </div>
+        ) : null}
 
         <LoginForm />
 

@@ -12,8 +12,14 @@ import {
 // Next 16에서 middleware는 proxy로 이름이 바뀌었다.
 // 여기서는 쿠키만 보고 판단한다(낙관적 검사). 진짜 검증은 페이지가 /api/auth/me로 한다.
 const PUBLIC_PATHS = ["/login"];
+// 쿠키를 지우러 가는 길은 쿠키가 남아 있어도 막지 않는다. 막으면 거절된 세션이 빠져나갈 수 없다.
+const ALWAYS_ALLOW = ["/session/clear"];
 
 export async function proxy(request: NextRequest) {
+  if (ALWAYS_ALLOW.includes(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
   const isPublic = PUBLIC_PATHS.some(
     (path) => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`),
   );

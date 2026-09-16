@@ -35,9 +35,10 @@ export async function requireMe(): Promise<Me> {
   try {
     return await callApi<Me>("/api/auth/me", { accessToken });
   } catch (error) {
-    // 쿠키 정리는 렌더 중에 못 한다. proxy와 로그아웃이 맡는다.
+    // 렌더 중에는 쿠키를 지울 수 없다. 쿠키를 지우는 Route Handler를 거쳐 로그인으로 보낸다.
+    // 곧장 /login으로 보내면 proxy가 남은 access 쿠키를 보고 다시 대시보드로 돌려보내 왕복한다.
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-      redirect("/login");
+      redirect("/session/clear");
     }
     throw error;
   }
