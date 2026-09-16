@@ -11,6 +11,10 @@ public class ApiException extends ErrorResponseException {
         super(status, problem(status, code, detail), null);
     }
 
+    public static ApiException unauthorized(String code, String detail) {
+        return new ApiException(HttpStatus.UNAUTHORIZED, code, detail);
+    }
+
     public static ApiException badRequest(String code, String detail) {
         return new ApiException(HttpStatus.BAD_REQUEST, code, detail);
     }
