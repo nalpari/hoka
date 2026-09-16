@@ -92,6 +92,12 @@ where email = '<슈퍼관리자 이메일>';
 
 **Flyway baseline.** `appdb`의 `public`에는 다른 프로젝트의 테이블이 이미 있다. 그래서 `baseline-on-migrate: true`와 함께 **`baseline-version: 0`**을 쓴다. 기본 baseline 버전(1)을 그대로 두면 `V1`이 적용된 것으로 기록돼 `bo_*` 테이블이 만들어지지 않는다.
 
+# Front integration
+
+[hoka-bo-front](/projects/hoka-bo-front.md)가 BFF로 붙어 있다. 로그인 화면(`/login`)은 Server Action으로 `POST /api/auth/login`을 부르고 토큰을 HttpOnly 쿠키 `bo_at`(15분)·`bo_rt`(30일/12시간)에 담는다. "로그인 유지" 선택은 `bo_rm`에 남긴다 — refresh를 회전시킬 때 원래 선택을 알아야 만료가 줄지 않는다.
+
+`src/proxy.ts`가 보호 라우트를 지키고, access 쿠키가 사라지면 `POST /api/auth/refresh`로 갱신해 응답과 요청 헤더 양쪽에 새 쿠키를 싣는다. 로그인 이력의 IP·UA는 BFF가 넘긴 `X-Forwarded-For`·`User-Agent`에서 온다.
+
 # Not built yet
 
 설계에서 뒤로 미룬 것들이다. 상세는 [설계 문서](../../docs/bo-auth-design.md).[^design]

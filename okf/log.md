@@ -1,6 +1,7 @@
 # Directory Update Log
 
 ## 2026-09-16
+* **Update**: hoka-bo-front에 로그인 화면과 BFF 인증 배관이 생겨 [hoka-bo-front](/projects/hoka-bo-front.md)의 Stack·Commands·Notes, [hoka-fo-front](/projects/hoka-fo-front.md)의 쌍둥이 문장, [BO 인증·권한](/architecture/bo-auth.md)의 프론트 연동 절, [System overview](/architecture/system-overview.md)의 BFF 절과 가정, [Worktrees](/development/worktrees.md)의 `.env` 복사 행 갱신.
 * **Update**: hoka-bo-api에 springdoc(Swagger UI) 추가에 맞춰 [hoka-bo-api](/projects/hoka-bo-api.md)의 Stack·Notes와 [BO 인증·권한](/architecture/bo-auth.md)의 공개 경로 갱신.
 * **Creation**: [BO 인증·권한](/architecture/bo-auth.md) 추가. [Architecture](/architecture/index.md) 갱신. 인증 방식이 정해져 [System overview](/architecture/system-overview.md)의 가정도 수정.
 * **Update**: SecurityConfig가 HTTP Basic에서 JWT Resource Server로 바뀌고 Flyway baseline 설정이 추가돼 [hoka-bo-api](/projects/hoka-bo-api.md)의 Notes 갱신.

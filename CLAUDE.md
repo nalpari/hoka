@@ -14,7 +14,7 @@ The root is the git repository but not a build. It holds five separate projects,
 | `hoka-bo-api` | same as above | Back office API (`com.hoka.bo`) |
 | `hoka-batch` | Spring Boot 4.1.1 + Spring Batch 6, Java 21, Maven | Batch jobs run from the shell with `java -jar` (`com.hoka.batch`) |
 
-- The FO/BO pairs are identical apart from their names, with two exceptions. Only `hoka-fo-api` has Resilience4j (dependencies, `application.yaml` settings, the sample `GET /api/samples/{id}`, its tests, and the okf rule in its `CLAUDE.md`), and only `hoka-fo-api` still has the sample CRUD — `hoka-bo-api`'s copy was removed when its auth/permission work started. Keep them in step unless a change is meant for only one side.
+- The FO/BO pairs are no longer identical. On the frontend side, only `hoka-bo-front` has the login screen, the BFF auth plumbing (`src/proxy.ts`, cookies, `BO_API_BASE_URL`) and the design stylesheet `src/app/hoka.css`; `hoka-fo-front` is still the bare scaffold. On the API side the differences are as follows. Only `hoka-fo-api` has Resilience4j (dependencies, `application.yaml` settings, the sample `GET /api/samples/{id}`, its tests, and the okf rule in its `CLAUDE.md`), and only `hoka-fo-api` still has the sample CRUD — `hoka-bo-api`'s copy was removed when its auth/permission work started. Keep them in step unless a change is meant for only one side.
 - Each project has its own build. Run commands from inside that project's directory.
 - Git: one repository rooted here (branch `main`, remote `origin` = `https://github.com/nalpari/hoka.git`). The projects have no `.git` of their own. `origin/main`, which the [worktree policy](#worktrees) branches from, exists only after the first push.
 
@@ -77,9 +77,10 @@ pnpm lint       # eslint (flat config: next core-web-vitals + typescript)
 
 - **Read `AGENTS.md` in each frontend first.** This Next.js version has breaking changes compared with your training data. Before writing Next.js code, check the bundled docs in `node_modules/next/dist/docs/`. `next dev` rewrites that block in `AGENTS.md`, so don't remove it.
 - React Compiler is on (`reactCompiler: true` in `next.config.ts`, via `babel-plugin-react-compiler`). Don't add `useMemo`/`useCallback` just to memoize.
-- Tailwind v4 has no `tailwind.config`. Theme tokens live in `src/app/globals.css` under `@theme inline`.
+- Tailwind v4 has no `tailwind.config`. In `hoka-fo-front`, theme tokens live in `src/app/globals.css` under `@theme inline`. In `hoka-bo-front`, the design system `src/app/hoka.css` (a copy of `ref/design/assets/hoka.css`) owns the tokens and component classes, and Tailwind is only used for one-off utilities.
 - Path alias: `@/*` maps to `src/*`.
 - There is no test runner yet.
+- `hoka-bo-front` needs `BO_API_BASE_URL` in `.env.local` (see the tracked `.env.example`); it has no default, and the app fails to reach the API without it. The browser never calls `hoka-bo-api` directly — the Next server (BFF) holds the tokens in HttpOnly cookies and forwards them as a Bearer header. Route protection lives in `src/proxy.ts` (Next 16 renamed `middleware` to `proxy`). Implemented screens: `/login` and a temporary landing page. Contract: `okf/architecture/bo-auth.md`.
 - pnpm 11 is the package manager (`packageManager: pnpm@11.18.0`, `pnpm-lock.yaml`). Don't run `npm install`; it creates a `package-lock.json`.
 - pnpm blocks dependency build scripts by default. The allowlist is `allowBuilds` in each frontend's `pnpm-workspace.yaml` (currently `unrs-resolver`). On `ERR_PNPM_IGNORED_BUILDS`, add the package there as `true`/`false`; `pnpm approve-builds` is interactive and hangs in agent sessions.
 

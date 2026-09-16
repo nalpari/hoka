@@ -1,69 +1,124 @@
-import Image from "next/image";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+import { logout } from "@/app/login/actions";
+import { Brandmark, Icon } from "@/components/Icon";
+import { ApiError, callApi } from "@/lib/api";
+import { readTokens } from "@/lib/session";
+
+type MenuAccess = {
+  code: string;
+  parentCode: string | null;
+  name: string;
+  path: string;
+  canCreate: boolean;
+  canRead: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+};
+
+type Me = {
+  id: number;
+  email: string;
+  name: string;
+  department: string | null;
+  roleCode: string;
+  roleName: string;
+  isSuper: boolean;
+  passwordChangeRequired: boolean;
+  menus: MenuAccess[];
+};
+
+// 레일·대시보드가 붙기 전까지 쓰는 임시 착지 페이지. 로그인 결과를 그대로 보여 준다.
+export default async function HomePage() {
+  const { accessToken } = await readTokens();
+  if (!accessToken) {
+    redirect("/login");
+  }
+
+  let me: Me;
+  try {
+    me = await callApi<Me>("/api/auth/me", { accessToken });
+  } catch (error) {
+    // 쿠키 쓰기는 렌더 중에 못 하므로 여기서는 보내기만 한다. 정리는 proxy와 로그아웃이 맡는다.
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      redirect("/login");
+    }
+    throw error;
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="page" style={{ maxWidth: 880, margin: "0 auto", padding: "var(--s-7) var(--s-5)" }}>
+      <div className="flex flex--between" style={{ marginBottom: "var(--s-6)" }}>
+        <span className="flex gap-2">
+          <Brandmark />
+          <b className="wordmark">HOKA</b>
+          <span className="rail__tag" style={{ marginLeft: 2 }}>
+            백오피스
+          </span>
+        </span>
+        <form action={logout}>
+          <button className="btn btn--secondary btn--sm" type="submit">
+            로그아웃
+          </button>
+        </form>
+      </div>
+
+      {me.passwordChangeRequired ? (
+        <div className="note note--warn mb-4">
+          <Icon name="alert" size={16} />
+          <div>
+            <strong>임시 비밀번호로 로그인했습니다</strong>
+            비밀번호를 바꾸기 전까지 다른 기능은 열리지 않습니다. 변경 화면은 곧 붙습니다.
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      ) : null}
+
+      <section className="panel">
+        <div className="panel__head">
+          <h3>로그인한 사용자</h3>
+          <span className="t-xs dim">/api/auth/me</span>
         </div>
-      </main>
-    </div>
+        <div className="panel__body">
+          <dl className="deflist">
+            <dt>이름</dt>
+            <dd>{me.name}</dd>
+            <dt>계정</dt>
+            <dd>{me.email}</dd>
+            <dt>부서</dt>
+            <dd>{me.department ?? "-"}</dd>
+            <dt>역할</dt>
+            <dd>
+              {me.roleName} <span className="dim">({me.roleCode})</span>
+            </dd>
+          </dl>
+        </div>
+        <div className="panel__body" style={{ borderTop: "1px solid var(--hairline)" }}>
+          <div className="sechead">
+            <h2>접근 가능한 메뉴</h2>
+            <span className="t-xs dim">{me.menus.length}개</span>
+          </div>
+          {me.menus.length === 0 ? (
+            <p className="t-sm muted">열린 메뉴가 없습니다.</p>
+          ) : (
+            <div className="flex gap-1 flex--wrap">
+              {me.menus.map((menu) => (
+                <span className="badge badge--outline" key={menu.code}>
+                  {menu.name}
+                  <span className="dim" style={{ marginLeft: 4 }}>
+                    {actionsOf(menu)}
+                  </span>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
+}
+
+function actionsOf(menu: MenuAccess) {
+  return [menu.canCreate && "C", menu.canRead && "R", menu.canUpdate && "U", menu.canDelete && "D"]
+    .filter(Boolean)
+    .join("");
 }

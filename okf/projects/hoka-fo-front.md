@@ -46,7 +46,7 @@ pnpm lint
 - 이 Next.js 버전은 학습 데이터와 API가 다르다. 코드 작성 전 `node_modules/next/dist/docs/`를 확인한다.[^agents]
 - 테스트 러너 미설정.
 - `npm install`은 쓰지 않는다. `package-lock.json`이 새로 생긴다.
-- [hoka-bo-front](/projects/hoka-bo-front.md)와 이름 외 설정이 동일한 쌍둥이 프로젝트.
+- [hoka-bo-front](/projects/hoka-bo-front.md)와 스캐폴드 설정은 같지만, BO에는 로그인·BFF 인증 배관과 시안 스타일시트가 추가돼 더 이상 동일하지 않다. FO는 아직 스캐폴드 상태다.
 - 백엔드 연동 대상으로 [hoka-fo-api](/projects/hoka-fo-api.md)를 가정한다(아직 연동 코드 없음). [System overview](/architecture/system-overview.md) 참고.
 
 [^pkg]: package.json
