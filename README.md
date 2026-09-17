@@ -123,8 +123,9 @@ Windows에서 Claude Code의 Bash 도구는 Git Bash를 쓴다. 1단계의 Git f
 **안 써도 된다.** 저장소는 graft 없이도 그대로 동작한다. 쓰지 않으면 이 단계와 6단계의 graft 부분을
 건너뛰고 4단계로 간다.
 
-공식 안내는 <https://trailhq.com/graft#start>에 있다. 여기서는 전역 설치만 하고,
-그 페이지의 두 번째 명령 `graft init`은 저장소를 클론한 뒤 6단계에서 실행한다.
+공식 안내는 <https://trailhq.com/graft#start>에 있다. 여기서는 전역 설치만 한다.
+그 페이지의 두 번째 명령 `graft init`은 저장소를 클론한 뒤 6단계에서, **플래그를 붙여** 실행한다.
+페이지에 적힌 그대로 실행하면 추적 중인 파일과 홈 디렉터리 설정까지 바뀐다.
 
 `graft`를 `PATH`에서 찾는다. `.mcp.json`의 MCP 서버와 `.claude/settings.json`의 훅·상태줄이 여기에 해당한다.
 macOS에서 nvm을 쓰면 **1단계에서 설치한 Node 24가 활성화된 셸에서** 전역 설치한다.
@@ -243,11 +244,24 @@ Copy-Item .claude/settings.json.example .claude/settings.json
 절대 경로로 새겨지기 때문이다. 저장소 루트에서 실행한다.
 
 ```bash
-graft init    # .mcp.json, .claude/settings.json, .claude/helpers/*.cjs 생성
-graft build   # graft/ 그래프 생성. API 키가 필요 없고 비용도 들지 않는다
+graft init --no-agents   # 위 네 경로를 만들고 graft/ 그래프까지 만든다
 ```
 
-`graft build`는 한 번만 하면 된다. 이후에는 훅이 편집할 때마다 갱신한다.
+**`--no-agents`를 꼭 붙인다.** 빼면 Claude Code 외의 에이전트 설정까지 써서 `AGENTS.md`(추적 중인
+파일이다)를 고치고 `opencode.json`, `.cursor/`, `GEMINI.md`, `.gemini/`, `.grok/`를 만든다. 전부
+`.gitignore`에 없어 작업 트리가 더러워진다.
+
+**저장소 밖도 건드린다.** `~/.claude/settings.json`, `~/.claude.json`처럼 **모든 저장소에 영향을 주는**
+사용자 설정을 함께 쓴다. `--no-global`이 이걸 막는다고 도움말에 적혀 있지만 graft 0.18.0의 `--dry-run`
+출력에는 플래그를 줘도 그대로 남으니, 실제로 막히는지는 기대하지 않는 편이 낫다. 무엇을 건드릴지는
+**쓰기 전에** 확인할 수 있다.
+
+```bash
+graft init --no-agents --dry-run   # 건드릴 파일만 출력하고 끝낸다
+```
+
+그래프는 `graft init`이 같이 만들어 준다(`--no-build`가 그걸 끄는 옵션이다). 따로 다시 만들 일이
+있으면 `graft build`를 쓴다. API 키가 필요 없고 비용도 들지 않는다. 이후에는 훅이 편집할 때마다 갱신한다.
 
 **`graft init`은 `.claude/settings.json`을 통째로 새로 쓴다.** 위에서 복사한 okf 훅이 지워지므로,
 `graft init` 뒤에 `.claude/settings.json.example`의 `hooks.Stop` 항목을 생성된 파일의 `hooks.Stop`
@@ -439,8 +453,9 @@ Claude Code에서는 `/hoka-cnp`로 이 규칙대로 커밋하고 푸시할 수 
 
 ## Claude Code 사용 시
 
-- 루트 [CLAUDE.md](CLAUDE.md)와 각 프로젝트의 `CLAUDE.md`가 에이전트 지침이다. 프론트는 `AGENTS.md`도 읽힌다.
-`AGENTS.md`의 Next.js 블록은 `next dev`가 다시 쓰므로 지우지 않는다.
+- 루트 [CLAUDE.md](CLAUDE.md)와 각 프로젝트의 `CLAUDE.md`가 에이전트 지침이다. `AGENTS.md`도 읽힌다 —
+프론트 두 개에는 Next.js 블록이, 루트에는 graft 블록이 들어 있다. 둘 다 `<!-- ... -->` 표시로 감싼
+자동 생성 구역이라(`next dev`와 `graft init`이 다시 쓴다) 지우지 말고, 손으로 쓸 내용은 그 바깥에 둔다.
 - Stop 훅 [`.claude/hooks/okf-sync-check.sh`](.claude/hooks/okf-sync-check.sh)가 응답을 끝내기 전에
 프로젝트 파일은 바뀌었는데 `okf/`가 그대로인지 확인한다. 스크립트는 저장소에 있지만 **등록은 각자
 `.claude/settings.json`에 해야 한다** — [처음 설치하기](#처음-설치하기-claude-code-기준) 6단계 참고. 동작하려면 `jq`가 필요하다.

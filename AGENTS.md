@@ -39,3 +39,11 @@ re-read whole files.
 After big code changes, refresh the graph with `graft build` (deterministic,
 no API key, $0).
 <!-- graft:end -->
+
+<!-- 아래는 graft 블록 바깥이라 `graft init`이 덮어쓰지 않는다. -->
+
+## graft가 없을 때
+
+위 블록은 graft가 만들고 관리한다. **graft는 선택 설치라 없을 수도 있다.** `graft` 명령이
+`PATH`에 없거나 `graft/` 디렉터리가 없으면 위 지시는 건너뛰고 평소대로 검색·읽기로 진행한다.
+설치 절차는 [README](README.md#처음-설치하기-claude-code-기준) 3·6단계에 있다.
