@@ -4,7 +4,7 @@ title: Sample CRUD
 description: sample 테이블과 hoka-fo-api가 제공하는 /api/samples CRUD 샘플 코드. 단건 조회에 Resilience4j 적용.
 tags: [api, fo, mybatis, sample]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-16T00:20:00Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T00:23:21Z }
 sources:
   - id: fo-controller
     resource: ../../hoka-fo-api/src/main/java/com/hoka/fo/sample/SampleController.java
@@ -20,6 +20,7 @@ sources:
 # Table
 
 `appdb`의 `public.sample`. 코드가 만든 테이블이 아니라 DB에 이미 있던 테이블이며, 스키마 관리 도구는 아직 없다.
+새 로컬 DB에는 직접 만들어야 한다. DDL은 루트 README "처음 설치하기" 5단계와 `hoka-batch/src/test/resources/schema.sql`에 있다.
 
 | 컬럼 | 타입 | 제약 |
 |---|---|---|

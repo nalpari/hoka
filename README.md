@@ -26,6 +26,8 @@
 ## 처음 설치하기 (Claude Code 기준)
 
 위에서부터 순서대로 실행한다. 각 단계에서 **자기 OS 블록만** 실행하고, 이미 설치된 도구는 건너뛴다.
+**3단계(graft CLI)와 6단계의 graft 부분은 선택이다.** 건너뛰어도 빌드·테스트·실행은 전부 정상이고,
+에이전트가 코드를 찾을 때 파일을 더 읽을 뿐이다.
 macOS는 [Homebrew](https://brew.sh), Windows는 Windows 10 1809+/11에 기본으로 들어 있는
 [winget](https://learn.microsoft.com/windows/package-manager/winget/)을 쓴다.
 
@@ -35,13 +37,14 @@ Windows 절차는 같은 버전을 winget으로 설치하도록 옮긴 것이고
 
 | 도구                                                         | 용도                                                                 |
 | ---------------------------------------------------------- | ------------------------------------------------------------------ |
-| Node.js 24 / npm                                           | Claude Code 훅·상태줄 스크립트(`.claude/helpers/*.cjs`), graft CLI 전역 설치    |
+| Node.js 24 / npm                                           | 프론트 실행·빌드(pnpm이 이 위에서 돈다). graft를 쓰면 그 CLI와 훅·상태줄 스크립트도 여기서 돈다 |
 | pnpm 11                                                    | 프론트 패키지 매니저 (`pnpm-lock.yaml`)                                         |
 | JDK 21                                                     | API·배치 빌드. Maven은 `./mvnw`가 받아 쓰므로 따로 설치하지 않는다                        |
+| [Docker](https://docs.docker.com/get-started/get-docker/)  | 로컬 PostgreSQL(5단계). `hoka-bo-api`·`hoka-batch` 테스트도 Testcontainers로 DB를 띄우므로 필요하다 |
 | jq                                                         | Stop 훅 `okf-sync-check.sh`. 없으면 훅이 조용히 건너뛴다                        |
 | [uv](https://docs.astral.sh/uv/)                           | `okf/` 적합성 검사                                                      |
 | [Claude Code](https://docs.claude.com/en/docs/claude-code) | 에이전트 CLI                                                           |
-| [graft](https://www.npmjs.com/package/@nanonets/graft)     | 코드 그래프. MCP 서버·훅·스킬이 이 CLI를 부른다                                    |
+| [graft](https://www.npmjs.com/package/@nanonets/graft) **(선택)** | 코드 그래프. 에이전트가 파일을 덜 읽고 코드를 찾게 해 준다. 없어도 모든 빌드·테스트·실행은 그대로 된다 |
 | [Git for Windows](https://git-scm.com/downloads/win) (Windows만) | Git과 Git Bash. Stop 훅 `okf-sync-check.sh`와 `hoka-batch/bin/run-job.sh`가 bash 스크립트라 필요하다 |
 
 
@@ -115,10 +118,13 @@ Windows에서 Claude Code의 Bash 도구는 Git Bash를 쓴다. 1단계의 Git f
 { "env": { "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe" } }
 ```
 
-### 3. graft CLI
+### 3. graft CLI (선택)
 
-공식 안내는 <https://trailhq.com/graft#start>에 있다. **다만 그 페이지가 알려주는 두 번째 명령 `graft init`은
-이 저장소에서 실행하지 않는다**(아래 5단계 참고). 전역 설치만 하고 넘어간다.
+**안 써도 된다.** 저장소는 graft 없이도 그대로 동작한다. 쓰지 않으면 이 단계와 6단계의 graft 부분을
+건너뛰고 4단계로 간다.
+
+공식 안내는 <https://trailhq.com/graft#start>에 있다. 여기서는 전역 설치만 하고,
+그 페이지의 두 번째 명령 `graft init`은 저장소를 클론한 뒤 6단계에서 실행한다.
 
 `graft`를 `PATH`에서 찾는다. `.mcp.json`의 MCP 서버와 `.claude/settings.json`의 훅·상태줄이 여기에 해당한다.
 macOS에서 nvm을 쓰면 **1단계에서 설치한 Node 24가 활성화된 셸에서** 전역 설치한다.
@@ -165,36 +171,115 @@ foreach ($d in 'hoka-fo-api','hoka-bo-api','hoka-batch') {
 }
 ```
 
-### 5. graft 그래프 생성
+### 5. 로컬 DB (Docker)
 
-**`graft init`은 절대 실행하지 않는다. `graft build`만 실행한다.**
-
-`graft init`이 만드는 파일(`.mcp.json`, `.claude/settings.json`, `.claude/helpers/*.cjs`)은 이미 저장소에
-커밋되어 있다. 다시 실행하면 헬퍼 스크립트에 자기 PC의 절대 경로가 새겨져 다른 사람 환경을 깨는 diff가 생긴다.
-이 경로를 못 찾아도 헬퍼는 `npm root -g`로 graft를 찾으므로 직접 고칠 일도 없다.
-
-`graft/` 디렉터리는 로컬 캐시라 git에 없다. 클론한 뒤 `graft build`로 한 번 만든다. API 키가 필요 없고
-비용도 들지 않는다. 이후에는 훅이 편집할 때마다 갱신한다.
+세 프로젝트가 같은 PostgreSQL `appdb`를 쓴다. 이미지 태그는 테스트의 Testcontainers가 쓰는 것과
+같은 `postgres:18-alpine`으로 맞춘다. 로컬에 PostgreSQL이 이미 5432를 쓰고 있으면 `-p 5433:5432`처럼
+바꾸고 각 프로젝트의 `DB_URL`도 같이 바꾼다.
 
 ```bash
-graft build
+docker run -d --name hoka-db \
+  -e POSTGRES_DB=appdb \
+  -e POSTGRES_USER=app \
+  -e POSTGRES_PASSWORD=app \
+  -p 5432:5432 \
+  -v hoka-db:/var/lib/postgresql \
+  postgres:18-alpine
 ```
 
-### 6. Claude Code 실행
+Windows PowerShell에서는 줄바꿈 문자가 달라 한 줄로 쓴다.
+
+```powershell
+docker run -d --name hoka-db -e POSTGRES_DB=appdb -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app -p 5432:5432 -v hoka-db:/var/lib/postgresql postgres:18-alpine
+```
+
+`appdb`, 계정 `app`/`app`은 `hoka-fo-api`와 `hoka-batch`의 기본값이고 `hoka-bo-api`의 `local` 프로파일
+값이라, 이대로 두면 세 프로젝트 모두 설정 없이 붙는다.
+
+볼륨은 `/var/lib/postgresql/data`가 아니라 **`/var/lib/postgresql`에 붙인다.** PostgreSQL 18부터 데이터
+디렉터리 규칙이 바뀌어서, 예전 글을 보고 `/data`에 마운트하면 컨테이너가 기동하지 않고 바로 죽는다.
+
+**`sample` 테이블만 직접 만든다.** 나머지는 앱이 알아서 만든다 — `hoka-bo-api`의 `bo_*` 테이블은 기동할 때
+Flyway가, `hoka-batch`의 `BATCH_*` 테이블은 첫 실행 때 Spring Batch가 만든다. `sample`은 DDL이 저장소에
+없고 만드는 코드도 없어서, 이걸 빼면 `hoka-fo-api`의 `SampleControllerTests`가 실패한다.
+
+```bash
+docker exec hoka-db psql -U app -d appdb -c "create table sample (id bigserial primary key, name text not null, created_at timestamptz not null default now());"
+```
+
+확인과 정리는 이렇게 한다.
+
+```bash
+docker exec hoka-db psql -U app -d appdb -c '\dt'   # 테이블 목록
+docker stop hoka-db && docker start hoka-db          # 멈췄다 다시 켜기 (데이터 유지)
+docker rm -f hoka-db && docker volume rm hoka-db     # 데이터까지 지우고 처음부터
+```
+
+테스트가 쓰는 DB는 이 컨테이너가 아니다. `hoka-bo-api`와 `hoka-batch`는 Testcontainers가 매번 빈
+PostgreSQL을 따로 띄우므로, 이 컨테이너를 지워도 그 테스트는 영향을 받지 않는다(Docker 자체는 필요하다).
+
+### 6. Claude Code 설정
+
+`.claude/settings.json`은 사람마다 내용이 갈려 git에 없다. 클론한 뒤 각자 만든다.
+
+#### okf 동기화 훅 등록
+
+**graft를 쓰든 안 쓰든 필요하다.** 이 훅이 없으면 코드만 고치고 `okf/` 문서를 빠뜨려도 아무도 알려주지
+않는다. 저장소 루트에 `.claude/settings.json`을 만들고 아래를 넣는다. 스크립트 자체는 저장소에 있다.
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PROJECT_DIR}/.claude/hooks/okf-sync-check.sh\"",
+            "timeout": 30,
+            "statusMessage": "okf 문서 동기화 확인"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### graft 설정과 그래프 생성 (선택)
+
+3단계에서 graft를 설치했을 때만 한다. graft가 만드는 파일(`.mcp.json`, `.claude/settings.json`,
+`.claude/helpers/`, `.claude/skills/graft/`)도 git에 없다. 헬퍼 스크립트에 그 PC의 graft 설치 경로가
+절대 경로로 새겨지기 때문이다. 저장소 루트에서 실행한다.
+
+```bash
+graft init    # .mcp.json, .claude/settings.json, .claude/helpers/*.cjs 생성
+graft build   # graft/ 그래프 생성. API 키가 필요 없고 비용도 들지 않는다
+```
+
+`graft build`는 한 번만 하면 된다. 이후에는 훅이 편집할 때마다 갱신한다.
+
+**`graft init`은 `.claude/settings.json`을 통째로 새로 쓴다.** 위에서 넣은 okf 훅이 지워지므로,
+`graft init` 뒤에 생성된 파일의 `hooks.Stop` 배열에 그 항목을 다시 더한다.
+
+### 7. Claude Code 실행
 
 ```bash
 claude
 ```
 
-- 처음 실행하면 프로젝트 MCP 서버 `graft`(`.mcp.json`)를 허용할지 묻는다. 허용한다.
-- `/mcp`로 `graft`가 connected인지 확인한다.
-- 프로젝트 스킬 `/hoka-cnp`(커밋·푸시)와 `graft`는 `.claude/skills/`에 들어 있어 따로 설치하지 않는다.
+- 프로젝트 스킬 `/hoka-cnp`(커밋·푸시)는 `.claude/skills/`에 들어 있어 따로 설치하지 않는다.
+- graft를 설치했으면, 처음 실행할 때 프로젝트 MCP 서버 `graft`(`.mcp.json`)를 허용할지 묻는다. 허용하고
+  `/mcp`로 connected인지 확인한다. graft 스킬도 `graft init`이 같이 깔아 준다.
 
 ### Windows에서 이 문서의 나머지를 읽는 법
 
 아래 명령은 모두 macOS 기준으로 적혀 있다. Windows에서는 이렇게 바꿔 읽는다.
 
 - **`./mvnw` → `.\mvnw.cmd`** (PowerShell·CMD 기준). Git Bash에서는 `./mvnw` 그대로 쓴다.
+- **PowerShell에서는 `-D...` 인자를 따옴표로 감싼다** — `.\mvnw.cmd test "-Dtest=HokaFoApiApplicationTests#contextLoads"`.
+  감싸지 않으면 PowerShell이 먼저 해석해 Maven에 그대로 넘어가지 않는다. 특히 `#`은 주석 시작 문자라
+  뒤가 잘린 채 **오류 없이** 그 클래스 전체가 돌아간다. CMD와 Git Bash는 따옴표가 필요 없다.
 - **`bin/run-job.sh`는 bash 스크립트라 Git Bash에서 실행한다.** 날짜 계산에 GNU `date`를 쓰는데
   Git Bash에 들어 있어서 그대로 동작한다.
 - 환경 변수는 `export X=y` 대신 `$env:X = 'y'`(PowerShell)로 넣는다.
@@ -357,15 +442,19 @@ Claude Code에서는 `/hoka-cnp`로 이 규칙대로 커밋하고 푸시할 수 
 - `hoka-*-front/.env*` (단 `hoka-bo-front/.env.example`은 추적한다)
 - `**/.agent/`
 - `/graft/`: graft 그래프 캐시. `graft build`로 다시 만든다
+- `/.mcp.json`, `/.claude/settings.json`, `/.claude/helpers/`, `/.claude/skills/graft/`:
+  `graft init`이 만드는 파일. 헬퍼에 그 PC의 절대 경로가 들어간다
 
 ## Claude Code 사용 시
 
 - 루트 [CLAUDE.md](CLAUDE.md)와 각 프로젝트의 `CLAUDE.md`가 에이전트 지침이다. 프론트는 `AGENTS.md`도 읽힌다.
 `AGENTS.md`의 Next.js 블록은 `next dev`가 다시 쓰므로 지우지 않는다.
 - Stop 훅 [`.claude/hooks/okf-sync-check.sh`](.claude/hooks/okf-sync-check.sh)가 응답을 끝내기 전에
-프로젝트 파일은 바뀌었는데 `okf/`가 그대로인지 확인한다. 동작하려면 `jq`가 필요하다.
-- graft 훅(`.claude/helpers/graft-hooks.cjs`)은 세션 시작, 프롬프트 제출, 편집 후에 그래프를 갱신하고 컨텍스트를 붙인다.
-graft CLI가 없으면 아무 일도 하지 않으므로 [처음 설치하기](#처음-설치하기-claude-code-기준) 3단계를 확인한다.
+프로젝트 파일은 바뀌었는데 `okf/`가 그대로인지 확인한다. 스크립트는 저장소에 있지만 **등록은 각자
+`.claude/settings.json`에 해야 한다** — [처음 설치하기](#처음-설치하기-claude-code-기준) 6단계 참고. 동작하려면 `jq`가 필요하다.
+- graft는 선택이다. 설치했으면 훅(`.claude/helpers/graft-hooks.cjs`)이 세션 시작, 프롬프트 제출, 편집 후에
+그래프를 갱신하고 컨텍스트를 붙인다. 이 파일도 git에 없어 `graft init`이 만든다.
+훅이 조용하면 [처음 설치하기](#처음-설치하기-claude-code-기준) 3·6단계를 확인한다.
 - 워크트리는 명시적으로 요청할 때만 만든다. 위치는 macOS/Linux가 `~/.worktrees/hoka/<관광명소>`,
 Windows가 `C:\workspace\.worktrees\hoka\<관광명소>`이고, 브랜치 이름은 포켓몬으로 짓는다.
 절차는 [`okf/development/worktrees.md`](okf/development/worktrees.md)를 따른다.

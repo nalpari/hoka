@@ -5,3 +5,10 @@
 
 # graft's local graph cache — regenerable, not committed (run `graft build`).
 /graft/
+
+# graft 도구 등록 — 각자 로컬에서 `graft init`으로 만든다. 헬퍼에 그 PC의 절대 경로가 새겨진다.
+# 설치 절차는 README "처음 설치하기" 참고.
+/.mcp.json
+/.claude/settings.json
+/.claude/helpers/
+/.claude/skills/graft/
