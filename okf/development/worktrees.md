@@ -4,7 +4,7 @@ title: Worktrees
 description: 명시적으로 요청된 워크트리를 만들고 설정·정리하는 절차. 만든 뒤 진입하지 않는다.
 tags: [development, git, worktrees]
 status: draft
-generated: { by: claude-code/claude-opus-5, at: 2026-09-17T00:16:26Z }
+generated: { by: claude-code/claude-opus-5, at: 2026-09-17T00:37:52Z }
 ---
 
 # Worktrees
@@ -64,7 +64,7 @@ done
 |---|---|---|
 | `hoka-*-front/.env*` | 복사 | 프론트 `.gitignore`가 `.env*`를 무시한다. `hoka-bo-front/.env.local`에 `BO_API_BASE_URL`이 있어야 로그인이 동작한다(예시는 추적되는 `.env.example`). |
 | `hoka-*-front/node_modules` | `pnpm install --frozen-lockfile`로 새로 설치 | 추적하지 않는 디렉터리라 딸려오지 않는다. `AGENTS.md`가 읽으라는 `node_modules/next/dist/docs/`도 설치 후에 생긴다. |
-| `.mcp.json`, `.claude/settings.json`, `.claude/helpers/`, `.claude/skills/graft/` | 복사 | `graft init`이 만드는 파일이라 git에 없다. 없으면 워크트리에서 graft MCP 서버·훅·상태줄과 okf 동기화 Stop 훅이 모두 죽는다. 헬퍼에 박힌 절대 경로는 이 PC의 graft 설치 위치라 같은 머신 안에서는 그대로 쓸 수 있고, 훅은 `CLAUDE_PROJECT_DIR`로 프로젝트를 찾으므로 경로가 바뀌어도 된다. |
+| `.mcp.json`, `.claude/settings.json`, `.claude/helpers/`, `.claude/skills/graft/` | 복사 | `graft init`이 만드는 파일이라 git에 없다. 없으면 워크트리에서 graft MCP 서버·훅·상태줄과 okf 동기화 Stop 훅이 모두 죽는다. okf 훅만 다시 세우려면 추적되는 `.claude/settings.json.example`을 복사해도 된다. 헬퍼에 박힌 절대 경로는 이 PC의 graft 설치 위치라 같은 머신 안에서는 그대로 쓸 수 있고, 훅은 `CLAUDE_PROJECT_DIR`로 프로젝트를 찾으므로 경로가 바뀌어도 된다. |
 | `hoka-*/.claude/settings.local.json` | 복사하지 않음 | 메인 체크아웃의 `okf/`를 절대 경로로 가리킨다. 워크트리에서 쓰면 번들 수정이 메인 체크아웃에 들어간다. 워크트리 루트에서 세션을 시작하면 `okf/`가 작업 디렉터리 안이라 필요 없다. |
 | API 설정 | 없음 | `application.yaml`은 추적 중이라 딸려오고, API `.gitignore`가 무시하는 설정 파일은 없다. Maven 의존성은 `~/.m2`를 공유한다. |
 

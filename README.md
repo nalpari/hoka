@@ -225,25 +225,15 @@ PostgreSQL을 따로 띄우므로, 이 컨테이너를 지워도 그 테스트�
 #### okf 동기화 훅 등록
 
 **graft를 쓰든 안 쓰든 필요하다.** 이 훅이 없으면 코드만 고치고 `okf/` 문서를 빠뜨려도 아무도 알려주지
-않는다. 저장소 루트에 `.claude/settings.json`을 만들고 아래를 넣는다. 스크립트 자체는 저장소에 있다.
+않는다. 추적되는 [`.claude/settings.json.example`](.claude/settings.json.example)을 복사해서 쓴다.
+훅 스크립트 자체도 저장소에 있다.
 
-```json
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PROJECT_DIR}/.claude/hooks/okf-sync-check.sh\"",
-            "timeout": 30,
-            "statusMessage": "okf 문서 동기화 확인"
-          }
-        ]
-      }
-    ]
-  }
-}
+```bash
+cp .claude/settings.json.example .claude/settings.json
+```
+
+```powershell
+Copy-Item .claude/settings.json.example .claude/settings.json
 ```
 
 #### graft 설정과 그래프 생성 (선택)
@@ -259,8 +249,9 @@ graft build   # graft/ 그래프 생성. API 키가 필요 없고 비용도 들�
 
 `graft build`는 한 번만 하면 된다. 이후에는 훅이 편집할 때마다 갱신한다.
 
-**`graft init`은 `.claude/settings.json`을 통째로 새로 쓴다.** 위에서 넣은 okf 훅이 지워지므로,
-`graft init` 뒤에 생성된 파일의 `hooks.Stop` 배열에 그 항목을 다시 더한다.
+**`graft init`은 `.claude/settings.json`을 통째로 새로 쓴다.** 위에서 복사한 okf 훅이 지워지므로,
+`graft init` 뒤에 `.claude/settings.json.example`의 `hooks.Stop` 항목을 생성된 파일의 `hooks.Stop`
+배열에 다시 더한다. graft도 `Stop` 훅을 넣으므로 배열을 통째로 바꾸지 말고 항목만 추가한다.
 
 ### 7. Claude Code 실행
 
@@ -443,7 +434,8 @@ Claude Code에서는 `/hoka-cnp`로 이 규칙대로 커밋하고 푸시할 수 
 - `**/.agent/`
 - `/graft/`: graft 그래프 캐시. `graft build`로 다시 만든다
 - `/.mcp.json`, `/.claude/settings.json`, `/.claude/helpers/`, `/.claude/skills/graft/`:
-  `graft init`이 만드는 파일. 헬퍼에 그 PC의 절대 경로가 들어간다
+  `graft init`이 만드는 파일. 헬퍼에 그 PC의 절대 경로가 들어간다.
+  단 `.claude/settings.json.example`(okf 동기화 훅)은 추적한다
 
 ## Claude Code 사용 시
 
