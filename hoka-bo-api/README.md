@@ -41,6 +41,15 @@
 java -jar target/bo-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
 ```
 
+**Windows PowerShell에서는 `-D...` 인자를 따옴표로 감쌉니다.** 감싸지 않으면 PowerShell이 인자를 자기 문법으로
+먼저 해석해 Maven에 그대로 전달되지 않습니다. 이 문서의 다른 `-D...` 명령도 모두 같습니다.
+
+```powershell
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=local"
+```
+
+CMD와 Git Bash에서는 따옴표 없이 그대로 씁니다.
+
 **프로파일을 빼면 환경변수가 없어 기동에 실패합니다.** 프로파일 없이 띄우려면 위 환경변수를 모두 export 합니다.
 
 기본 포트는 `8080`입니다. hoka-fo-api도 기본 포트가 `8080`이라 둘을 함께 띄우면 충돌합니다.
@@ -49,6 +58,12 @@ java -jar target/bo-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
 ```bash
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local -Dspring-boot.run.arguments=--server.port=8081
 java -jar target/bo-0.0.1-SNAPSHOT.jar --spring.profiles.active=local --server.port=8081
+```
+
+PowerShell에서는 `-D...` 두 개를 각각 감쌉니다.
+
+```powershell
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=local" "-Dspring-boot.run.arguments=--server.port=8081"
 ```
 
 `local`에서는 Swagger UI가 <http://localhost:8080/swagger-ui.html>에 열립니다(다른 환경에서는 꺼져 있습니다).
@@ -65,6 +80,13 @@ java -jar target/bo-0.0.1-SNAPSHOT.jar --spring.profiles.active=local --server.p
 
 ```bash
 ./mvnw test -Dtest=HokaBoApiApplicationTests#contextLoads
+```
+
+PowerShell에서는 따옴표가 특히 중요합니다. `#`이 주석 시작 문자라, 감싸지 않으면 `#contextLoads`가
+잘린 채 전달되어 **오류 없이 그 클래스의 테스트 전체가 돌아갑니다.**
+
+```powershell
+./mvnw test "-Dtest=HokaBoApiApplicationTests#contextLoads"
 ```
 
 ## 호출
