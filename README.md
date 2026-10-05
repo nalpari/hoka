@@ -160,8 +160,17 @@ cd hoka
 
 **Windows (PowerShell)**
 
+`.claude/skills/` 아래 스킬 5개(`design-taste-frontend`, `impeccable`, `next-best-practices`,
+`redesign-existing-projects`, `vercel-react-best-practices`)는 `.agents/skills/`를 가리키는 **심볼릭 링크**다.
+Windows의 Git은 기본값(`core.symlinks=false`)이라 이 링크를 대상 경로가 적힌 텍스트 파일로 체크아웃하고,
+그러면 Claude Code가 `SKILL.md`를 못 찾아 스킬이 조용히 로드되지 않는다. 클론 전에 두 가지를 맞춘다.
+
+1. **개발자 모드를 켠다** (설정 → 개인 정보 및 보안 → 개발자용 → 개발자 모드). 켜 두면 관리자 권한 없이
+   심볼릭 링크를 만들 수 있다.
+2. **`-c core.symlinks=true`로 클론한다.** 이 값은 클론한 저장소의 `.git/config`에 남는다.
+
 ```powershell
-git clone https://github.com/nalpari/hoka.git
+git clone -c core.symlinks=true https://github.com/nalpari/hoka.git
 cd hoka
 
 foreach ($d in 'hoka-fo-front','hoka-bo-front') {
@@ -171,6 +180,23 @@ foreach ($d in 'hoka-fo-api','hoka-bo-api','hoka-batch') {
   Push-Location $d; .\mvnw.cmd -q dependency:go-offline; Pop-Location
 }
 ```
+
+링크가 제대로 만들어졌는지 확인한다. 5줄 모두 `SymbolicLink`여야 한다.
+
+```powershell
+Get-ChildItem .claude\skills | Where-Object LinkType | Select-Object Name, LinkType
+```
+
+**이미 클론했는데 링크가 텍스트 파일로 되어 있다면** 설정을 바꾸고 그 5개만 다시 체크아웃한다.
+`git status`에는 아무 변화도 보이지 않으니 위 확인 명령으로 판단한다.
+
+```powershell
+git config --local core.symlinks true
+$skills = 'design-taste-frontend','impeccable','next-best-practices','redesign-existing-projects','vercel-react-best-practices'
+foreach ($s in $skills) { Remove-Item ".claude\skills\$s" -Force; git checkout -- ".claude/skills/$s" }
+```
+
+macOS·Linux는 기본값이 `core.symlinks=true`라 따로 할 일이 없다.
 
 ### 5. 로컬 DB (Docker)
 
