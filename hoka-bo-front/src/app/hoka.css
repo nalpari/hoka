@@ -2357,13 +2357,20 @@ table {
   border-left: 1px solid var(--hairline);
 }
 
-.auth__art img {
+.auth__art img,
+.auth__art video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: 50% 40%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth__art video {
+    display: none;
+  }
 }
 
 .auth__art::after {

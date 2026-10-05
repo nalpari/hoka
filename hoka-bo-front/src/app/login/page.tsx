@@ -83,12 +83,15 @@ export default async function LoginPage({
       <div className="auth__art">
         <Image
           src="/login-hero.webp"
-          alt="새벽 한강 러닝 코스에서 러닝화 끈을 묶는 러너"
+          alt="새벽 한강 러닝 코스를 따라 달리는 러너"
           fill
           priority
           sizes="50vw"
           style={{ objectFit: "cover", objectPosition: "50% 40%" }}
         />
+        <video autoPlay muted loop playsInline preload="auto" aria-hidden="true">
+          <source src="/login-hero.mp4" type="video/mp4" />
+        </video>
         <div className="auth__quote">
           <p>주문은 밤에도 들어옵니다. 아침에 열면 오늘 나갈 것부터 보여야 합니다.</p>
           <p>출고 마감, 사이즈 재고, 미답변 문의를 한 범위 안에서 봅니다.</p>

@@ -98,5 +98,5 @@ function signedOut(request: NextRequest, isPublic: boolean) {
 
 export const config = {
   // 정적 자산까지 매번 API를 부르지 않도록 제외한다.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:webp|png|jpg|jpeg|svg|ico|css|js)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:webp|png|jpg|jpeg|svg|ico|css|js|mp4)$).*)"],
 };
