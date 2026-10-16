@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HOKA Getting Started</title>
+<style>
+  body {
+    margin: 0;
+    padding: 24px 16px 64px;
+    background: #f4f6fa;
+    color: #1b2333;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+                 "Malgun Gothic", "Noto Sans KR", sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e2e7f0;
+    border-radius: 10px;
+    padding: 36px 40px 48px;
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 30px;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: #0b1b3f;
+  }
+  h1 + p { color: #5a6478; }
+  h2 {
+    margin: 48px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #1f4fd8;
+    font-size: 23px;
+    line-height: 1.35;
+    color: #0b1b3f;
+  }
+  h3 { margin: 36px 0 12px; font-size: 19px; color: #15306e; }
+  h4 { margin: 28px 0 10px; font-size: 16px; color: #15306e; }
+  p, li { word-break: keep-all; overflow-wrap: anywhere; }
+  ul { padding-left: 22px; }
+  li { margin: 6px 0; }
+  a { color: #1f4fd8; }
+  strong { color: #0b1b3f; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    background: #eef1f7;
+    border: 1px solid #e0e5ef;
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  pre {
+    position: relative;
+    background: #0f1729;
+    color: #e6ebf5;
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    border: 0;
+    padding: 0;
+    color: inherit;
+    font-size: 13px;
+    white-space: pre;
+  }
+  pre[data-lang]::before {
+    content: attr(data-lang);
+    display: block;
+    margin-bottom: 10px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8fa3c8;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    font-size: 14px;
+  }
+  th, td {
+    border: 1px solid #e2e7f0;
+    padding: 9px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #eef2fb; color: #0b1b3f; }
+  tr:nth-child(even) td { background: #fafbfe; }
+  hr { border: 0; border-top: 1px solid #e2e7f0; margin: 40px 0; }
+  .footer {
+    max-width: 860px;
+    margin: 20px auto 0;
+    color: #8a93a6;
+    font-size: 12px;
+    text-align: center;
+  }
+  @media (max-width: 600px) {
+    body { padding: 12px 8px 40px; }
+    .wrap { padding: 24px 18px 32px; border-radius: 8px; }
+    h1 { font-size: 25px; }
+    h2 { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>HOKA</h1>
+<p>프론트오피스(고객용)와 백오피스(관리자용)가 각각 Next.js 프론트와 Spring Boot API 한 쌍으로 이뤄지고,
+셸에서 실행하는 Spring Batch jar가 하나 붙은 모노레포다. 백오피스는 로그인과 사용자·역할·메뉴 관리가 동작하고,
+프론트오피스는 아직 스캐폴딩 직후 상태다.</p>
+<h2>처음 설치하기 (Claude Code 기준)</h2>
+<p>위에서부터 순서대로 실행한다. 각 단계에서 <strong>자기 OS 블록만</strong> 실행하고, 이미 설치된 도구는 건너뛴다.
+<strong>3단계(graft CLI)와 6단계는 선택이다.</strong> 건너뛰어도 빌드·테스트·실행은 전부 정상이고,
+에이전트가 코드를 찾을 때 파일을 더 읽을 뿐이다.
+macOS는 <a href="https://brew.sh">Homebrew</a>, Windows는 Windows 10 1809+/11에 기본으로 들어 있는
+<a href="https://learn.microsoft.com/windows/package-manager/winget/">winget</a>을 쓴다.</p>
+<p>실제로 확인한 환경은 macOS다(Node 24.15, pnpm 11.18, OpenJDK 21.0.11, graft 0.18.0).
+Windows 절차는 같은 버전을 winget으로 설치하도록 옮긴 것이고, 아직 그대로 돌려본 적은 없다.</p>
+<table>
+<thead>
+<tr>
+<th>도구</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node.js 24 / npm</td>
+<td>프론트 실행·빌드(pnpm이 이 위에서 돈다). graft를 쓰면 그 CLI와 훅·상태줄 스크립트도 여기서 돈다</td>
+</tr>
+<tr>
+<td>pnpm 11</td>
+<td>프론트 패키지 매니저 (<code>pnpm-lock.yaml</code>)</td>
+</tr>
+<tr>
+<td>JDK 21</td>
+<td>API·배치 빌드. Maven은 <code>./mvnw</code>가 받아 쓰므로 따로 설치하지 않는다</td>
+</tr>
+<tr>
+<td><a href="https://docs.docker.com/get-started/get-docker/">Docker</a></td>
+<td>로컬 PostgreSQL(5단계). <code>hoka-bo-api</code>·<code>hoka-batch</code> 테스트도 Testcontainers로 DB를 띄우므로 필요하다</td>
+</tr>
+<tr>
+<td>jq</td>
+<td>Stop 훅 <code>okf-sync-check.sh</code>. 없으면 훅이 조용히 건너뛴다</td>
+</tr>
+<tr>
+<td><a href="https://docs.astral.sh/uv/">uv</a></td>
+<td><code>okf/</code> 적합성 검사</td>
+</tr>
+<tr>
+<td><a href="https://docs.claude.com/en/docs/claude-code">Claude Code</a></td>
+<td>에이전트 CLI</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/@nanonets/graft">graft</a> <strong>(선택)</strong></td>
+<td>코드 그래프. 에이전트가 파일을 덜 읽고 코드를 찾게 해 준다. 없어도 모든 빌드·테스트·실행은 그대로 된다</td>
+</tr>
+<tr>
+<td><a href="https://git-scm.com/downloads/win">Git for Windows</a> (Windows만)</td>
+<td>Git과 Git Bash. Stop 훅 <code>okf-sync-check.sh</code>와 <code>hoka-batch/bin/run-job.sh</code>가 bash 스크립트라 필요하다</td>
+</tr>
+</tbody>
+</table>
+<h3>1. 기본 도구</h3>
+<p><strong>macOS</strong></p>
+<pre data-lang="bash"><code># Node.js 24 (nvm)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.nvm/nvm.sh
+nvm install 24
+
+# pnpm (프론트 package.json의 packageManager와 같은 버전)
+npm install -g pnpm@11.18.0
+
+# JDK 21, jq, uv
+brew install openjdk@21 jq uv
+echo 'export PATH=&quot;$(brew --prefix openjdk@21)/bin:$PATH&quot;' &gt;&gt; ~/.zshrc
+source ~/.zshrc
+
+# 확인
+node -v &amp;&amp; pnpm -v &amp;&amp; java -version &amp;&amp; jq --version &amp;&amp; uv --version
+</code></pre>
+<p><strong>Windows (PowerShell)</strong></p>
+<p>관리자 권한은 필요 없다. <code>winget install</code>은 한 번에 하나씩 받는다.</p>
+<pre data-lang="powershell"><code>winget install -e --id OpenJS.NodeJS.LTS                # Node.js 24 LTS
+winget install -e --id EclipseAdoptium.Temurin.21.JDK   # JDK 21
+winget install -e --id jqlang.jq
+winget install -e --id astral-sh.uv
+winget install -e --id Git.Git                          # Git + Git Bash
+</code></pre>
+<p><strong>여기서 PowerShell을 닫고 새로 연다.</strong> 설치한 도구의 <code>PATH</code>는 새 터미널부터 적용된다.</p>
+<pre data-lang="powershell"><code># pnpm (프론트 package.json의 packageManager와 같은 버전)
+npm install -g pnpm@11.18.0
+
+# 확인
+node -v; pnpm -v; java -version; jq --version; uv --version; git --version
+</code></pre>
+<h3>2. Claude Code</h3>
+<p><strong>macOS</strong></p>
+<pre data-lang="bash"><code>curl -fsSL https://claude.ai/install.sh | bash
+claude --version
+</code></pre>
+<p><strong>Windows (PowerShell)</strong></p>
+<pre data-lang="powershell"><code>irm https://claude.ai/install.ps1 | iex
+claude --version
+</code></pre>
+<p>winget으로 받아도 된다(<code>winget install -e --id Anthropic.ClaudeCode</code>). 대신 자동 업데이트가 되지 않아
+<code>winget upgrade Anthropic.ClaudeCode</code>를 직접 돌려야 한다.</p>
+<p>Windows에서 Claude Code의 Bash 도구는 Git Bash를 쓴다. 1단계의 Git for Windows를 기본 경로가 아닌 곳에
+설치했으면 <code>~/.claude/settings.json</code>에 경로를 적는다.</p>
+<pre data-lang="json"><code>{ &quot;env&quot;: { &quot;CLAUDE_CODE_GIT_BASH_PATH&quot;: &quot;C:\\Program Files\\Git\\bin\\bash.exe&quot; } }
+</code></pre>
+<h3>3. graft CLI (선택)</h3>
+<p><strong>안 써도 된다.</strong> 저장소는 graft 없이도 그대로 동작한다. 쓰지 않으면 이 단계와 6단계의 graft 부분을
+건너뛰고 4단계로 간다.</p>
+<p>공식 안내는 <a href="https://trailhq.com/graft#start">https://trailhq.com/graft#start</a>에 있다. 여기서는 전역 설치만 한다.
+그 페이지의 두 번째 명령 <code>graft init</code>은 저장소를 클론한 뒤 6단계에서, <strong>플래그를 붙여</strong> 실행한다.
+페이지에 적힌 그대로 실행하면 추적 중인 파일과 홈 디렉터리 설정까지 바뀐다.</p>
+<p><code>graft</code>를 <code>PATH</code>에서 찾는다. <code>.mcp.json</code>의 MCP 서버와 <code>.claude/settings.json</code>의 훅·상태줄이 여기에 해당한다.
+macOS에서 nvm을 쓰면 <strong>1단계에서 설치한 Node 24가 활성화된 셸에서</strong> 전역 설치한다.</p>
+<pre data-lang="bash"><code>DO_NOT_TRACK=1 npm install -g @nanonets/graft
+graft --version
+</code></pre>
+<p>Windows PowerShell에서는 환경 변수를 앞에 붙이는 문법이 달라 따로 넣는다.</p>
+<pre data-lang="powershell"><code>$env:DO_NOT_TRACK = 1
+npm install -g @nanonets/graft
+graft --version
+</code></pre>
+<h3>4. 저장소 클론과 의존성 설치</h3>
+<p>프로젝트마다 CodeCommit 저장소가 따로 있다. 다섯 개를 같은 상위 디렉터리에 나란히 클론한다.
+<code>&lt;session 명&gt;</code>은 CodeCommit 자격 증명 헬퍼가 쓸 AWS 프로파일(세션) 이름으로 바꾼다.</p>
+<p><strong>macOS</strong></p>
+<pre data-lang="bash"><code>git clone codecommit://&lt;session 명&gt;@hoka-dev-bo.git       # 백오피스 UI
+git clone codecommit://&lt;session 명&gt;@hoka-dev-bo-api.git   # 백오피스 API
+git clone codecommit://&lt;session 명&gt;@hoka-dev-fo.git       # 프론트오피스 UI
+git clone codecommit://&lt;session 명&gt;@hoka-dev-fo-api.git   # 프론트오피스 API
+git clone codecommit://&lt;session 명&gt;@hoka-dev-batch.git    # 배치
+
+(cd hoka-dev-bo &amp;&amp; pnpm install --frozen-lockfile)
+(cd hoka-dev-fo &amp;&amp; pnpm install --frozen-lockfile)
+(cd hoka-dev-bo-api &amp;&amp; ./mvnw -q dependency:go-offline)
+(cd hoka-dev-fo-api &amp;&amp; ./mvnw -q dependency:go-offline)
+(cd hoka-dev-batch &amp;&amp; ./mvnw -q dependency:go-offline)
+</code></pre>
+<p><strong>Windows (PowerShell)</strong></p>
+<pre data-lang="powershell"><code>foreach ($r in 'hoka-dev-bo','hoka-dev-bo-api','hoka-dev-fo','hoka-dev-fo-api','hoka-dev-batch') {
+  git clone &quot;codecommit://&lt;session 명&gt;@$r.git&quot;
+}
+foreach ($d in 'hoka-dev-bo','hoka-dev-fo') {
+  Push-Location $d; pnpm install --frozen-lockfile; Pop-Location
+}
+foreach ($d in 'hoka-dev-bo-api','hoka-dev-fo-api','hoka-dev-batch') {
+  Push-Location $d; .\mvnw.cmd -q dependency:go-offline; Pop-Location
+}
+</code></pre>
+<h3>5. 로컬 DB (Docker)</h3>
+<p>세 프로젝트가 같은 PostgreSQL <code>appdb</code>를 쓴다. 이미지 태그는 테스트의 Testcontainers가 쓰는 것과
+같은 <code>postgres:18-alpine</code>으로 맞춘다. 로컬에 PostgreSQL이 이미 5432를 쓰고 있으면 <code>-p 5433:5432</code>처럼
+바꾸고 각 프로젝트의 <code>DB_URL</code>도 같이 바꾼다.</p>
+<pre data-lang="bash"><code>docker run -d --name hoka-db \
+  -e POSTGRES_DB=appdb \
+  -e POSTGRES_USER=app \
+  -e POSTGRES_PASSWORD=app \
+  -p 5432:5432 \
+  -v hoka-db:/var/lib/postgresql \
+  postgres:18-alpine
+</code></pre>
+<p>Windows PowerShell에서는 줄바꿈 문자가 달라 한 줄로 쓴다.</p>
+<pre data-lang="powershell"><code>docker run -d --name hoka-db -e POSTGRES_DB=appdb -e POSTGRES_USER=app -e POSTGRES_PASSWORD=app -p 5432:5432 -v hoka-db:/var/lib/postgresql postgres:18-alpine
+</code></pre>
+<p><code>appdb</code>, 계정 <code>app</code>/<code>app</code>은 <code>hoka-fo-api</code>와 <code>hoka-batch</code>의 기본값이고 <code>hoka-bo-api</code>의 <code>local</code> 프로파일
+값이라, 이대로 두면 세 프로젝트 모두 설정 없이 붙는다.</p>
+<p>볼륨은 <code>/var/lib/postgresql/data</code>가 아니라 <strong><code>/var/lib/postgresql</code>에 붙인다.</strong> PostgreSQL 18부터 데이터
+디렉터리 규칙이 바뀌어서, 예전 글을 보고 <code>/data</code>에 마운트하면 컨테이너가 기동하지 않고 바로 죽는다.</p>
+<p><strong><code>sample</code> 테이블만 직접 만든다.</strong> 나머지는 앱이 알아서 만든다 — <code>hoka-bo-api</code>의 <code>bo_*</code> 테이블은 기동할 때
+Flyway가, <code>hoka-batch</code>의 <code>BATCH_*</code> 테이블은 첫 실행 때 Spring Batch가 만든다. <code>sample</code>은 DDL이 저장소에
+없고 만드는 코드도 없어서, 이걸 빼면 <code>hoka-fo-api</code>의 <code>SampleControllerTests</code>가 실패한다.</p>
+<pre data-lang="bash"><code>docker exec hoka-db psql -U app -d appdb -c &quot;create table sample (id bigserial primary key, name text not null, created_at timestamptz not null default now());&quot;
+</code></pre>
+<p>확인과 정리는 이렇게 한다.</p>
+<pre data-lang="bash"><code>docker exec hoka-db psql -U app -d appdb -c '\dt'   # 테이블 목록
+docker stop hoka-db &amp;&amp; docker start hoka-db          # 멈췄다 다시 켜기 (데이터 유지)
+docker rm -f hoka-db &amp;&amp; docker volume rm hoka-db     # 데이터까지 지우고 처음부터
+</code></pre>
+<p>테스트가 쓰는 DB는 이 컨테이너가 아니다. <code>hoka-bo-api</code>와 <code>hoka-batch</code>는 Testcontainers가 매번 빈
+PostgreSQL을 따로 띄우므로, 이 컨테이너를 지워도 그 테스트는 영향을 받지 않는다(Docker 자체는 필요하다).</p>
+<h3>6. graft 설정과 그래프 생성 (선택)</h3>
+<p>3단계에서 graft를 설치했을 때만 한다. graft가 만드는 파일(<code>.mcp.json</code>, <code>.claude/settings.json</code>,
+<code>.claude/helpers/</code>, <code>.claude/skills/graft/</code>)은 git에 없다. 헬퍼 스크립트에 그 PC의 graft 설치 경로가
+절대 경로로 새겨지기 때문이다. 저장소 루트에서 실행한다.</p>
+<pre data-lang="bash"><code>graft init --no-agents   # 위 네 경로를 만들고 graft/ 그래프까지 만든다
+</code></pre>
+<p><strong><code>--no-agents</code>를 꼭 붙인다.</strong> 빼면 Claude Code 외의 에이전트 설정까지 써서 <code>AGENTS.md</code>(추적 중인
+파일이다)를 고치고 <code>opencode.json</code>, <code>.cursor/</code>, <code>GEMINI.md</code>, <code>.gemini/</code>, <code>.grok/</code>를 만든다. 전부
+<code>.gitignore</code>에 없어 작업 트리가 더러워진다.</p>
+<p><strong>저장소 밖도 건드린다.</strong> <code>~/.claude/settings.json</code>, <code>~/.claude.json</code>처럼 <strong>모든 저장소에 영향을 주는</strong>
+사용자 설정을 함께 쓴다. <code>--no-global</code>이 이걸 막는다고 도움말에 적혀 있지만 graft 0.18.0의 <code>--dry-run</code>
+출력에는 플래그를 줘도 그대로 남으니, 실제로 막히는지는 기대하지 않는 편이 낫다. 무엇을 건드릴지는
+<strong>쓰기 전에</strong> 확인할 수 있다.</p>
+<pre data-lang="bash"><code>graft init --no-agents --dry-run   # 건드릴 파일만 출력하고 끝낸다
+</code></pre>
+<p>그래프는 <code>graft init</code>이 같이 만들어 준다(<code>--no-build</code>가 그걸 끄는 옵션이다). 따로 다시 만들 일이
+있으면 <code>graft build</code>를 쓴다. API 키가 필요 없고 비용도 들지 않는다. 이후에는 훅이 편집할 때마다 갱신한다.</p>
+<p><strong><code>graft init</code>은 <code>.claude/settings.json</code>을 통째로 새로 쓴다.</strong> okf 동기화 훅을 등록해 뒀다면 지워지므로,
+<code>graft init</code> 뒤에 <code>.claude/settings.json.example</code>의 <code>hooks.Stop</code> 항목을 생성된 파일의 <code>hooks.Stop</code>
+배열에 다시 더한다. graft도 <code>Stop</code> 훅을 넣으므로 배열을 통째로 바꾸지 말고 항목만 추가한다.</p>
+<h3>7. Claude Code 실행</h3>
+<pre data-lang="bash"><code>claude
+</code></pre>
+<ul>
+<li>프로젝트 스킬 <code>/hoka-cnp</code>(커밋·푸시)는 <code>.claude/skills/</code>에 들어 있어 따로 설치하지 않는다.</li>
+<li>graft를 설치했으면, 처음 실행할 때 프로젝트 MCP 서버 <code>graft</code>(<code>.mcp.json</code>)를 허용할지 묻는다. 허용하고
+  <code>/mcp</code>로 connected인지 확인한다. graft 스킬도 <code>graft init</code>이 같이 깔아 준다.</li>
+</ul>
+<h3>Windows에서 README의 나머지를 읽는 법</h3>
+<p><a href="https://github.com/nalpari/hoka/blob/main/README.md">README</a>의 실행·빌드·테스트 명령은 모두 macOS 기준으로 적혀 있다. Windows에서는 이렇게 바꿔 읽는다.</p>
+<ul>
+<li><strong><code>./mvnw</code> → <code>.\mvnw.cmd</code></strong> (PowerShell·CMD 기준). Git Bash에서는 <code>./mvnw</code> 그대로 쓴다.</li>
+<li><strong>PowerShell에서는 <code>-D...</code> 인자를 따옴표로 감싼다</strong> — <code>.\mvnw.cmd test "-Dtest=HokaFoApiApplicationTests#contextLoads"</code>.
+  감싸지 않으면 PowerShell이 먼저 해석해 Maven에 그대로 넘어가지 않는다. 특히 <code>#</code>은 주석 시작 문자라
+  뒤가 잘린 채 <strong>오류 없이</strong> 그 클래스 전체가 돌아간다. CMD와 Git Bash는 따옴표가 필요 없다.</li>
+<li><strong><code>bin/run-job.sh</code>는 bash 스크립트라 Git Bash에서 실행한다.</strong> 날짜 계산에 GNU <code>date</code>를 쓰는데
+  Git Bash에 들어 있어서 그대로 동작한다.</li>
+<li>환경 변수는 <code>export X=y</code> 대신 <code>$env:X = 'y'</code>(PowerShell)로 넣는다.</li>
+</ul>
+</div>
+<p class="footer">HOKA 저장소 <code>Getting Started.md</code>에서 생성 · 최신 내용은 저장소 README를 확인한다.</p>
+</body>
+</html>
